@@ -13,6 +13,7 @@ mod markdown_options;
 use markdown_options::MARKDOWN_OPTIONS;
 
 #[derive(Debug, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Frontmatter {
     pub title: String
 }
