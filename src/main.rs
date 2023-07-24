@@ -4,6 +4,7 @@
 use std::{
     fs::{self, File},
     io::{prelude::*, BufReader},
+    process::Command,
 };
 
 use serde::Deserialize;
@@ -110,7 +111,7 @@ fn main() -> Result<(), String> {
         let mut path = entry.path();
         let file = File::open(path.clone()).unwrap();
         path.set_extension("html");
-        let mut output_file = File::create(path).unwrap();
+        let mut output_file = File::create(path.clone()).unwrap();
 
         let mut buf_reader = BufReader::new(file);
         let mut contents = String::new();
@@ -127,6 +128,11 @@ fn main() -> Result<(), String> {
                 }
             ).as_bytes()
         ).unwrap();
+        output_file.sync_all().unwrap();
+        Command::new("npx")
+            .args(["prettier", &path.into_os_string().into_string().unwrap(), "--write"])
+            .output()
+            .expect("failed to execute process");
     }
 
     Ok(())
