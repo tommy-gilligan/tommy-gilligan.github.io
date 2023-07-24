@@ -4,57 +4,14 @@
 use std::{
     fs::{self, File},
     io::{prelude::*, BufReader},
-    process::Command,
     path::PathBuf,
 };
-use serde::Deserialize;
 
-mod markdown_options;
-use markdown_options::MARKDOWN_OPTIONS;
+mod layout;
+mod prettier;
 
-#[derive(Debug, PartialEq, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Frontmatter {
-    pub title: String
-}
-
-markup::define! {
-    Layout<'a>(content: &'a str, frontmatter: Frontmatter) {
-        @markup::doctype()
-        html {
-            head {
-                title { @frontmatter.title }
-                style { @include_str!("layout.css") }
-            }
-            body {
-                header { h1 { @frontmatter.title } }
-                #main { @markup::raw(content) }
-                footer { "(c) " 2023 }
-            }
-        }
-    }
-}
-
-fn frontmatter(contents: &str) -> Frontmatter {
-    match &markdown::to_mdast(contents, &MARKDOWN_OPTIONS.parse).unwrap().children().unwrap()[0] {
-        markdown::mdast::Node::Yaml(markdown::mdast::Yaml { value, .. }) => {
-            let fm: Frontmatter = serde_yaml::from_str(&value).unwrap();
-            return fm
-        },
-        _ => ()
-    }
-    panic!()
-}
-
-fn prettier(path: &PathBuf) {
-    Command::new("npx")
-        .args(["prettier", &path.clone().into_os_string().into_string().unwrap(), "--write"])
-        .output()
-        .expect("failed to execute process");
-}
-
-fn main() -> Result<(), String> {
-    for entry in fs::read_dir(".")
+fn paths() -> Vec<(PathBuf, PathBuf)> {
+    fs::read_dir(".")
         .unwrap()
         .map(std::result::Result::unwrap)
         .filter(|e| {
@@ -62,30 +19,31 @@ fn main() -> Result<(), String> {
                 && e.path().extension().is_some()
                 && e.path().extension().unwrap().to_str().unwrap() == "md"
         })
-    {
-        let mut path = entry.path();
-        let file = File::open(path.clone()).unwrap();
-        path.set_extension("html");
-        let mut output_file = File::create(path.clone()).unwrap();
+        .map(|f| {
+            let input_path = f.path();
+            let mut output_path = f.path();
+            output_path.set_extension("html");
+            (input_path, output_path)
+        })
+        .collect()
+}
 
-        let mut buf_reader = BufReader::new(file);
+fn main() {
+    for (input_path, output_path) in paths() {
+        println!("rendering {input_path:?}");
+        let input_file = File::open(input_path).unwrap();
+        let mut output_file = File::create(output_path.clone()).unwrap();
+
+        let mut buf_reader = BufReader::new(input_file);
         let mut contents = String::new();
         buf_reader.read_to_string(&mut contents).unwrap();
-        output_file.write_all(
-            format!(
-                "{}",
-                Layout {
-                    frontmatter: frontmatter(&contents),
-                    content: &markdown::to_html_with_options(
-                        &contents,
-                        &MARKDOWN_OPTIONS
-                    )?
-                }
-            ).as_bytes()
-        ).unwrap();
+        output_file
+            .write_all(layout::render(&contents).as_bytes())
+            .unwrap();
         output_file.sync_all().unwrap();
-        prettier(&path);
+        println!("rendered {output_path:?}");
     }
 
-    Ok(())
+    println!("prettier");
+    prettier::run();
 }

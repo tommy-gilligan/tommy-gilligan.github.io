@@ -1,10 +1,4 @@
-use markdown::{
-    Options,
-    CompileOptions,
-    ParseOptions,
-    Constructs,
-    LineEnding,
-};
+use markdown::{CompileOptions, Constructs, LineEnding, Options, ParseOptions};
 
 pub const MARKDOWN_OPTIONS: Options = Options {
     compile: CompileOptions {

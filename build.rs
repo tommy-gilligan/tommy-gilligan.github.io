@@ -28,6 +28,6 @@ markup::define! {
 fn main() {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("index.html");
-    fs::write(&dest_path, format!("{}", Home {})).unwrap();
+    fs::write(dest_path, format!("{}", Home {})).unwrap();
     println!("cargo:rerun-if-changed=build.rs");
 }
