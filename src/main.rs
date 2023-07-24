@@ -5,17 +5,17 @@ use std::{
     fs::{self, File},
     io::{prelude::*, BufReader},
     process::Command,
+    path::PathBuf,
 };
-
 use serde::Deserialize;
+
+mod markdown_options;
+use markdown_options::MARKDOWN_OPTIONS;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct Frontmatter {
     pub title: String
 }
-
-mod markdown_options;
-use crate::markdown_options::MARKDOWN_OPTIONS;
 
 markup::define! {
     Layout<'a>(content: &'a str, frontmatter: Frontmatter) {
@@ -43,6 +43,13 @@ fn frontmatter(contents: &str) -> Frontmatter {
         _ => ()
     }
     panic!()
+}
+
+fn prettier(path: &PathBuf) {
+    Command::new("npx")
+        .args(["prettier", &path.clone().into_os_string().into_string().unwrap(), "--write"])
+        .output()
+        .expect("failed to execute process");
 }
 
 fn main() -> Result<(), String> {
@@ -76,10 +83,7 @@ fn main() -> Result<(), String> {
             ).as_bytes()
         ).unwrap();
         output_file.sync_all().unwrap();
-        Command::new("npx")
-            .args(["prettier", &path.into_os_string().into_string().unwrap(), "--write"])
-            .output()
-            .expect("failed to execute process");
+        prettier(&path);
     }
 
     Ok(())
