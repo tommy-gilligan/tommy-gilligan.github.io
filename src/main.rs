@@ -8,6 +8,7 @@ use std::{
 };
 
 mod layout;
+mod picture;
 mod prettier;
 
 fn paths() -> Vec<(PathBuf, PathBuf)> {
@@ -43,6 +44,8 @@ fn main() {
         output_file.sync_all().unwrap();
         println!("rendered {output_path:?}");
     }
+    
+    svg::write(std::io::stdout(), &picture::picture()).unwrap();
 
     println!("prettier");
     prettier::run();

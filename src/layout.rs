@@ -35,6 +35,14 @@ fn frontmatter(contents: &str) -> Frontmatter {
     {
         return serde_yaml::from_str(value).unwrap();
     }
+    if let markdown::mdast::Node::Toml(markdown::mdast::Toml { value, .. }) =
+        &markdown::to_mdast(contents, &MARKDOWN_OPTIONS.parse)
+            .unwrap()
+            .children()
+            .unwrap()[0]
+    {
+        return toml::from_str(value).unwrap();
+    }
     panic!()
 }
 
