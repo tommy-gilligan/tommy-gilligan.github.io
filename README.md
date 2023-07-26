@@ -6,3 +6,7 @@ My opinionated static-site generator for me.
 - git integration
 - diagramming
 - graphviz
+
+```
+let a = 1;
+```
