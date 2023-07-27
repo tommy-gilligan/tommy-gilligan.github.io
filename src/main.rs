@@ -31,7 +31,6 @@ fn paths() -> Vec<(PathBuf, PathBuf)> {
 
 fn main() {
     for (input_path, output_path) in paths() {
-        println!("rendering {input_path:?}");
         let input_file = File::open(input_path).unwrap();
         let mut output_file = File::create(output_path.clone()).unwrap();
 
@@ -42,11 +41,5 @@ fn main() {
             .write_all(layout::render(&contents).as_bytes())
             .unwrap();
         output_file.sync_all().unwrap();
-        println!("rendered {output_path:?}");
     }
-    
-    svg::write(std::io::stdout(), &picture::picture()).unwrap();
-
-    println!("prettier");
-    prettier::run();
 }

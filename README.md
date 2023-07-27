@@ -1,12 +1,7 @@
-# blogmake
+# hey
 
-My opinionated static-site generator for me.
-
-- syntax highlighting
-- git integration
-- diagramming
-- graphviz
-
-```
-let a = 1;
+```rust
+fn double(a: u8) -> u8 {
+  2 * a
+}
 ```
