@@ -8,8 +8,8 @@ use std::{
 };
 
 mod layout;
-mod picture;
 mod prettier;
+mod syntax_highlighting;
 
 fn paths() -> Vec<(PathBuf, PathBuf)> {
     fs::read_dir(".")
@@ -42,4 +42,14 @@ fn main() {
             .unwrap();
         output_file.sync_all().unwrap();
     }
+
+    let a = r#"
+    for i in 1 2 3
+    do
+        echo $i
+    done
+    "#;
+    println!("{}", syntax_highlighting::format_code(a));
+
+    // prettier::run();
 }
