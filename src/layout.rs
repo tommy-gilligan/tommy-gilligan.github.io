@@ -1,11 +1,13 @@
 mod markdown_options;
 
+// <meta http-equiv="refresh" content="3;url=https://www.mozilla.org" />
 markup::define! {
     Layout<'a>(content: &'a str) {
         @markup::doctype()
         html {
             head {
                 meta[charset = "utf-8"];
+                meta[http_equiv = "X-Frame-Options", content = "DENY"];
                 style { @include_str!("layout.css") }
             }
             body {
