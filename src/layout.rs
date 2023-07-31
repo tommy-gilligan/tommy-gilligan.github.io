@@ -9,7 +9,10 @@ markup::define! {
                 style { @include_str!("layout.css") }
             }
             body {
-                #main { @markup::raw(content) }
+                header {
+                    h1 { "My Blog" }
+                }
+                main { @markup::raw(content) }
             }
         }
     }
