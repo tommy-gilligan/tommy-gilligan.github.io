@@ -5,8 +5,6 @@ on: [push]
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: "-D warnings"
-  ACTIONS_STEP_DEBUG: true
-  ACTIONS_RUNNER_DEBUG: true
   DISPLAY: ":99"
 
 jobs:
@@ -53,8 +51,8 @@ jobs:
       - uses: browser-actions/setup-chrome@v1
       - uses: nanasess/setup-chromedriver@v2
       - run: |
-          chromedriver --verbose --enable-chrome-logs &
-          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+          chromedriver --verbose --enable-chrome-logs --log-path=chromedriver.log &
+          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
       - uses: actions/cache@v3
         with:
           path: |
@@ -67,6 +65,12 @@ jobs:
           key: ${{ runner.os }}-browser-${{ hashFiles('**/Cargo.toml') }}
       - run: cargo run
       - run: cargo test
+      - name: Chromedriver Log
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: chromedriver-log
+          path: chromedriver.log
   build:
     needs: [clippy, format, browser]
     name: Build site and deploy
