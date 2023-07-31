@@ -2,14 +2,12 @@
 #![deny(clippy::nursery)]
 
 use std::{
-    fs::{self, File, create_dir_all},
+    fs::{self, create_dir_all, File},
     io::{prelude::*, BufReader},
-    path::{PathBuf, Path},
+    path::{Path, PathBuf},
 };
 
 mod layout;
-mod prettier;
-mod syntax_highlighting;
 
 fn paths() -> Vec<(PathBuf, PathBuf)> {
     // default directory in gh action
