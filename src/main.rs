@@ -2,9 +2,9 @@
 #![deny(clippy::nursery)]
 
 use std::{
-    fs::{self, File},
+    fs::{self, File, create_dir_all},
     io::{prelude::*, BufReader},
-    path::PathBuf,
+    path::{PathBuf, Path},
 };
 
 mod layout;
@@ -12,6 +12,10 @@ mod prettier;
 mod syntax_highlighting;
 
 fn paths() -> Vec<(PathBuf, PathBuf)> {
+    // default directory in gh action
+    let output_dir = Path::new("./_site");
+    create_dir_all(output_dir).unwrap();
+
     fs::read_dir(".")
         .unwrap()
         .map(std::result::Result::unwrap)
@@ -22,7 +26,7 @@ fn paths() -> Vec<(PathBuf, PathBuf)> {
         })
         .map(|f| {
             let input_path = f.path();
-            let mut output_path = f.path();
+            let mut output_path = output_dir.clone().join(f.path());
             output_path.set_extension("html");
             (input_path, output_path)
         })
@@ -42,14 +46,6 @@ fn main() {
             .unwrap();
         output_file.sync_all().unwrap();
     }
-
-    let a = r#"
-    for i in 1 2 3
-    do
-        echo $i
-    done
-    "#;
-    println!("{}", syntax_highlighting::format_code(a));
 
     // prettier::run();
 }

@@ -1,10 +1,10 @@
 [package]
-name = "blogmake"
+name = "blog"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-markdown = { path = "/home/tomgilligan257/markdown-rs" }
+markdown = "1.0.0-alpha.11"
 markup = "0.13.1"
 serde = { version = "1.0", features = [ "derive" ] }
 serde_yaml = ">= 0.9"

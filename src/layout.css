@@ -1,26 +1,8 @@
-* {
-  hyphens: auto !important;
-  text-wrap: wrap !important;
-}
-code {
-  max-width: 80ex;
-}
 body {
-  background: white;
   #main { 
-     max-width: 100;
-     text-align: justify;
-    .source {
-      font-size: 20px;
-      .keyword {
-        color: orange;
-      }
-      .variable {
-        color: blue;
-      }
-      .function {
-        color: purple;
-      }
-    }
+    max-width: 70ch;
+    text-align: justify;
+    hyphens: auto;
+    text-wrap: wrap;
   }
 }
