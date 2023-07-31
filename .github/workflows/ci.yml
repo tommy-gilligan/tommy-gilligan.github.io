@@ -1,20 +1,66 @@
-on:
-  push:
-    branches:
-      - main
-
 name: CI
 
+on: [push]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
 jobs:
-  build:
-    permissions:
-      pages: write
-      id-token: write
-    name: Build site and deploy
+  clippy:
+    name: Clippy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/.crates.toml
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-clippy-${{ hashFiles('**/Cargo.toml') }}
+      - run: cargo clippy
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/.crates.toml
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-format-${{ hashFiles('**/Cargo.toml') }}
+      - run: cargo fmt
+  build:
+    needs: [clippy, format]
+    name: Build site and deploy
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/.crates.toml
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-build-${{ hashFiles('**/Cargo.toml') }}
       - run: cargo run
       - uses: actions/upload-pages-artifact@v2
       - uses: actions/deploy-pages@v2
