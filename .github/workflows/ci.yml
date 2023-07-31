@@ -5,6 +5,8 @@ on: [push]
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: "-D warnings"
+  ACTIONS_STEP_DEBUG: true
+  ACTIONS_RUNNER_DEBUG: true
 
 jobs:
   clippy:
@@ -53,6 +55,7 @@ jobs:
           export DISPLAY=:99
           chromedriver --url-base=/wd/hub &
           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+      - run: ps ef
       - uses: actions/cache@v3
         with:
           path: |
