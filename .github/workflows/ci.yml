@@ -40,7 +40,7 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-format-${{ hashFiles('**/Cargo.toml') }}
-      - run: cargo fmt
+      - run: cargo fmt --check
   build:
     needs: [clippy, format]
     name: Build site and deploy
