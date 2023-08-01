@@ -1,3 +1,9 @@
++++
+title = "The Title"
+author = "The Author"
+description = "The Description"
+published_at = 2023-08-01T01:01:01Z
++++
 I love using Neovim but at the shell I still prefer to use Emacs style
 keybindings. I've never been able to remember them all, so lets build a script
 to remind us of them.
@@ -150,7 +156,7 @@ emacs style keybindings are the defaault
 I have no idea what `infer-next-history` means but a definition can be found at
 `zshzle(1)`
 ```
-man 1 zshzle
+% man 1 zshzle
 ```
 
 Scrolling down, we get 
