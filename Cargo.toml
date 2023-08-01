@@ -15,4 +15,4 @@ tokio = "1.29.1"
 hyper-staticfile = "0.9.5"
 hyper = { version = "0.14.27", features = [ "server" ] }
 rss = "2"
-chrono = "0.4.26"
+chrono = { version = "0.4.26", default-features = false, features = [ "std", "clock" ] }
