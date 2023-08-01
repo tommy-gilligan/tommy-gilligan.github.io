@@ -1,7 +1,10 @@
 #![deny(clippy::pedantic)]
 #![deny(clippy::nursery)]
 
-use hyper::{Body, Request, Response, Server, service::{make_service_fn, service_fn}};
+use hyper::{
+    service::{make_service_fn, service_fn},
+    Body, Request, Response, Server,
+};
 use std::{convert::Infallible, net::SocketAddr};
 use thirtyfour::{extensions::cdp::ChromeDevTools, prelude::*};
 

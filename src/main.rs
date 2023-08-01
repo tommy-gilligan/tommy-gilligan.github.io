@@ -7,9 +7,9 @@ use std::{
     path::Path,
 };
 
+mod index;
 mod layout;
 mod source_file;
-mod index;
 
 fn main() {
     let mut pages: Vec<(String, String)> = Vec::new();
@@ -21,9 +21,12 @@ fn main() {
         let output_dir = Path::new("./_site");
         create_dir_all(output_dir).unwrap();
 
-        pages.push(
-            (file.output_path(Path::new("."), "html").display().to_string(), file.frontmatter().title)
-        );
+        pages.push((
+            file.output_path(Path::new("."), "html")
+                .display()
+                .to_string(),
+            file.frontmatter().title,
+        ));
 
         let mut output_file = File::create(file.output_path(output_dir, "html")).unwrap();
         output_file.write_all(output.as_bytes()).unwrap();
