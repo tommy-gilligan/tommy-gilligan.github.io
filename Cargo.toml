@@ -1,5 +1,9 @@
 [package]
 name = "blog"
+description = "my blog"
+authors = [ "Tommy Gilligan" ]
+repository = "git@github.com:tomgilligan/tomgilligan.github.io.git"
+homepage = "https://tomgilligan.github.io/"
 version = "0.1.0"
 edition = "2021"
 
@@ -16,3 +20,9 @@ hyper-staticfile = "0.9.5"
 hyper = { version = "0.14.27", features = [ "server" ] }
 rss = "2"
 chrono = { version = "0.4.26", default-features = false, features = [ "std", "clock" ] }
+git-version = "0.3.5"
+const_format = "0.2.31"
+build-time = "0.1.3"
+macro_const = "0.1.0"
+toml-datetime-compat = { version = "0.2.0", features = [ "chrono", "serde_with" ] }
+url = "2.4.0"

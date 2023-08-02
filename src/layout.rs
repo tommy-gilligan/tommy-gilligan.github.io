@@ -12,6 +12,7 @@ markup::define! {
                 meta[name = "description", content = &frontmatter.description];
                 title { @frontmatter.title }
                 style { @include_str!("layout.css") }
+                link[rel = "alternate", r#type = "application/rss+xml", href = "pages.xml", title = "My Blog"];
             }
             body {
                 header {

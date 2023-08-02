@@ -17,7 +17,8 @@ pub struct Frontmatter {
     pub description: String,
     #[serde(default = "default_author")]
     pub author: String,
-    pub published_at: toml::value::Datetime,
+    #[serde(with = "toml_datetime_compat")]
+    pub published_at: chrono::DateTime<chrono::FixedOffset>,
 }
 
 pub fn frontmatter(contents: &str, parse_options: &ParseOptions) -> Frontmatter {

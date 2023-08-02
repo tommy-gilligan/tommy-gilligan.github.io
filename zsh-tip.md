@@ -1,8 +1,8 @@
 +++
-title = "The Title"
-author = "The Author"
-description = "The Description"
-published_at = 2023-08-01T01:01:01Z
+title = "Zsh Keybinding Reminder"
+author = "Tommy Gilligan"
+description = "A small masochism to use Zsh more efficiently"
+published_at = 2023-08-01T14:57:00Z
 +++
 I love using Neovim but at the shell I still prefer to use Emacs style
 keybindings. I've never been able to remember them all, so lets build a script
