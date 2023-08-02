@@ -107,7 +107,6 @@ fn main() {
         let item = binding
             .title(file.frontmatter().title)
             .description(file.frontmatter().description)
-            .author(file.frontmatter().author)
             .pub_date(
                 file.frontmatter()
                     .published_at
