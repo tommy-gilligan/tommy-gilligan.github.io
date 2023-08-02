@@ -1,6 +1,6 @@
 markup::define! {
-    LinkList(pages: Vec<(String, String)>) {
-        @for (href, text) in pages.iter() {
+    LinkList(links: Vec<(String, String)>) {
+        @for (href, text) in links.iter() {
             a [href = href] {
                 @text
             }

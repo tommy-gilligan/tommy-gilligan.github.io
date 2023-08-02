@@ -1,6 +1,7 @@
 #![deny(clippy::pedantic)]
 #![deny(clippy::nursery)]
 
+use build_time::build_time_local;
 use rss::{ChannelBuilder, ItemBuilder};
 use std::{
     fs::{create_dir_all, File},
@@ -8,90 +9,25 @@ use std::{
     path::Path,
 };
 
+mod config;
 mod layout;
 mod link_list;
 mod source_file;
-
-use build_time::build_time_local;
-use git_version::git_version;
-
-fn language() -> String {
-    "en-AU".to_string()
-}
-
-fn title() -> String {
-    "My Blog".to_string()
-}
-
-fn strip_email(mut author: String) -> String {
-    if let Some(start_index) = author.find('<') {
-        if let Some(end_index) = author.rfind('>') {
-            if end_index > start_index {
-                author.replace_range(start_index..=end_index, "");
-            }
-        }
-    }
-    assert!(author.find('@').is_none(),);
-
-    author.trim().to_string()
-}
-
-fn authors() -> Vec<String> {
-    if env!("CARGO_PKG_AUTHORS").is_empty() {
-        panic!()
-    } else {
-        env!("CARGO_PKG_AUTHORS")
-            .split(':')
-            .map(|author| strip_email(author.to_string()))
-            .collect()
-    }
-}
-
-fn generator() -> String {
-    if env!("CARGO_PKG_REPOSITORY").is_empty() {
-        format!(
-            "{} version: {}",
-            env!("CARGO_PKG_NAME"),
-            env!("CARGO_PKG_VERSION")
-        )
-    } else {
-        format!(
-            "{} version: {}",
-            env!("CARGO_PKG_REPOSITORY"),
-            git_version!()
-        )
-    }
-}
-
-fn homepage() -> String {
-    assert!(!env!("CARGO_PKG_HOMEPAGE").is_empty(),);
-    env!("CARGO_PKG_HOMEPAGE").to_string()
-}
-
-use url::Url;
-fn base_url() -> Url {
-    homepage().parse().unwrap()
-}
-
-fn description() -> String {
-    assert!(!env!("CARGO_PKG_DESCRIPTION").is_empty(),);
-    env!("CARGO_PKG_DESCRIPTION").to_string()
-}
 
 fn main() {
     let mut pages: Vec<(String, String)> = Vec::new();
     let mut binding = ChannelBuilder::default();
     let mut channel = binding
-        .title(title())
-        .link(base_url())
-        .description(description())
+        .title(config::title())
+        .link(config::base_url())
+        .description(config::description())
         // should only change when content has changed
         .last_build_date(Some(
             build_time_local!("%a, %d %b %Y %H:%M:%S %z").to_string(),
         ))
-        .language(language())
+        .language(config::language())
         .ttl("600".to_string())
-        .generator(generator());
+        .generator(config::generator());
 
     for file in source_file::SourceFile::from_dir(Path::new(".")).unwrap() {
         let body = file.body();
@@ -99,7 +35,7 @@ fn main() {
         let output = layout::Layout {
             title: "My Blog",
             body: &body,
-            language: &language(),
+            language: &config::language(),
             page_title: Some(&frontmatter.title),
             author: &frontmatter.author,
             description: &frontmatter.description,
@@ -136,11 +72,11 @@ fn main() {
 
     let output = layout::Layout {
         title: "My Blog",
-        body: &link_list::LinkList { pages }.to_string(),
-        language: &language(),
+        body: &link_list::LinkList { links: pages }.to_string(),
+        language: &config::language(),
         page_title: None,
-        author: &authors()[0],
-        description: &description(),
+        author: &config::authors()[0],
+        description: &config::description(),
     }
     .to_string();
     let mut output_file = File::create(output_dir.clone().join("index.html")).unwrap();
