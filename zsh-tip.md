@@ -89,8 +89,8 @@ emacs style keybindings are the defaault
 "^[7" digit-argument
 "^[8" digit-argument
 "^[9" digit-argument
-"^[<" beginning-of-buffer-or-history
-"^[>" end-of-buffer-or-history
+"^[&lt;" beginning-of-buffer-or-history
+"^[&gt;" end-of-buffer-or-history
 "^[?" which-command
 "^[A" accept-and-hold
 "^[B" backward-word
@@ -144,8 +144,8 @@ emacs style keybindings are the defaault
 " "-"~" self-insert
 "^?" backward-delete-char
 "\M-^@"-"\M-^?" self-insert
-</pre>
 </code>
+</pre>
 </details>
 
 ```
