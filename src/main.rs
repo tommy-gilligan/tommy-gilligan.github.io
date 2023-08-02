@@ -8,8 +8,8 @@ use std::{
     path::Path,
 };
 
-mod index;
 mod layout;
+mod link_list;
 mod source_file;
 
 use build_time::build_time_local;
@@ -23,26 +23,29 @@ fn title() -> String {
     "My Blog".to_string()
 }
 
-// fn strip_email(mut author: String) -> String {
-//     if let Some(start_index) = author.find('<') {
-//         if let Some(end_index) = author.rfind('>') {
-//             if end_index > start_index {
-//                 author.replace_range(start_index..=end_index, "")
-//             }
-//         }
-//     }
-//     assert!(author.find('@').is_none(), );
-//
-//     author.trim().to_string()
-// }
-//
-// fn authors() -> Vec<String> {
-//     if !env!("CARGO_PKG_AUTHORS").is_empty() {
-//         env!("CARGO_PKG_AUTHORS").split(':').map(|author| strip_email(author.to_string())).collect()
-//     } else {
-//         panic!()
-//     }
-// }
+fn strip_email(mut author: String) -> String {
+    if let Some(start_index) = author.find('<') {
+        if let Some(end_index) = author.rfind('>') {
+            if end_index > start_index {
+                author.replace_range(start_index..=end_index, "");
+            }
+        }
+    }
+    assert!(author.find('@').is_none(),);
+
+    author.trim().to_string()
+}
+
+fn authors() -> Vec<String> {
+    if env!("CARGO_PKG_AUTHORS").is_empty() {
+        panic!()
+    } else {
+        env!("CARGO_PKG_AUTHORS")
+            .split(':')
+            .map(|author| strip_email(author.to_string()))
+            .collect()
+    }
+}
 
 fn generator() -> String {
     if env!("CARGO_PKG_REPOSITORY").is_empty() {
@@ -89,10 +92,19 @@ fn main() {
         .language(language())
         .ttl("600".to_string())
         .generator(generator());
+
     for file in source_file::SourceFile::from_dir(Path::new(".")).unwrap() {
         let body = file.body();
         let frontmatter = file.frontmatter();
-        let output = layout::render(&body, frontmatter);
+        let output = layout::Layout {
+            title: "My Blog",
+            body: &body,
+            language: &language(),
+            page_title: Some(&frontmatter.title),
+            author: &frontmatter.author,
+            description: &frontmatter.description,
+        }
+        .to_string();
 
         let output_dir = Path::new("./_site");
         create_dir_all(output_dir).unwrap();
@@ -121,13 +133,20 @@ fn main() {
 
     let output_dir = Path::new("./_site");
     create_dir_all(output_dir).unwrap();
-    let output = index::render(pages);
 
+    let output = layout::Layout {
+        title: "My Blog",
+        body: &link_list::LinkList { pages }.to_string(),
+        language: &language(),
+        page_title: None,
+        author: &authors()[0],
+        description: &description(),
+    }
+    .to_string();
     let mut output_file = File::create(output_dir.clone().join("index.html")).unwrap();
-
     output_file.write_all(output.as_bytes()).unwrap();
-    let channel = channel.build();
 
+    let channel = channel.build();
     let output_file = File::create(output_dir.clone().join("pages.xml")).unwrap();
-    channel.write_to(output_file).unwrap(); // // write to the channel to a writer
+    channel.write_to(output_file).unwrap();
 }
