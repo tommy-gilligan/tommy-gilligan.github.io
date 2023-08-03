@@ -67,7 +67,7 @@ impl SourceFile {
     }
 
     pub fn output_path(&self, dir: &Path, extension: &str) -> PathBuf {
-        let mut path = dir.clone().join(&self.path);
+        let mut path = dir.clone().join(&self.path.file_name().unwrap());
         path.set_extension(extension);
         path
     }

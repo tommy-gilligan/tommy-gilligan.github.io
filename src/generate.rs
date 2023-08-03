@@ -31,7 +31,7 @@ fn main() {
         .ttl("600".to_string())
         .generator(config::generator());
 
-    for mut file in source_file::SourceFile::from_dir(Path::new(".")).unwrap() {
+    for mut file in source_file::SourceFile::from_dir(Path::new("./pages/")).unwrap() {
         let body = file.body();
         let frontmatter = file.frontmatter();
         let output = layout::Layout {
