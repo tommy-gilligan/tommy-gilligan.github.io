@@ -1,3 +1,9 @@
+:root {
+  --foreground-color: black;
+  --background-color: white;
+  --background-darkened: #ddd;
+  --foreground-lightened: #222;
+}
 body {
   font-family: sans-serif;
 }
@@ -7,7 +13,14 @@ main {
   hyphens: auto;
   white-space: normal;
 }
-
+summary {
+  cursor: pointer;
+  border: var(--foreground-color) 1px solid;
+  padding-left: 5px;
+}
+summary:hover {
+  background: var(--background-darkened);
+}
 code {
   .comment {
     font-style: italic;
