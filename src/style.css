@@ -21,12 +21,14 @@ summary {
 summary:hover {
   background: var(--background-darkened);
 }
-code .comment {
-  font-style: italic;
-}
-code .variable {
-  color: #0086b3;
-}
-code .keyword {
-  color: #a71d5d;
+code {
+  .comment {
+    font-style: italic;
+  }
+  .variable {
+    color: #0086b3;
+  }
+  .keyword {
+    color: #a71d5d;
+  }
 }
