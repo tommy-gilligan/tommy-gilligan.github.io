@@ -20,6 +20,7 @@ tokio = "1.29.1"
 toml = ">= 0.7.6"
 toml-datetime-compat = { version = "0.2.0", features = [ "chrono", "serde_with" ] }
 url = "2.4.0"
+lightningcss = "1.0.0-alpha.44"
 
 [dev-dependencies]
 hyper = { version = "0.14.27", features = [ "server" ] }

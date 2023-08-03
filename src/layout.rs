@@ -14,6 +14,7 @@ markup::define! {
         body: &'a str,
         language: &'a str,
         page_title: Option<&'a str>,
+        style: &'a str,
     ) {
         @markup::doctype()
         html[lang = language] {
@@ -24,7 +25,9 @@ markup::define! {
                 meta[name = "author", content = author];
                 meta[name = "description", content = description];
                 link[rel = "alternate", r#type = "application/rss+xml", href = "pages.xml", title = title];
-                style { @include_str!("layout.css") }
+                style {
+                    @markup::raw(style)
+                }
             }
             body {
                 header {

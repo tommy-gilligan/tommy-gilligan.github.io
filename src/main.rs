@@ -13,6 +13,7 @@ mod config;
 mod layout;
 mod link_list;
 mod source_file;
+mod style;
 mod syntax_highlighting;
 
 fn main() {
@@ -40,6 +41,7 @@ fn main() {
             page_title: Some(&frontmatter.title),
             author: &frontmatter.author,
             description: &frontmatter.description,
+            style: &style::style(),
         }
         .to_string();
 
@@ -78,6 +80,7 @@ fn main() {
         page_title: None,
         author: &config::authors()[0],
         description: &config::description(),
+        style: &style::style(),
     }
     .to_string();
     let mut output_file = File::create(output_dir.clone().join("index.html")).unwrap();
