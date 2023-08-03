@@ -58,7 +58,7 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-browser-${{ hashFiles('**/Cargo.toml') }}
-      - run: cargo run
+      - run: cargo run --bin generate
       - uses: Cyb3r-Jak3/html5validator-action@v7.2.0
         with:
           css: true
@@ -97,6 +97,6 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-build-${{ hashFiles('**/Cargo.toml') }}
-      - run: cargo run
+      - run: cargo run --bin generate
       - uses: actions/upload-pages-artifact@v2
       - uses: actions/deploy-pages@v2
