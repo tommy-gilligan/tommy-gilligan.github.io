@@ -16,7 +16,7 @@ phone
 mention how zshzle is at the core of this
 emacs style keybindings are the defaault
 
-```
+```zsh
 % bindkey -M emacs
 ```
 
@@ -148,19 +148,19 @@ emacs style keybindings are the defaault
 </pre>
 </details>
 
-```
-% bindkey -M emacs | shuf | head -n1
+```zsh
+% bindkey -M emacs | shuf -n1
 "^X^N" infer-next-history
 ```
 
 I have no idea what `infer-next-history` means but a definition can be found at
 `zshzle(1)`
-```
+```zsh
 % man 1 zshzle
 ```
 
 Scrolling down, we get 
-```
+```zsh
 infer-next-history (^X^N) (unbound) (unbound)
   Search in the history list for a line matching the current one and fetch
   the event following it.
@@ -168,19 +168,19 @@ infer-next-history (^X^N) (unbound) (unbound)
 
 It would be nice for our script to display this next to the keybinding.
 Grepping the man page for `infer-next-history` does not work though.
-```
+```zsh
 % man 1 zshzle | grep -C5 'infer-next-history'
 %
 ```
 
 Grepping for the definition body does work though
-```
+```zsh
 % man 1 zshzle | grep -C5 'Search in the history list'
 ```
 
 What is going on? Why can't `grep` find this?  Let's inspect the output from
 `man` with `xxd`.
-```
+```zsh
 % man 1 zshzle | grep -C5 'Search in the history list' | xxd
 …
 00000100: 2020 2020 2020 2069 0869 6e08 6e66 0866         i.in.nf.f
@@ -196,7 +196,7 @@ What is going on? Why can't `grep` find this?  Let's inspect the output from
 Here we see that we have a characte n (`0x6e`) then `0x08` and the same
 character n (`0x6e`) again. What is `0x08`?
 
-```
+```zsh
 % man ascii
 …
 The hexadecimal set:
@@ -208,14 +208,14 @@ The hexadecimal set:
 
 It is the backspace character.  We can strip out this pattern with:
 
-```
+```zsh
 % man -P cat 1 zshzle | sed 's/.\x08//g'
 ```
 
 That is: where there is a character followed by the backspace character,
 substitute both characters with nothing (delete them).
 
-```
+```zsh
 % man -P cat 1 zshzle | sed 's/.\x08//g' | grep -A2 "^[[:space:]]*infer-next-history"
 infer-next-history (^X^N) (unbound) (unbound)
       Search in the history list for a line matching the current one
@@ -225,12 +225,13 @@ infer-next-history (^X^N) (unbound) (unbound)
 So putting it all together now:
 
 
-```
+```zsh
 # Select a random keybinding
-let keybinding=$(bindkey -M emacs)
+keybinding=$(bindkey -M emacs | shuf -n1)
 # Get keyboard shortcut part of the keybinding, deleting the quotes
-let shortcut=$(echo $keybinding | cut -1 -d' ' | tr -d '"')
-echo $shortcut
+shortcut=${${${(s. .)keybinding}[1]}[2,-2]}
+bound=${${(s. .)keybinding}[2]}
+man -P cat 1 zshzle | sed -n "s/.\x08//g; /^ *$bound /,/^       [^[:space:]]/p"
 ```
 
 
@@ -238,7 +239,7 @@ What about key bindings that I've already committed to memory?  Bit of a wasted
 opportunity to tell me about a key binding like that.  A deny-list can be kept
 in the `.zshrc` embedded in our script that prints keybinding tips.  All we
 need to do to filter out a keybinding by name is 
-```
+```zsh
 | grep -Ev ' (beginning-of-line|end-of-line)$' |
 ```
 

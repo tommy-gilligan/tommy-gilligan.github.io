@@ -13,6 +13,7 @@ mod config;
 mod layout;
 mod link_list;
 mod source_file;
+mod syntax_highlighting;
 
 fn main() {
     let mut pages: Vec<(String, String)> = Vec::new();
@@ -29,7 +30,7 @@ fn main() {
         .ttl("600".to_string())
         .generator(config::generator());
 
-    for file in source_file::SourceFile::from_dir(Path::new(".")).unwrap() {
+    for mut file in source_file::SourceFile::from_dir(Path::new(".")).unwrap() {
         let body = file.body();
         let frontmatter = file.frontmatter();
         let output = layout::Layout {

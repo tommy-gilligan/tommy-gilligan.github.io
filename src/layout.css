@@ -7,3 +7,15 @@ main {
   hyphens: auto;
   white-space: normal;
 }
+
+code {
+  .comment {
+    font-style: italic;
+  }
+  .variable {
+    color: #0086b3;
+  }
+  .keyword {
+    color: #a71d5d;
+  }
+}

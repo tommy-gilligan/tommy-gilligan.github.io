@@ -22,13 +22,12 @@ pub struct Frontmatter {
 }
 
 pub fn frontmatter(contents: &str, parse_options: &ParseOptions) -> Frontmatter {
-    if let Node::Toml(Toml { value, .. }) = &markdown::to_mdast(contents, parse_options)
-        .unwrap()
-        .children()
-        .unwrap()[0]
-    {
-        return toml::from_str(value).unwrap();
+    if let Ok(mdast) = markdown::to_mdast(contents, parse_options) {
+        if let [Node::Toml(Toml { value, .. }), ..] = &mdast.children().unwrap()[..] {
+            if let Ok(frontmatter) = toml::from_str(value) {
+                return frontmatter;
+            }
+        }
     }
-    // refuse to deal with Yaml because this is a Rust project
-    panic!()
+    unimplemented!("No YAML support planned")
 }

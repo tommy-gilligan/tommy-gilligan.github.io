@@ -8,11 +8,57 @@ use std::{
 mod frontmatter;
 mod markdown_options;
 pub use crate::source_file::frontmatter::Frontmatter;
+use crate::syntax_highlighting::format_code;
 
 const EXTENSION: &str = "md";
 
 pub struct SourceFile {
     path: PathBuf,
+}
+
+markup::define! {
+    CodeContainer<'a>(
+        formatted_code: &'a str,
+        language: &'a str,
+    ) {
+        pre {
+            code.{format!("language-{}", language)} {
+                @markup::raw(formatted_code)
+            }
+        }
+    }
+}
+
+pub fn replace_code(contents: &mut String) {
+    // fix mixing bytes with chars
+    let mdast = markdown::to_mdast(contents, &markdown_options::MARKDOWN_OPTIONS.parse).unwrap();
+
+    let mut file_offset_accum: isize = 0;
+    for child in (mdast.children()).unwrap() {
+        if let markdown::mdast::Node::Code(markdown::mdast::Code {
+            value,
+            lang,
+            position,
+            ..
+        }) = child
+        {
+            let code = CodeContainer {
+                formatted_code: &format_code(value, lang.as_ref().unwrap()),
+                language: lang.as_ref().unwrap(),
+            }
+            .to_string();
+            let start = position.clone().unwrap().start.offset;
+            let end = position.clone().unwrap().end.offset;
+
+            contents.replace_range(
+                usize::try_from(isize::try_from(start).unwrap() + file_offset_accum).unwrap()
+                    ..usize::try_from(isize::try_from(end).unwrap() + file_offset_accum).unwrap(),
+                &code,
+            );
+            file_offset_accum += isize::try_from(code.len()).unwrap()
+                - (isize::try_from(end).unwrap() - isize::try_from(start).unwrap());
+        }
+    }
 }
 
 impl SourceFile {
@@ -38,9 +84,10 @@ impl SourceFile {
         frontmatter::frontmatter(&self.contents(), &markdown_options::MARKDOWN_OPTIONS.parse)
     }
 
-    pub fn body(&self) -> String {
-        markdown::to_html_with_options(&self.contents(), &markdown_options::MARKDOWN_OPTIONS)
-            .unwrap()
+    pub fn body(&mut self) -> String {
+        let mut contents = self.contents();
+        replace_code(&mut contents);
+        markdown::to_html_with_options(&contents, &markdown_options::MARKDOWN_OPTIONS).unwrap()
     }
 
     // probably should exclude index.md
