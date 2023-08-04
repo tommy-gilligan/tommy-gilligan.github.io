@@ -49,13 +49,16 @@ pub fn generator() -> String {
     }
 }
 
-pub fn homepage() -> String {
+pub fn homepage() -> Url {
     assert!(!env!("CARGO_PKG_HOMEPAGE").is_empty(),);
-    env!("CARGO_PKG_HOMEPAGE").to_string()
+    let mut url: Url = env!("CARGO_PKG_HOMEPAGE").to_string().parse().unwrap();
+    url.set_scheme("https").unwrap();
+    assert_eq!(url.scheme(), "https");
+    url
 }
 
 pub fn base_url() -> Url {
-    homepage().parse().unwrap()
+    homepage()[..url::Position::BeforePath].parse().unwrap()
 }
 
 pub fn description() -> String {

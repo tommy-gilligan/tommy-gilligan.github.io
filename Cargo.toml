@@ -3,7 +3,7 @@ name = "blog"
 description = "my blog"
 authors = [ "Tommy Gilligan" ]
 repository = "git@github.com:tomgilligan/tomgilligan.github.io.git"
-homepage = "https://tomgilligan.github.io/"
+homepage = "https://tomgilligan.github.io/abc.htm?ab=1"
 version = "0.1.0"
 edition = "2021"
 
@@ -23,18 +23,19 @@ url = "2.4.0"
 lightningcss = "1.0.0-alpha.44"
 hyper = { version = "0.14.27", features = [ "full" ] }
 hyper-staticfile = "0.9.5"
+sitemap = ">= 0.4"
 
 [dev-dependencies]
 thirtyfour = "0.32.0-rc.8"
 
 [[bin]]
 name = "generate"
-test = false
-bench = false
 path = "src/generate.rs"
 
 [[bin]]
 name = "serve"
-test = false
-bench = false
 path = "src/serve.rs"
+
+[[bin]]
+name = "crawl"
+path = "src/crawl.rs"
