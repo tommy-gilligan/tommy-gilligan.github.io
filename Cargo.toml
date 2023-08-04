@@ -27,6 +27,7 @@ sitemap = ">= 0.4"
 thirtyfour = "0.32.0-rc.8"
 serde_json = ">0.1"
 base64 = ">=0.21.2"
+regex = "1.9.1"
 
 [[bin]]
 name = "generate"

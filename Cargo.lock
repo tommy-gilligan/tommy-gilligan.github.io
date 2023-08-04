@@ -164,6 +164,7 @@ dependencies = [
  "lightningcss",
  "markdown",
  "markup",
+ "regex",
  "rss",
  "serde",
  "serde_json",

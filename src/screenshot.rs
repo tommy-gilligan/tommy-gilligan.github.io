@@ -1,22 +1,20 @@
 #![deny(clippy::pedantic)]
 #![deny(clippy::nursery)]
 
-use base64::{engine::general_purpose, Engine as _};
-use serde_json::json;
 use sitemap::{
     reader::{SiteMapEntity, SiteMapReader},
     structs::{Location, UrlEntry},
 };
 use std::{
     fs::{create_dir_all, File},
-    io::Write,
     path::Path,
 };
-use thirtyfour::{extensions::cdp::ChromeDevTools, prelude::*};
+
 use tokio::process::Command;
 
 const PATH: &str = "target/debug/serve";
 
+mod chrome_driver;
 #[allow(dead_code)]
 mod config;
 
@@ -31,46 +29,30 @@ async fn main() {
     let mut server_child = Command::new(PATH)
         .spawn()
         .expect("failed to execute process");
-    let caps = DesiredCapabilities::chrome();
-    let driver = WebDriver::new("http://127.0.0.1:9515", caps).await.unwrap();
-    let dev_tools = ChromeDevTools::new(driver.handle.clone());
 
     let file = File::open(output_dir.clone().join("sitemap.xml")).expect("Unable to open file.");
     let parser = SiteMapReader::new(file);
+
+    let mut driver = chrome_driver::ChromeDriver::new().await;
     for entity in parser {
         if let SiteMapEntity::Url(UrlEntry {
-            loc: Location::Url(mut url),
+            loc: Location::Url(url),
             ..
         }) = entity
         {
-            url.set_host(Some("localhost")).unwrap();
-            url.set_port(Some(62394)).unwrap();
-            url.set_scheme("http").unwrap();
             assert!(server_child.id().is_some());
-            driver.goto(url.to_string()).await.unwrap();
-            let screenshot_as_base64 = dev_tools
-                .execute_cdp_with_params(
-                    "Page.captureScreenshot",
-                    json!({"captureBeyondViewport": true}),
-                )
-                .await
-                .unwrap();
+            driver.goto(url.clone()).await;
+
             let path = url.path().strip_prefix('/').unwrap();
             let mut joined_path = screenshots_dir.join(path);
             joined_path = joined_path.with_extension("png");
-            let mut screenshot_file = File::create(joined_path).unwrap();
-            screenshot_file
-                .write_all(
-                    &general_purpose::STANDARD
-                        .decode(screenshot_as_base64["data"].as_str().unwrap().as_bytes())
-                        .unwrap(),
-                )
-                .unwrap();
+
+            driver.screenshot(&joined_path).await;
         }
     }
 
     server_child.start_kill().unwrap();
     server_child.wait().await.unwrap();
 
-    driver.quit().await.unwrap();
+    driver.quit().await;
 }
