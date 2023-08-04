@@ -25,6 +25,7 @@ markup::define! {
                 meta[name = "author", content = author];
                 meta[name = "description", content = description];
                 link[rel = "alternate", r#type = "application/rss+xml", href = "pages.xml", title = title];
+                link[rel = "icon", href = "data:;base64,iVBORw0KGgo="];
                 style {
                     @markup::raw(style)
                 }
