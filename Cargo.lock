@@ -155,6 +155,7 @@ dependencies = [
 name = "blog"
 version = "0.1.0"
 dependencies = [
+ "base64 0.21.2",
  "build-time",
  "chrono",
  "git-version",
@@ -165,6 +166,7 @@ dependencies = [
  "markup",
  "rss",
  "serde",
+ "serde_json",
  "sitemap",
  "syntect",
  "thirtyfour",

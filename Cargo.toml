@@ -24,9 +24,9 @@ lightningcss = "1.0.0-alpha.44"
 hyper = { version = "0.14.27", features = [ "full" ] }
 hyper-staticfile = "0.9.5"
 sitemap = ">= 0.4"
-
-[dev-dependencies]
 thirtyfour = "0.32.0-rc.8"
+serde_json = ">0.1"
+base64 = ">=0.21.2"
 
 [[bin]]
 name = "generate"
@@ -39,3 +39,7 @@ path = "src/serve.rs"
 [[bin]]
 name = "crawl"
 path = "src/crawl.rs"
+
+[[bin]]
+name = "screenshot"
+path = "src/screenshot.rs"
