@@ -16,15 +16,15 @@ markup = "0.13.1"
 rss = "2"
 serde = { version = "1.0", features = [ "derive" ] }
 syntect = "5.0.0"
-tokio = "1.29.1"
+tokio = { version = "1.29.1", features = [ "full" ] }
 toml = ">= 0.7.6"
 toml-datetime-compat = { version = "0.2.0", features = [ "chrono", "serde_with" ] }
 url = "2.4.0"
 lightningcss = "1.0.0-alpha.44"
+hyper = { version = "0.14.27", features = [ "full" ] }
+hyper-staticfile = "0.9.5"
 
 [dev-dependencies]
-hyper = { version = "0.14.27", features = [ "server" ] }
-hyper-staticfile = "0.9.5"
 thirtyfour = "0.32.0-rc.8"
 
 [[bin]]
@@ -32,3 +32,9 @@ name = "generate"
 test = false
 bench = false
 path = "src/generate.rs"
+
+[[bin]]
+name = "serve"
+test = false
+bench = false
+path = "src/serve.rs"
