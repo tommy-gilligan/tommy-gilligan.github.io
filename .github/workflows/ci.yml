@@ -78,6 +78,24 @@ jobs:
         with:
           name: chromedriver-log
           path: chromedriver.log
+  generate:
+    name: Generate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/.crates.toml
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-generate-${{ hashFiles('**/Cargo.toml') }}
+      - run: cargo run --bin generate
+      - run: cargo run --bin crawl
   build:
     needs: [clippy, format, browser]
     name: Build site and deploy
