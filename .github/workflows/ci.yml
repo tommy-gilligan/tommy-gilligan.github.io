@@ -99,12 +99,6 @@ jobs:
           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
       - run: cargo build --bin serve
       - run: cargo test
-      - name: Chromedriver Log
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: chromedriver-log
-          path: chromedriver.log
   deploy:
     needs: [clippy, format, browser]
     name: Deploy
@@ -151,6 +145,12 @@ jobs:
       - run: cargo build --bin serve
       - run: cargo run --bin screenshot
       - uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: screenshots
           path: screenshots
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: chromedriver-log
+          path: chromedriver.log
