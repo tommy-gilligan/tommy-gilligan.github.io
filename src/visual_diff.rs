@@ -2,6 +2,7 @@
 #![deny(clippy::nursery)]
 
 use git2::Repository;
+use viuer::{print_from_file, Config};
 
 #[allow(dead_code)]
 mod config;
@@ -18,9 +19,32 @@ async fn main() {
         .unwrap()
         .deltas()
     {
-        assert!(
-            !d.old_file().path().unwrap().starts_with("screenshots/"),
-            "changes in screenshots detected"
-        );
+        if d.old_file().path().unwrap().starts_with("screenshots/") {
+            let old_conf = Config {
+                // set offset
+                x: 0,
+                y: 0,
+                // set dimensions
+                width: Some(80),
+                height: Some(25),
+                ..Default::default()
+            };
+            //let old_conf = Config {
+            //    // set offset
+            //    x: 20,
+            //    y: 4,
+            //    // set dimensions
+            //    width: Some(80),
+            //    height: Some(25),
+            //    ..Default::default()
+            //};
+            print_from_file(d.old_file().path().unwrap(), &old_conf)
+                .expect("Image printing failed.");
+            // print_from_file(d.new_file().path().unwrap(), &conf).expect("Image printing failed.");
+            panic!(
+                "changes in screenshot {:?} detected",
+                d.old_file().path().unwrap()
+            );
+        }
     }
 }

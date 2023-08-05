@@ -29,6 +29,7 @@ tokio = { version = "1.29.1", features = [ "full" ] }
 toml = ">= 0.7.6"
 toml-datetime-compat = { version = "0.2.0", features = [ "chrono", "serde_with" ] }
 url = "2.4.0"
+viuer = { version = "0.6.2", features = [ "sixel" ] }
 
 [[bin]]
 name = "generate"
