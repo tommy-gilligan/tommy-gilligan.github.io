@@ -30,6 +30,7 @@ toml = ">= 0.7.6"
 toml-datetime-compat = { version = "0.2.0", features = [ "chrono", "serde_with" ] }
 url = "2.4.0"
 viuer = { version = "0.6.2", features = [ "sixel" ] }
+notify = "6.0.1"
 
 [[bin]]
 name = "generate"
@@ -50,3 +51,7 @@ path = "src/screenshot.rs"
 [[bin]]
 name = "visual_diff"
 path = "src/visual_diff.rs"
+
+[[bin]]
+name = "watch"
+path = "src/watch.rs"
