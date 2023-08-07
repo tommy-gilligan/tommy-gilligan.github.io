@@ -16,13 +16,10 @@ use notify::{
     EventKind::{Modify, Remove},
     RecursiveMode, Watcher,
 };
-use sitemap::{
-    reader::{SiteMapEntity, SiteMapReader},
-    structs::{Location, UrlEntry},
-};
+
 use std::{
     convert::Infallible,
-    fs::{create_dir_all, File},
+    fs::create_dir_all,
     net::SocketAddr,
     path::Path,
     process::{Child, Command},
@@ -116,35 +113,23 @@ async fn main() {
             println!("generating");
         }
         Cli::Screenshot(_) => {
-            let output_dir = Path::new("./_site");
-            create_dir_all(output_dir).unwrap();
-
             let screenshots_dir = Path::new("./screenshots");
             create_dir_all(screenshots_dir).unwrap();
 
             let server_child = serve();
             let abort_handle = server_child.abort_handle();
             server_child.await.unwrap();
-            let file =
-                File::open(output_dir.clone().join("sitemap.xml")).expect("Unable to open file.");
-            let parser = SiteMapReader::new(file);
-
             let mut driver = chrome_driver::ChromeDriver::new().await;
-            for entity in parser {
-                if let SiteMapEntity::Url(UrlEntry {
-                    loc: Location::Url(url),
-                    ..
-                }) = entity
-                {
-                    assert!(!abort_handle.is_finished());
-                    driver.goto(url.clone()).await;
 
-                    let path = url.path().strip_prefix('/').unwrap();
-                    let mut joined_path = screenshots_dir.join(path);
-                    joined_path = joined_path.with_extension("png");
+            for url in Output::new("./_site").open_sitemap() {
+                assert!(!abort_handle.is_finished());
+                driver.goto(url.clone()).await;
 
-                    driver.screenshot(&joined_path).await;
-                }
+                let path = url.path().strip_prefix('/').unwrap();
+                let mut joined_path = screenshots_dir.join(path);
+                joined_path = joined_path.with_extension("png");
+
+                driver.screenshot(&joined_path).await;
             }
 
             abort_handle.abort();

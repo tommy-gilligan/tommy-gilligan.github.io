@@ -6,6 +6,7 @@ pub struct Crawler {
 }
 
 impl Crawler {
+    #[must_use]
     pub fn new() -> Self {
         let urls: Vec<Url> = read_dir(Path::new("./_site"))
             .unwrap()
