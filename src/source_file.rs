@@ -9,6 +9,10 @@ mod frontmatter;
 mod markdown_options;
 pub use crate::source_file::frontmatter::Frontmatter;
 use crate::syntax_highlighting::format_code;
+use chrono::{DateTime, TimeZone, Utc};
+use git2::Repository;
+
+use crate::author;
 
 const EXTENSION: &str = "md";
 
@@ -64,6 +68,39 @@ pub fn replace_code(contents: &mut String) {
 impl SourceFile {
     const fn new(path: PathBuf) -> Self {
         Self { path }
+    }
+
+    pub fn history(&self) -> Vec<(DateTime<Utc>, String, String, String)> {
+        let mut path = self.path.clone();
+        let mut res = Vec::new();
+        path = path.strip_prefix("./").unwrap().to_path_buf();
+        println!("{:?}", &path);
+        let repo = match Repository::open(".") {
+            Ok(repo) => repo,
+            Err(e) => panic!("failed to open: {e}"),
+        };
+        let mut tree = repo.revwalk().unwrap();
+        tree.push_head().unwrap();
+        for oid in tree {
+            let o = oid.unwrap();
+            let c = repo.find_commit(o).unwrap();
+            if c.tree().unwrap().get_path(&path).is_ok() {
+                let signature = c.author_with_mailmap(&repo.mailmap().unwrap()).unwrap();
+                let tommy = author::Author {
+                    email: signature.email().unwrap().to_owned(),
+                    name: signature.name().unwrap().to_owned(),
+                };
+                let tommy_view = author::AuthorView { author: tommy }.to_string();
+
+                res.push((
+                    Utc.timestamp_opt(c.time().seconds(), 0).unwrap(),
+                    c.message().unwrap().to_owned(),
+                    tommy_view,
+                    c.id().to_string(),
+                ));
+            }
+        }
+        res
     }
 
     pub fn output_path(&self, dir: &Path, extension: &str) -> PathBuf {

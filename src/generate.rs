@@ -9,7 +9,9 @@ use std::{
     path::Path,
 };
 
+mod author;
 mod config;
+mod history;
 mod layout;
 mod link_list;
 mod source_file;
@@ -32,11 +34,16 @@ fn main() {
         .generator(config::generator());
 
     for mut file in source_file::SourceFile::from_dir(Path::new("./pages/")).unwrap() {
+        let footer = history::History {
+            commits: file.history(),
+        }
+        .to_string();
         let body = file.body();
         let frontmatter = file.frontmatter();
         let output = layout::Layout {
             title: "My Blog",
             body: &body,
+            footer: &footer,
             language: &config::language(),
             page_title: Some(&frontmatter.title),
             author: &frontmatter.author,
@@ -78,6 +85,7 @@ fn main() {
         body: &link_list::LinkList { links: pages }.to_string(),
         language: &config::language(),
         page_title: None,
+        footer: "",
         author: &config::authors()[0],
         description: &config::description(),
         style: &style::style(),

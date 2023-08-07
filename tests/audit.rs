@@ -7,7 +7,7 @@ const PATH: &str = "target/debug/serve";
 
 #[tokio::test]
 async fn test_audit() -> WebDriverResult<()> {
-    let mut server_child = Command::new(PATH)
+    let server_child = Command::new(PATH)
         .spawn()
         .expect("failed to execute process");
     let caps = DesiredCapabilities::chrome();

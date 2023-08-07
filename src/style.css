@@ -32,3 +32,13 @@ code {
     color: #a71d5d;
   }
 }
+figure {
+  margin: 0;
+}
+.commits {
+  padding: 0;
+  .commit {
+    justify-content: space-between;
+    display: flex;
+  }
+}
