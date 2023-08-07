@@ -23,26 +23,36 @@ async fn handle(req: Request<Body>) -> std::result::Result<Response<Body>, Infal
 
 use std::process::Command;
 
-const PATH: &str = "target/debug/generate";
+use std::process::Child;
+
+fn run_generate() -> Child {
+    Command::new("cargo")
+        .arg("run")
+        .arg("--bin")
+        .arg("generate")
+        .spawn()
+        .expect("failed to execute process")
+}
 
 #[tokio::main]
 async fn main() {
-    let mut child = Command::new(PATH)
-        .spawn()
-        .expect("failed to execute process");
+    let mut child = run_generate();
+
     let mut watcher = notify::recommended_watcher(move |res| {
         if let Ok(Event {
             kind: e @ (Modify(_) | Remove(_)),
+            paths,
             ..
         }) = res
         {
             println!("{e:?}");
+            for path in paths {
+                println!("{:?}", path);
+            }
             child.try_wait().unwrap().map_or((), |status| {
                 if status.success() {
                     println!("generating");
-                    child = Command::new(PATH)
-                        .spawn()
-                        .expect("failed to execute process");
+                    child = run_generate();
                 } else {
                     panic!()
                 }
@@ -53,6 +63,16 @@ async fn main() {
     watcher
         .watch(Path::new("pages"), RecursiveMode::NonRecursive)
         .unwrap();
+    watcher
+        .watch(Path::new("pages"), RecursiveMode::NonRecursive)
+        .unwrap();
+    watcher
+        .watch(Path::new("src"), RecursiveMode::Recursive)
+        .unwrap();
+    watcher
+        .watch(Path::new("Cargo.toml"), RecursiveMode::NonRecursive)
+        .unwrap();
+
     let make_service = make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(handle)) });
     let serve = Server::bind(&SocketAddr::from(([127, 0, 0, 1], 62394))).serve(make_service);
     let local_addr = serve.local_addr();
