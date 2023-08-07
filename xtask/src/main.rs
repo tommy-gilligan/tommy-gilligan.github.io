@@ -100,7 +100,7 @@ fn serve() -> JoinHandle<()> {
 async fn main() {
     match Cli::parse() {
         Cli::Crawl(CrawlArgs { host }) => {
-            let mut sitemap = Output::new("./_site").create_sitemap();
+            let mut sitemap = Output::new("./_site").sitemap().create();
 
             for mut url in Crawler::new() {
                 url.set_host(Some(&host)).unwrap();
@@ -121,7 +121,7 @@ async fn main() {
             server_child.await.unwrap();
             let mut driver = chrome_driver::ChromeDriver::new().await;
 
-            for url in Output::new("./_site").open_sitemap() {
+            for url in Output::new("./_site").sitemap().open() {
                 assert!(!abort_handle.is_finished());
                 driver.goto(url.clone()).await;
 

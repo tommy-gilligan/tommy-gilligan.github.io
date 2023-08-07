@@ -5,6 +5,12 @@ pub struct Crawler {
     urls: Vec<Url>,
 }
 
+impl Default for Crawler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Crawler {
     #[must_use]
     pub fn new() -> Self {
