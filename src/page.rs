@@ -7,7 +7,7 @@ use std::{
 
 mod frontmatter;
 mod markdown_options;
-pub use crate::source_file::frontmatter::Frontmatter;
+pub use crate::page::frontmatter::Frontmatter;
 use crate::syntax_highlighting::format_code;
 use chrono::{DateTime, TimeZone, Utc};
 use git2::Repository;
@@ -16,7 +16,7 @@ use crate::author;
 
 const EXTENSION: &str = "md";
 
-pub struct SourceFile {
+pub struct Page {
     path: PathBuf,
 }
 
@@ -65,9 +65,13 @@ pub fn replace_code(contents: &mut String) {
     }
 }
 
-impl SourceFile {
+impl Page {
     const fn new(path: PathBuf) -> Self {
         Self { path }
+    }
+
+    pub fn published_at(&self) -> DateTime<Utc> {
+        self.history().first().unwrap().0
     }
 
     pub fn history(&self) -> Vec<(DateTime<Utc>, String, String, String)> {

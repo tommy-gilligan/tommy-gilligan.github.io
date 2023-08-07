@@ -14,7 +14,7 @@ mod config;
 mod history;
 mod layout;
 mod link_list;
-mod source_file;
+mod page;
 mod style;
 mod syntax_highlighting;
 
@@ -33,7 +33,7 @@ fn main() {
         .ttl("600".to_string())
         .generator(config::generator());
 
-    for mut file in source_file::SourceFile::from_dir(Path::new("./pages/")).unwrap() {
+    for mut file in page::Page::from_dir(Path::new("./pages/")).unwrap() {
         let footer = history::History {
             commits: file.history(),
         }
@@ -45,8 +45,8 @@ fn main() {
             body: &body,
             footer: &footer,
             language: &config::language(),
+            author: &config::authors()[0],
             page_title: Some(&frontmatter.title),
-            author: &frontmatter.author,
             description: &frontmatter.description,
             style: &style::style(),
         }
@@ -66,8 +66,7 @@ fn main() {
             .title(file.frontmatter().title)
             .description(file.frontmatter().description)
             .pub_date(
-                file.frontmatter()
-                    .published_at
+                file.published_at()
                     .format("%a, %d %b %Y %H:%M:%S %z")
                     .to_string(),
             );

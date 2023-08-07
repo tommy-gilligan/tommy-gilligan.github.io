@@ -1,24 +1,11 @@
-use markdown::{
-    mdast::{Node, Toml},
-    ParseOptions,
-};
+use markdown::{mdast::{Node, Toml}, ParseOptions};
 use serde::Deserialize;
-
-const DEFAULT_AUTHOR: &str = "Tommy Gilligan";
-
-fn default_author() -> String {
-    DEFAULT_AUTHOR.to_string()
-}
 
 #[derive(Debug, PartialEq, Eq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Frontmatter {
     pub title: String,
     pub description: String,
-    #[serde(default = "default_author")]
-    pub author: String,
-    #[serde(with = "toml_datetime_compat")]
-    pub published_at: chrono::DateTime<chrono::FixedOffset>,
 }
 
 pub fn frontmatter(contents: &str, parse_options: &ParseOptions) -> Frontmatter {
