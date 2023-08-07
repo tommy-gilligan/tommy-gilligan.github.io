@@ -35,7 +35,7 @@ markup::define! {
             }
             body {
                 header {
-                    h1 { @title }
+                    h1 { a[href = "/"] { @title } }
                     h2 { @page_title }
                 }
                 main { @markup::raw(body) }
