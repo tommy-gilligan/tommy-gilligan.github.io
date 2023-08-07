@@ -6,10 +6,12 @@
 mod author;
 pub mod chrome_driver;
 mod config;
+pub mod crawl;
 pub mod generate;
 mod history;
 mod layout;
 mod link_list;
+pub mod output;
 pub mod page;
 pub mod render;
 mod style;

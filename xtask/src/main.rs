@@ -5,7 +5,7 @@
 #![allow(clippy::missing_panics_doc)]
 
 use clap::Parser;
-use generation::chrome_driver;
+use generation::{chrome_driver, crawl::Crawler, output::Output};
 use git2::Repository;
 use hyper::{
     service::{make_service_fn, service_fn},
@@ -19,18 +19,15 @@ use notify::{
 use sitemap::{
     reader::{SiteMapEntity, SiteMapReader},
     structs::{Location, UrlEntry},
-    writer::SiteMapWriter,
 };
 use std::{
     convert::Infallible,
-    ffi::OsStr,
-    fs::{create_dir_all, read_dir, File},
+    fs::{create_dir_all, File},
     net::SocketAddr,
-    path::{Path, PathBuf},
+    path::Path,
     process::{Child, Command},
 };
 use tokio::task::JoinHandle;
-use url::Url;
 use viuer::{print_from_file, Config};
 
 #[derive(Parser)]
@@ -48,7 +45,7 @@ enum Cli {
 #[derive(clap::Args, Debug)]
 #[command(author, version, about, long_about = None)]
 struct CrawlArgs {
-    base_url: String,
+    host: String,
 }
 
 #[derive(clap::Args, Debug)]
@@ -72,22 +69,6 @@ struct VisualDiffArgs;
 #[derive(clap::Args, Debug)]
 #[command(author, version, about, long_about = None)]
 struct WatchArgs;
-
-const EXTENSION: &str = "html";
-
-pub fn from_dir(path: &Path) -> std::io::Result<Vec<PathBuf>> {
-    Ok(read_dir(path)?
-        .filter_map(|e| {
-            e.map_or(None, |f| match f.file_type() {
-                Ok(file_type) if file_type.is_file() => match f.path().extension() {
-                    Some(extension) if extension == OsStr::new(EXTENSION) => Some(f.path()),
-                    _ => None,
-                },
-                _ => None,
-            })
-        })
-        .collect())
-}
 
 fn run_generate() -> Child {
     Command::new("cargo")
@@ -121,27 +102,14 @@ fn serve() -> JoinHandle<()> {
 #[tokio::main]
 async fn main() {
     match Cli::parse() {
-        Cli::Crawl(CrawlArgs { base_url }) => {
-            let base_url: Url = base_url.parse().unwrap();
-            assert_eq!(base_url.scheme(), "https");
-            let base_url: Url = base_url[..url::Position::BeforePath].parse().unwrap();
+        Cli::Crawl(CrawlArgs { host }) => {
+            let mut sitemap = Output::new("./_site").create_sitemap();
 
-            let output_dir = Path::new("./_site");
-            let mut output = File::create(output_dir.clone().join("sitemap.xml")).unwrap();
-            let sitemap_writer = SiteMapWriter::new(&mut output);
-            let mut urlwriter = sitemap_writer
-                .start_urlset()
-                .expect("Unable to write urlset");
-
-            for file in from_dir(output_dir).unwrap() {
-                let mut url = base_url.clone();
-                url.set_path(file.file_name().unwrap().to_str().unwrap());
-                urlwriter
-                    .url(UrlEntry::builder().loc(url.to_string()))
-                    .expect("Unable to write url");
+            for mut url in Crawler::new() {
+                url.set_host(Some(&host)).unwrap();
+                url.set_port(None).unwrap();
+                sitemap.push(url);
             }
-
-            urlwriter.end().expect("Unable to write close tags");
         }
         Cli::Generate(GenerateArgs { page_path: _ }) => {
             generation::generate::main();
