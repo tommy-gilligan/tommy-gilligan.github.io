@@ -1,4 +1,7 @@
-use markdown::{mdast::{Node, Toml}, ParseOptions};
+use markdown::{
+    mdast::{Node, Toml},
+    ParseOptions,
+};
 use serde::Deserialize;
 
 #[derive(Debug, PartialEq, Eq, Deserialize)]
