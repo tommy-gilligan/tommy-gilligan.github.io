@@ -4,7 +4,9 @@ use syntect::util::LinesWithEndings;
 
 pub fn format_code(code: &str, language: &str) -> String {
     let binding = SyntaxSet::load_defaults_newlines();
-    let syntax = binding.find_syntax_by_extension(language).unwrap();
+    let syntax = binding
+        .find_syntax_by_extension(language)
+        .unwrap_or_else(|| binding.find_syntax_plain_text());
     let ss = SyntaxSet::load_defaults_newlines();
     let mut html_generator =
         ClassedHTMLGenerator::new_with_class_style(syntax, &ss, ClassStyle::Spaced);
