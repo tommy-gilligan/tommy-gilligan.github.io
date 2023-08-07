@@ -8,14 +8,12 @@ use std::{
 mod frontmatter;
 mod markdown_options;
 pub use crate::page::frontmatter::Frontmatter;
-use crate::syntax_highlighting::format_code;
 use chrono::{DateTime, TimeZone, Utc};
 use git2::Repository;
 
-use crate::author;
-
 const EXTENSION: &str = "md";
 
+#[derive(Debug)]
 pub struct Page {
     path: PathBuf,
 }
@@ -47,7 +45,7 @@ pub fn replace_code(contents: &mut String) {
         }) = child
         {
             let code = CodeContainer {
-                formatted_code: &format_code(value, lang.as_ref().unwrap()),
+                formatted_code: value,
                 language: lang.as_ref().unwrap(),
             }
             .to_string();
@@ -70,15 +68,36 @@ impl Page {
         Self { path }
     }
 
+    #[must_use]
     pub fn published_at(&self) -> DateTime<Utc> {
         self.history().first().unwrap().0
     }
 
+    #[must_use]
+    pub fn updated_at(&self) -> Option<DateTime<Utc>> {
+        let updated_at = self.history().last().unwrap().0;
+        if updated_at == self.published_at() {
+            None
+        } else {
+            Some(updated_at)
+        }
+    }
+
+    #[must_use]
+    pub fn title(&self) -> String {
+        self.frontmatter().title
+    }
+
+    #[must_use]
+    pub fn description(&self) -> String {
+        self.frontmatter().description
+    }
+
+    #[must_use]
     pub fn history(&self) -> Vec<(DateTime<Utc>, String, String, String)> {
         let mut path = self.path.clone();
         let mut res = Vec::new();
         path = path.strip_prefix("./").unwrap().to_path_buf();
-        println!("{:?}", &path);
         let repo = match Repository::open(".") {
             Ok(repo) => repo,
             Err(e) => panic!("failed to open: {e}"),
@@ -89,17 +108,10 @@ impl Page {
             let o = oid.unwrap();
             let c = repo.find_commit(o).unwrap();
             if c.tree().unwrap().get_path(&path).is_ok() {
-                let signature = c.author_with_mailmap(&repo.mailmap().unwrap()).unwrap();
-                let tommy = author::Author {
-                    email: signature.email().unwrap().to_owned(),
-                    name: signature.name().unwrap().to_owned(),
-                };
-                let tommy_view = author::AuthorView { author: tommy }.to_string();
-
                 res.push((
                     Utc.timestamp_opt(c.time().seconds(), 0).unwrap(),
                     c.message().unwrap().to_owned(),
-                    tommy_view,
+                    String::new(),
                     c.id().to_string(),
                 ));
             }
@@ -107,12 +119,14 @@ impl Page {
         res
     }
 
+    #[must_use]
     pub fn output_path(&self, dir: &Path, extension: &str) -> PathBuf {
         let mut path = dir.clone().join(self.path.file_name().unwrap());
         path.set_extension(extension);
         path
     }
 
+    #[must_use]
     pub fn contents(&self) -> String {
         let input_file = File::open(&self.path).unwrap();
         let mut buf_reader = BufReader::new(input_file);
@@ -121,18 +135,20 @@ impl Page {
         contents
     }
 
-    pub fn frontmatter(&self) -> Frontmatter {
-        frontmatter::frontmatter(&self.contents(), &markdown_options::MARKDOWN_OPTIONS.parse)
-    }
-
     pub fn body(&mut self) -> String {
         let mut contents = self.contents();
         replace_code(&mut contents);
         markdown::to_html_with_options(&contents, &markdown_options::MARKDOWN_OPTIONS).unwrap()
     }
 
+    fn frontmatter(&self) -> Frontmatter {
+        frontmatter::frontmatter(&self.contents(), &markdown_options::MARKDOWN_OPTIONS.parse)
+    }
+
     // probably should exclude index.md
-    pub fn from_dir(path: &Path) -> std::io::Result<Vec<Self>> {
+    pub fn from_dir(path_str: &str) -> std::io::Result<Vec<Self>> {
+        let path = Path::new(path_str);
+        assert!(path.is_dir());
         Ok(read_dir(path)?
             .filter_map(|e| {
                 e.map_or(None, |f| match f.file_type() {

@@ -23,6 +23,8 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
+            xtask/target
+            generation/target
           key: ${{ runner.os }}-clippy-${{ hashFiles('**/Cargo.toml') }}
       - run: cargo clippy --all-targets
   format:
@@ -40,6 +42,8 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
+            xtask/target
+            generation/target
           key: ${{ runner.os }}-format-${{ hashFiles('**/Cargo.toml') }}
       - run: cargo fmt --check
   generate:
@@ -59,9 +63,11 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
+            xtask/target
+            generation/target
           key: ${{ runner.os }}-generate-${{ hashFiles('**/Cargo.toml') }}
-      - run: cargo run --bin generate
-      - run: cargo run --bin crawl
+      - run: cargo xtask generate pages
+      - run: cargo xtask crawl https://localhost/
       - uses: actions/upload-artifact@v3
         with:
           name: site
@@ -90,17 +96,16 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
+            xtask/target
+            generation/target
           key: ${{ runner.os }}-browser-${{ hashFiles('**/Cargo.toml') }}
       - uses: browser-actions/setup-chrome@v1
       - uses: nanasess/setup-chromedriver@v2
         with:
           chromedriver-version: '115.0.5790.102'
-      - run: cargo build --bin serve
       - run: |
           chromedriver --verbose --enable-chrome-logs --log-path=chromedriver.log &
           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-      - run: cargo build --bin serve
-      - run: cargo test
   deploy:
     needs: [clippy, format, browser]
     name: Deploy
@@ -136,6 +141,8 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
+            xtask/target
+            generation/target
           key: ${{ runner.os }}-screenshot-${{ hashFiles('**/Cargo.toml') }}
       - uses: browser-actions/setup-chrome@v1
       - uses: nanasess/setup-chromedriver@v2
@@ -144,9 +151,8 @@ jobs:
       - run: |
           chromedriver --verbose --enable-chrome-logs --log-path=chromedriver.log &
           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-      - run: cargo build --bin serve
-      - run: cargo run --bin screenshot
-      - run: cargo run --bin visual_diff
+      - run: cargo xtask screenshot
+      - run: cargo xtask visual_diff
       - uses: actions/upload-artifact@v3
         if: always()
         with:

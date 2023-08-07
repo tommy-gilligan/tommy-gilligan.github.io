@@ -1,6 +1,3 @@
-#![deny(clippy::pedantic)]
-#![deny(clippy::nursery)]
-
 use build_time::build_time_local;
 use rss::{ChannelBuilder, ItemBuilder};
 use std::{
@@ -9,46 +6,37 @@ use std::{
     path::Path,
 };
 
-mod author;
-mod config;
-mod history;
-mod layout;
-mod link_list;
-mod page;
-mod style;
-mod syntax_highlighting;
-
-fn main() {
+pub fn main() {
     let mut pages: Vec<(String, String)> = Vec::new();
     let mut binding = ChannelBuilder::default();
+
     let mut channel = binding
-        .title(config::title())
-        .link(config::base_url())
-        .description(config::description())
+        .title(crate::config::title())
+        .link(crate::config::base_url())
+        .description(crate::config::description())
         // should only change when content has changed
         .last_build_date(Some(
             build_time_local!("%a, %d %b %Y %H:%M:%S %z").to_string(),
         ))
-        .language(config::language())
+        .language(crate::config::language())
         .ttl("600".to_string())
-        .generator(config::generator());
+        .generator(crate::config::generator());
 
-    for mut file in page::Page::from_dir(Path::new("./pages/")).unwrap() {
-        let footer = history::History {
+    for mut file in crate::page::Page::from_dir("./pages/").unwrap() {
+        let footer = crate::history::History {
             commits: file.history(),
         }
         .to_string();
         let body = file.body();
-        let frontmatter = file.frontmatter();
-        let output = layout::Layout {
+        let output = crate::layout::Layout {
             title: "My Blog",
             body: &body,
             footer: &footer,
-            language: &config::language(),
-            author: &config::authors()[0],
-            page_title: Some(&frontmatter.title),
-            description: &frontmatter.description,
-            style: &style::style(),
+            language: &crate::config::language(),
+            author: &crate::config::authors()[0],
+            page_title: Some(&file.title()),
+            description: &file.description(),
+            style: &crate::style::style(),
         }
         .to_string();
 
@@ -59,12 +47,12 @@ fn main() {
             file.output_path(Path::new("."), "html")
                 .display()
                 .to_string(),
-            file.frontmatter().title,
+            file.title(),
         ));
         let mut binding = ItemBuilder::default();
         let item = binding
-            .title(file.frontmatter().title)
-            .description(file.frontmatter().description)
+            .title(file.title())
+            .description(file.description())
             .pub_date(
                 file.published_at()
                     .format("%a, %d %b %Y %H:%M:%S %z")
@@ -79,15 +67,15 @@ fn main() {
     let output_dir = Path::new("./_site");
     create_dir_all(output_dir).unwrap();
 
-    let output = layout::Layout {
+    let output = crate::layout::Layout {
         title: "My Blog",
-        body: &link_list::LinkList { links: pages }.to_string(),
-        language: &config::language(),
+        body: &crate::link_list::LinkList { links: pages }.to_string(),
+        language: &crate::config::language(),
         page_title: None,
         footer: "",
-        author: &config::authors()[0],
-        description: &config::description(),
-        style: &style::style(),
+        author: &crate::config::authors()[0],
+        description: &crate::config::description(),
+        style: &crate::style::style(),
     }
     .to_string();
     let mut output_file = File::create(output_dir.clone().join("index.html")).unwrap();
