@@ -16,7 +16,6 @@ pub struct ChromeDriver {
 
 impl ChromeDriver {
     pub async fn new() -> Self {
-        assert!(!Path::new("chromedriver.log").exists());
         let mut caps = DesiredCapabilities::chrome();
         // GPU doesn't get used on GH runner
         caps.set_disable_gpu().unwrap();
