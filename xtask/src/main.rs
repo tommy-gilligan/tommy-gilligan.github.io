@@ -105,12 +105,28 @@ async fn main() {
             for mut url in Crawler::new() {
                 url.set_host(Some(&host)).unwrap();
                 url.set_port(None).unwrap();
-                sitemap.push(url);
+                sitemap.push(&url);
             }
         }
         Cli::Generate(GenerateArgs { page_path: _ }) => {
-            generation::generate::main();
-            println!("generating");
+            // for mut page in Page::from_dir("./pages/").unwrap() {
+            //     let output_page = Output::new("./_site").page(page.file_stem());
+            //     let style = generation::style::Style::new(Path::new("style.css"));
+            //     let layout_factory = Factory {
+            //         style,
+            //         title: "My Blog".to_string(),
+            //         language: "en-AU".to_string(),
+            //     };
+
+            //     // let output = Layout {
+            //     //     body: &page.body(),
+            //     //     footer: &History { commits: page.history() }.to_string(),
+            //     //     author: page.author(),
+            //     //     page_title: Some(&page.title()),
+            //     //     description: &page.description(),
+            //     // }.to_string();
+            //     // page.output_path(Path::new("."), "html").display().to_string();
+            // }
         }
         Cli::Screenshot(_) => {
             let screenshots_dir = Path::new("./screenshots");

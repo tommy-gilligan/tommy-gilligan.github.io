@@ -74,6 +74,11 @@ impl Page {
     }
 
     #[must_use]
+    pub fn file_stem(&self) -> &OsStr {
+        self.path.file_stem().unwrap()
+    }
+
+    #[must_use]
     pub fn updated_at(&self) -> Option<DateTime<Utc>> {
         let updated_at = self.history().last().unwrap().0;
         if updated_at == self.published_at() {

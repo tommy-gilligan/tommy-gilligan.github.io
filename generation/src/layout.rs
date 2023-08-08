@@ -44,3 +44,11 @@ markup::define! {
         }
     }
 }
+
+use crate::style::Style;
+
+pub struct Factory {
+    pub title: String,
+    pub language: String,
+    pub style: Style,
+}
