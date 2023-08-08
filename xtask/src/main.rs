@@ -4,8 +4,17 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 
+use std::io::Write;
+
 use clap::Parser;
-use generation::{chrome_driver, crawl::Crawler, output::Output};
+use generation::{
+    chrome_driver,
+    crawl::Crawler,
+    layout::{Factory, Layout},
+    output::Output,
+    page::Page,
+    style::Style,
+};
 use git2::Repository;
 use hyper::{
     service::{make_service_fn, service_fn},
@@ -96,6 +105,20 @@ fn serve() -> JoinHandle<()> {
     })
 }
 
+fn layout_for_page(factory: &Factory, mut page: Page) -> String {
+    Layout {
+        title: &factory.title,
+        language: &factory.language,
+        style: &factory.style.style(),
+        description: &page.description(),
+        body: &page.body(),
+        page_title: None,
+        footer: "",
+        author: "",
+    }
+    .to_string()
+}
+
 #[tokio::main]
 async fn main() {
     match Cli::parse() {
@@ -109,24 +132,28 @@ async fn main() {
             }
         }
         Cli::Generate(GenerateArgs { page_path: _ }) => {
-            // for mut page in Page::from_dir("./pages/").unwrap() {
-            //     let output_page = Output::new("./_site").page(page.file_stem());
-            //     let style = generation::style::Style::new(Path::new("style.css"));
-            //     let layout_factory = Factory {
-            //         style,
-            //         title: "My Blog".to_string(),
-            //         language: "en-AU".to_string(),
-            //     };
+            let output = Output::new("./_site");
+            let style = Style::new(Path::new("style.css"));
+            let layout_factory = Factory {
+                style,
+                title: "My Blog".to_string(),
+                language: "en-AU".to_string(),
+            };
+            for page in Page::from_dir("./pages/").unwrap() {
+                output
+                    .page(page.file_stem())
+                    .write_all(layout_for_page(&layout_factory.clone(), page).as_bytes())
+                    .unwrap();
 
-            //     // let output = Layout {
-            //     //     body: &page.body(),
-            //     //     footer: &History { commits: page.history() }.to_string(),
-            //     //     author: page.author(),
-            //     //     page_title: Some(&page.title()),
-            //     //     description: &page.description(),
-            //     // }.to_string();
-            //     // page.output_path(Path::new("."), "html").display().to_string();
-            // }
+                // let output = Layout {
+                //     body: &page.body(),
+                //     footer: &History { commits: page.history() }.to_string(),
+                //     author: page.author(),
+                //     page_title: Some(&page.title()),
+                //     description: &page.description(),
+                // }.to_string();
+                // page.output_path(Path::new("."), "html").display().to_string();
+            }
         }
         Cli::Screenshot(_) => {
             let screenshots_dir = Path::new("./screenshots");

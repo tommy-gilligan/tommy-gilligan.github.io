@@ -2,7 +2,7 @@ mod sitemap;
 use sitemap::Sitemap;
 use std::{
     ffi::OsStr,
-    fs::File,
+    fs::{create_dir_all, File},
     path::{Path, PathBuf},
 };
 
@@ -13,6 +13,7 @@ pub struct Output {
 impl Output {
     #[must_use]
     pub fn new(path: &str) -> Self {
+        create_dir_all(path).unwrap();
         Self {
             path: Path::new(path).to_path_buf(),
         }

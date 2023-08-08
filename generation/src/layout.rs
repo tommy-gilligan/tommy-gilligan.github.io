@@ -47,6 +47,7 @@ markup::define! {
 
 use crate::style::Style;
 
+#[derive(Clone)]
 pub struct Factory {
     pub title: String,
     pub language: String,

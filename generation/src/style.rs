@@ -40,6 +40,7 @@ fn parser_options<'a>() -> ParserOptions<'a, 'a> {
     }
 }
 
+#[derive(Clone)]
 pub struct Style {
     path: PathBuf,
 }
