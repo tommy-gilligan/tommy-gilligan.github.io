@@ -10,6 +10,7 @@ mod markdown_options;
 pub use crate::page::frontmatter::Frontmatter;
 use chrono::{DateTime, TimeZone, Utc};
 use git2::Repository;
+use url::Url;
 
 const EXTENSION: &str = "md";
 
@@ -66,6 +67,28 @@ pub fn replace_code(contents: &mut String) {
 impl Page {
     const fn new(path: PathBuf) -> Self {
         Self { path }
+    }
+
+    pub fn link_urls(&self) -> Vec<Url> {
+        let mdast = markdown::to_mdast(&self.contents(), &markdown_options::MARKDOWN_OPTIONS.parse).unwrap();
+
+        (mdast.children()).unwrap().iter().filter_map(|child| {
+            if let markdown::mdast::Node::Paragraph(markdown::mdast::Paragraph { children, .. }) = child {
+                Some(
+                    children.iter().filter_map(|child| {
+                        if let markdown::mdast::Node::Link(markdown::mdast::Link { url, .. }) = child {
+                            Some(url.parse().unwrap())
+                        } else {
+                            None
+                        }
+                    })
+                )
+            } else {
+                None
+            }
+        })
+        .flatten()
+        .collect()
     }
 
     #[must_use]

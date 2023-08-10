@@ -6,12 +6,16 @@
 
 use std::io::Write;
 
+use url::Position;
+use url::Url;
+use tl::{Node::Tag, NodeHandle};
 use clap::Parser;
 use generation::{
     chrome_driver,
     crawl::Crawler,
     layout::{Factory, Layout},
     output::Output,
+    cache::Cache,
     page::Page,
     style::Style,
 };
@@ -35,6 +39,7 @@ use std::{
 };
 use tokio::task::JoinHandle;
 use viuer::{print_from_file, Config};
+use std::str::from_utf8;
 
 #[derive(Parser)]
 #[command(name = "xtask")]
@@ -42,6 +47,7 @@ use viuer::{print_from_file, Config};
 enum Cli {
     Crawl(CrawlArgs),
     Generate(GenerateArgs),
+    FavIcon(FavIconArgs),
     Screenshot(ScreenshotArgs),
     Serve(ServeArgs),
     VisualDiff(VisualDiffArgs),
@@ -52,6 +58,12 @@ enum Cli {
 #[command(author, version, about, long_about = None)]
 struct CrawlArgs {
     host: String,
+}
+
+#[derive(clap::Args, Debug)]
+#[command(author, version, about, long_about = None)]
+struct FavIconArgs {
+    page_path: String,
 }
 
 #[derive(clap::Args, Debug)]
@@ -119,6 +131,33 @@ fn layout_for_page(factory: &Factory, mut page: Page) -> String {
     .to_string()
 }
 
+async fn favicon_url(url: Url) -> Url {
+    let cache = Cache::new("./cache");
+    let body_bytes = cache.get(url.clone()).await.unwrap();
+    let body = from_utf8(&body_bytes).unwrap();
+    let dom = tl::parse(&body, tl::ParserOptions::default()).unwrap();
+    let parser = dom.parser();
+    let mut base_url: Url = (&url[..Position::BeforePath]).parse().unwrap();
+    let mut link_query = dom.query_selector(r#"link[rel~="icon"][href]"#).unwrap();
+    
+    if let Some(node_handle) = link_query.next() {
+        if let Tag(tag) = node_handle.get(parser).unwrap() {
+            return url::Url::options().base_url(Some(&base_url)).parse(tag.attributes().get("href").unwrap().unwrap().try_as_utf8_str().unwrap()).unwrap();
+        } else {
+            base_url.path_segments_mut().unwrap().push("favicon.ico");
+            return base_url;
+        }
+    } else {
+        base_url.path_segments_mut().unwrap().push("favicon.ico");
+        return base_url;
+    }
+}
+
+async fn favicon(url: Url) {
+    let cache = Cache::new("./favicon-cache");
+    cache.get(favicon_url(url).await).await;
+}
+
 #[tokio::main]
 async fn main() {
     match Cli::parse() {
@@ -129,6 +168,20 @@ async fn main() {
                 url.set_host(Some(&host)).unwrap();
                 url.set_port(None).unwrap();
                 sitemap.push(&url);
+            }
+        }
+        Cli::FavIcon(FavIconArgs { page_path }) => {
+            let output = Output::new("./_site");
+            for page in Page::from_dir(&page_path).unwrap() {
+                for url in page.link_urls() {
+                    favicon(url).await;
+                }
+                // println!("{:?}", );
+
+                // output
+                //     .page(page.file_stem())
+                //     .write_all(layout_for_page(&layout_factory.clone(), page).as_bytes())
+                //     .unwrap();
             }
         }
         Cli::Generate(GenerateArgs { page_path: _ }) => {

@@ -12,5 +12,6 @@ pub mod layout;
 mod link_list;
 pub mod output;
 pub mod page;
+pub mod cache;
 pub mod style;
 mod syntax_highlighting;

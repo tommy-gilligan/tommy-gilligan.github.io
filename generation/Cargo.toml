@@ -33,3 +33,5 @@ viuer = { version = "0.6.2" }
 notify = "6.0.1"
 md5 = "0.7.0"
 ordinal = "0.3.1"
+traversal = "0.1.2"
+reqwest = { version = "0.11" }

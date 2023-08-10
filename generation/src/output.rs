@@ -28,4 +28,14 @@ impl Output {
     pub fn page(&self, file_stem: &OsStr) -> File {
         File::create(self.path.clone().join(file_stem).with_extension("html")).unwrap()
     }
+
+    #[must_use]
+    pub fn index(&self) -> File {
+        File::create(self.path.clone().join("index.html")).unwrap()
+    }
+
+    #[must_use]
+    pub fn feed(&self) -> File {
+        File::create(self.path.clone().join("feed.xml")).unwrap()
+    }
 }
