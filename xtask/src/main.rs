@@ -1,21 +1,12 @@
+#![feature(async_closure)]
 #![deny(clippy::pedantic)]
 #![deny(clippy::nursery)]
 #![allow(clippy::too_many_lines)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 
-use std::io::Write;
-
 use clap::Parser;
-use generation::{
-    cache::Cache,
-    chrome_driver,
-    crawl::Crawler,
-    layout::{Factory, Layout},
-    output::Output,
-    page::Page,
-    style::Style,
-};
+use generation::{chrome_driver, crawl::Crawler, output::Output};
 use git2::Repository;
 use hyper::{
     service::{make_service_fn, service_fn},
@@ -26,11 +17,7 @@ use notify::{
     EventKind::{Modify, Remove},
     RecursiveMode, Watcher,
 };
-use tl::Node::Tag;
-use url::Position;
-use url::Url;
 
-use std::str::from_utf8;
 use std::{
     convert::Infallible,
     fs::create_dir_all,
@@ -46,8 +33,6 @@ use viuer::{print_from_file, Config};
 #[command(bin_name = "xtask")]
 enum Cli {
     Crawl(CrawlArgs),
-    Generate(GenerateArgs),
-    FavIcon(FavIconArgs),
     Screenshot(ScreenshotArgs),
     Serve(ServeArgs),
     VisualDiff(VisualDiffArgs),
@@ -58,18 +43,6 @@ enum Cli {
 #[command(author, version, about, long_about = None)]
 struct CrawlArgs {
     host: String,
-}
-
-#[derive(clap::Args, Debug)]
-#[command(author, version, about, long_about = None)]
-struct FavIconArgs {
-    page_path: String,
-}
-
-#[derive(clap::Args, Debug)]
-#[command(author, version, about, long_about = None)]
-struct GenerateArgs {
-    page_path: String,
 }
 
 #[derive(clap::Args, Debug)]
@@ -90,9 +63,9 @@ struct WatchArgs;
 
 fn run_generate() -> Child {
     Command::new("cargo")
-        .arg("xtask")
+        .arg("run")
+        .arg("--bin")
         .arg("generate")
-        .arg("pages")
         .spawn()
         .expect("failed to execute process")
 }
@@ -117,57 +90,6 @@ fn serve() -> JoinHandle<()> {
     })
 }
 
-fn layout_for_page(factory: &Factory, mut page: Page) -> String {
-    Layout {
-        title: &factory.title,
-        language: &factory.language,
-        style: &factory.style.style(),
-        description: &page.description(),
-        body: &page.body(),
-        page_title: None,
-        footer: "",
-        author: "",
-    }
-    .to_string()
-}
-
-async fn favicon_url(url: Url) -> Url {
-    let cache = Cache::new("./cache");
-    let body_bytes = cache.get(url.clone()).await.unwrap();
-    let body = from_utf8(&body_bytes).unwrap();
-    let dom = tl::parse(body, tl::ParserOptions::default()).unwrap();
-    let parser = dom.parser();
-    let mut base_url: Url = url[..Position::BeforePath].parse().unwrap();
-    let mut link_query = dom.query_selector(r#"link[rel~="icon"][href]"#).unwrap();
-
-    if let Some(node_handle) = link_query.next() {
-        if let Tag(tag) = node_handle.get(parser).unwrap() {
-            url::Url::options()
-                .base_url(Some(&base_url))
-                .parse(
-                    tag.attributes()
-                        .get("href")
-                        .unwrap()
-                        .unwrap()
-                        .try_as_utf8_str()
-                        .unwrap(),
-                )
-                .unwrap()
-        } else {
-            base_url.path_segments_mut().unwrap().push("favicon.ico");
-            base_url
-        }
-    } else {
-        base_url.path_segments_mut().unwrap().push("favicon.ico");
-        base_url
-    }
-}
-
-async fn favicon(url: Url) {
-    let cache = Cache::new("./favicon-cache");
-    cache.get(favicon_url(url).await).await;
-}
-
 #[tokio::main]
 async fn main() {
     match Cli::parse() {
@@ -178,44 +100,6 @@ async fn main() {
                 url.set_host(Some(&host)).unwrap();
                 url.set_port(None).unwrap();
                 sitemap.push(&url);
-            }
-        }
-        Cli::FavIcon(FavIconArgs { page_path }) => {
-            let _output = Output::new("./_site");
-            for page in Page::from_dir(&page_path).unwrap() {
-                for url in page.link_urls() {
-                    favicon(url).await;
-                }
-                // println!("{:?}", );
-
-                // output
-                //     .page(page.file_stem())
-                //     .write_all(layout_for_page(&layout_factory.clone(), page).as_bytes())
-                //     .unwrap();
-            }
-        }
-        Cli::Generate(GenerateArgs { page_path: _ }) => {
-            let output = Output::new("./_site");
-            let style = Style::new(Path::new("style.css"));
-            let layout_factory = Factory {
-                style,
-                title: "My Blog".to_string(),
-                language: "en-AU".to_string(),
-            };
-            for page in Page::from_dir("./pages/").unwrap() {
-                output
-                    .page(page.file_stem())
-                    .write_all(layout_for_page(&layout_factory.clone(), page).as_bytes())
-                    .unwrap();
-
-                // let output = Layout {
-                //     body: &page.body(),
-                //     footer: &History { commits: page.history() }.to_string(),
-                //     author: page.author(),
-                //     page_title: Some(&page.title()),
-                //     description: &page.description(),
-                // }.to_string();
-                // page.output_path(Path::new("."), "html").display().to_string();
             }
         }
         Cli::Screenshot(_) => {
@@ -279,16 +163,12 @@ async fn main() {
             let mut watcher = recommended_watcher(move |res| {
                 if let Ok(Event {
                     kind: _e @ (Modify(_) | Remove(_)),
-                    paths,
+                    paths: _,
                     ..
                 }) = res
                 {
-                    for path in paths {
-                        println!("{path:?}");
-                    }
                     child.try_wait().unwrap().map_or((), |status| {
                         if status.success() {
-                            println!("generating");
                             child = run_generate();
                         } else {
                             panic!()

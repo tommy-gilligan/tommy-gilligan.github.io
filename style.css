@@ -42,3 +42,6 @@ figure {
     display: flex;
   }
 }
+a img {
+  vertical-align: middle;
+}

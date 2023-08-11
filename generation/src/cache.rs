@@ -27,18 +27,16 @@ impl Cache {
         }
     }
 
-    pub async fn get(&self, url: Url) -> Option<Vec<u8>> {
-        let hash = hash_url(&url).to_string();
+    pub async fn get(&self, url: &Url) -> Option<Vec<u8>> {
+        let hash = hash_url(url).to_string();
         let path = self.path.join(hash.clone());
         let error_path = self.path.join("error").join(hash);
 
         if error_path.exists() {
             None
         } else if path.exists() {
-            println!("hit");
             Some(read(path).unwrap())
         } else {
-            println!("miss");
             let response = get(url.clone()).await.unwrap();
             let status = response.status();
             if status.is_client_error() {
@@ -46,7 +44,30 @@ impl Cache {
                 None
             } else {
                 let body = response.bytes().await.unwrap();
-                println!("{:?}", path);
+                write(path, body.clone()).unwrap();
+                Some(Vec::from(body))
+            }
+        }
+    }
+
+    #[must_use]
+    pub fn blocking_get(&self, url: &Url) -> Option<Vec<u8>> {
+        let hash = hash_url(url).to_string();
+        let path = self.path.join(hash.clone());
+        let error_path = self.path.join("error").join(hash);
+
+        if error_path.exists() {
+            None
+        } else if path.exists() {
+            Some(read(path).unwrap())
+        } else {
+            let response = reqwest::blocking::get(url.clone()).unwrap();
+            let status = response.status();
+            if status.is_client_error() {
+                write(error_path, status.as_str()).unwrap();
+                None
+            } else {
+                let body = response.bytes().unwrap();
                 write(path, body.clone()).unwrap();
                 Some(Vec::from(body))
             }
