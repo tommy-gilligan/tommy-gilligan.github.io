@@ -69,26 +69,35 @@ impl Page {
         Self { path }
     }
 
+    #[must_use]
     pub fn link_urls(&self) -> Vec<Url> {
-        let mdast = markdown::to_mdast(&self.contents(), &markdown_options::MARKDOWN_OPTIONS.parse).unwrap();
+        let mdast = markdown::to_mdast(&self.contents(), &markdown_options::MARKDOWN_OPTIONS.parse)
+            .unwrap();
 
-        (mdast.children()).unwrap().iter().filter_map(|child| {
-            if let markdown::mdast::Node::Paragraph(markdown::mdast::Paragraph { children, .. }) = child {
-                Some(
-                    children.iter().filter_map(|child| {
-                        if let markdown::mdast::Node::Link(markdown::mdast::Link { url, .. }) = child {
+        (mdast.children())
+            .unwrap()
+            .iter()
+            .filter_map(|child| {
+                if let markdown::mdast::Node::Paragraph(markdown::mdast::Paragraph {
+                    children,
+                    ..
+                }) = child
+                {
+                    Some(children.iter().filter_map(|child| {
+                        if let markdown::mdast::Node::Link(markdown::mdast::Link { url, .. }) =
+                            child
+                        {
                             Some(url.parse().unwrap())
                         } else {
                             None
                         }
-                    })
-                )
-            } else {
-                None
-            }
-        })
-        .flatten()
-        .collect()
+                    }))
+                } else {
+                    None
+                }
+            })
+            .flatten()
+            .collect()
     }
 
     #[must_use]

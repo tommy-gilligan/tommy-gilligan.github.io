@@ -6,16 +6,13 @@
 
 use std::io::Write;
 
-use url::Position;
-use url::Url;
-use tl::{Node::Tag, NodeHandle};
 use clap::Parser;
 use generation::{
+    cache::Cache,
     chrome_driver,
     crawl::Crawler,
     layout::{Factory, Layout},
     output::Output,
-    cache::Cache,
     page::Page,
     style::Style,
 };
@@ -29,7 +26,11 @@ use notify::{
     EventKind::{Modify, Remove},
     RecursiveMode, Watcher,
 };
+use tl::Node::Tag;
+use url::Position;
+use url::Url;
 
+use std::str::from_utf8;
 use std::{
     convert::Infallible,
     fs::create_dir_all,
@@ -39,7 +40,6 @@ use std::{
 };
 use tokio::task::JoinHandle;
 use viuer::{print_from_file, Config};
-use std::str::from_utf8;
 
 #[derive(Parser)]
 #[command(name = "xtask")]
@@ -135,21 +135,31 @@ async fn favicon_url(url: Url) -> Url {
     let cache = Cache::new("./cache");
     let body_bytes = cache.get(url.clone()).await.unwrap();
     let body = from_utf8(&body_bytes).unwrap();
-    let dom = tl::parse(&body, tl::ParserOptions::default()).unwrap();
+    let dom = tl::parse(body, tl::ParserOptions::default()).unwrap();
     let parser = dom.parser();
-    let mut base_url: Url = (&url[..Position::BeforePath]).parse().unwrap();
+    let mut base_url: Url = url[..Position::BeforePath].parse().unwrap();
     let mut link_query = dom.query_selector(r#"link[rel~="icon"][href]"#).unwrap();
-    
+
     if let Some(node_handle) = link_query.next() {
         if let Tag(tag) = node_handle.get(parser).unwrap() {
-            return url::Url::options().base_url(Some(&base_url)).parse(tag.attributes().get("href").unwrap().unwrap().try_as_utf8_str().unwrap()).unwrap();
+            url::Url::options()
+                .base_url(Some(&base_url))
+                .parse(
+                    tag.attributes()
+                        .get("href")
+                        .unwrap()
+                        .unwrap()
+                        .try_as_utf8_str()
+                        .unwrap(),
+                )
+                .unwrap()
         } else {
             base_url.path_segments_mut().unwrap().push("favicon.ico");
-            return base_url;
+            base_url
         }
     } else {
         base_url.path_segments_mut().unwrap().push("favicon.ico");
-        return base_url;
+        base_url
     }
 }
 
@@ -171,7 +181,7 @@ async fn main() {
             }
         }
         Cli::FavIcon(FavIconArgs { page_path }) => {
-            let output = Output::new("./_site");
+            let _output = Output::new("./_site");
             for page in Page::from_dir(&page_path).unwrap() {
                 for url in page.link_urls() {
                     favicon(url).await;
