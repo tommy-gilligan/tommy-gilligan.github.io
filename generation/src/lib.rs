@@ -1,3 +1,4 @@
+#![feature(unboxed_closures)]
 #![deny(clippy::pedantic)]
 #![deny(clippy::nursery)]
 #![allow(clippy::missing_panics_doc)]
@@ -9,6 +10,7 @@ pub mod chrome_driver;
 pub mod crawl;
 pub mod favicon;
 pub mod generate;
+pub mod git;
 pub mod history;
 pub mod layout;
 mod link_list;

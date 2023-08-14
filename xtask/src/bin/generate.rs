@@ -19,15 +19,17 @@ use generation::{
 
 use std::path::Path;
 
-fn layout_for_page(factory: &Factory, page: &str) -> String {
+fn layout_for_page(factory: &Factory, body: &str, page: &Page) -> String {
+    let history = page.history();
+    let footer = generation::history::History { commits: history }.to_string();
     Layout {
         title: &factory.title,
         language: &factory.language,
         style: &factory.style.style(),
-        description: "",
-        body: page,
-        page_title: None,
-        footer: "",
+        description: &page.description(),
+        body,
+        page_title: Some(&page.title()),
+        footer: &footer,
         author: "",
     }
     .to_string()
@@ -52,7 +54,7 @@ fn main() {
         title: "My Blog".to_string(),
         language: "en-AU".to_string(),
     };
-    for page in Page::from_dir("pages").unwrap() {
+    for page in Page::from_dir("./pages").unwrap() {
         let mut m = Markdown::new(page.contents());
         m.replace(|node| match node {
             markdown::mdast::Node::Link(markdown::mdast::Link { url, children, .. }) => {
@@ -91,7 +93,7 @@ fn main() {
 
         let mut output_file = output.page(page.file_stem());
         output_file
-            .write_all(layout_for_page(&layout_factory, &m.render()).as_bytes())
+            .write_all(layout_for_page(&layout_factory, &m.render(), &page).as_bytes())
             .unwrap();
     }
 }

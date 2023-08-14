@@ -35,12 +35,26 @@ code {
 figure {
   margin: 0;
 }
-.commits {
-  padding: 0;
-  .commit {
-    justify-content: space-between;
-    display: flex;
-  }
+table.commits {
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+table.commits caption {
+  text-align: left;
+}
+.commits td { padding: 0; text-align: right }
+.commits td:nth-child(1) { text-align: left }
+.commits td:nth-child(2) { width: 50px }
+.commits td:nth-child(3) { width: 24px }
+.commits td:nth-child(4) { width: 120px }
+footer {
+  display: flex;
+  align-content: start;
+  justify-content: space-between;
+
+}
+.author {
+  flex: 1
 }
 a img {
   vertical-align: middle;

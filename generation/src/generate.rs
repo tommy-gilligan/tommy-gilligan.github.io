@@ -23,10 +23,6 @@
 //         .generator(crate::config::generator());
 //
 //     for mut file in crate::page::Page::from_dir("./pages/").unwrap() {
-//         let footer = crate::history::History {
-//             commits: file.history(),
-//         }
-//         .to_string();
 //         let body = file.body();
 //         let output = crate::layout::Layout {
 //             title: "My Blog",

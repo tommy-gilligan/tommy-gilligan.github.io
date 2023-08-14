@@ -8,8 +8,9 @@ use std::{
 mod frontmatter;
 mod markdown_options;
 pub use crate::page::frontmatter::Frontmatter;
-use chrono::{DateTime, TimeZone, Utc};
-use git2::Repository;
+
+use crate::git::Git;
+use git2::Commit;
 use url::Url;
 
 const EXTENSION: &str = "md";
@@ -17,6 +18,7 @@ const EXTENSION: &str = "md";
 #[derive(Debug)]
 pub struct Page {
     path: PathBuf,
+    repo: Git,
 }
 
 markup::define! {
@@ -65,8 +67,11 @@ pub fn replace_code(contents: &mut String) {
 }
 
 impl Page {
-    const fn new(path: PathBuf) -> Self {
-        Self { path }
+    fn new(path: PathBuf) -> Self {
+        Self {
+            path,
+            repo: Git::new(),
+        }
     }
 
     #[must_use]
@@ -100,25 +105,25 @@ impl Page {
             .collect()
     }
 
-    #[must_use]
-    pub fn published_at(&self) -> DateTime<Utc> {
-        self.history().first().unwrap().0
-    }
+    // #[must_use]
+    // pub fn published_at(&self) -> DateTime<Utc> {
+    //     self.history().first().unwrap().0
+    // }
 
     #[must_use]
     pub fn file_stem(&self) -> &OsStr {
         self.path.file_stem().unwrap()
     }
 
-    #[must_use]
-    pub fn updated_at(&self) -> Option<DateTime<Utc>> {
-        let updated_at = self.history().last().unwrap().0;
-        if updated_at == self.published_at() {
-            None
-        } else {
-            Some(updated_at)
-        }
-    }
+    // #[must_use]
+    // pub fn updated_at(&self) -> Option<DateTime<Utc>> {
+    //     let updated_at = self.history().last().unwrap().0;
+    //     if updated_at == self.published_at() {
+    //         None
+    //     } else {
+    //         Some(updated_at)
+    //     }
+    // }
 
     #[must_use]
     pub fn title(&self) -> String {
@@ -131,29 +136,9 @@ impl Page {
     }
 
     #[must_use]
-    pub fn history(&self) -> Vec<(DateTime<Utc>, String, String, String)> {
-        let mut path = self.path.clone();
-        let mut res = Vec::new();
-        path = path.strip_prefix("./").unwrap().to_path_buf();
-        let repo = match Repository::open(".") {
-            Ok(repo) => repo,
-            Err(e) => panic!("failed to open: {e}"),
-        };
-        let mut tree = repo.revwalk().unwrap();
-        tree.push_head().unwrap();
-        for oid in tree {
-            let o = oid.unwrap();
-            let c = repo.find_commit(o).unwrap();
-            if c.tree().unwrap().get_path(&path).is_ok() {
-                res.push((
-                    Utc.timestamp_opt(c.time().seconds(), 0).unwrap(),
-                    c.message().unwrap().to_owned(),
-                    String::new(),
-                    c.id().to_string(),
-                ));
-            }
-        }
-        res
+    pub fn history(&self) -> Vec<Commit> {
+        println!("{:?}", self.path);
+        self.repo.commits_for(&self.path)
     }
 
     #[must_use]

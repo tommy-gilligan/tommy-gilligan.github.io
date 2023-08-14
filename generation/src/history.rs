@@ -1,6 +1,8 @@
-use chrono::{DateTime, Datelike, Utc};
+use chrono::{TimeZone, Datelike, Utc};
+use git2::{Commit, Time};
 use ordinal::Ordinal;
 use url::Url;
+use crate::ditto::Ditto;
 
 const WEB_REPO_URL: &str = "https://github.com/tomgilligan/tomgilligan.github.io/commit/";
 
@@ -9,28 +11,47 @@ fn url_for_sha(sha: &str) -> Url {
     web_repo_url.join(sha).unwrap()
 }
 
-fn format_timestamp(dt: DateTime<Utc>) -> String {
-    format!(
-        "{}, {} of {}",
-        dt.format("%A"),
-        Ordinal(dt.date_naive().day()),
-        dt.format("%B, %Y"),
-    )
+markup::define! {
+    Link<'a>(commit: &'a Commit<'a>) {
+        a [href = url_for_sha(&commit.id().to_string()).to_string()] {
+            @commit.message()
+        }
+    }
+}
+
+fn format_commit(commit: &Commit) -> [String; 4] {
+    let datetime = Utc.timestamp_opt(commit.time().seconds(), 0).unwrap();
+    [
+        Link { commit: commit }.to_string(),
+        datetime.format("%H:%M").to_string(),
+        Ordinal(datetime.date_naive().day()).to_string(),
+        datetime.format(" of %B, %Y").to_string(),
+    ]
 }
 
 markup::define! {
-    History(commits: Vec<(DateTime<Utc>, String, String, String)>) {
-        ol.commits {
-            @for (_index, commit) in commits.iter().rev().enumerate() {
-                li.commit {
-                    span {
-                        a [href = url_for_sha(&commit.3).to_string()] {
-                            @commit.1
+    History<'a>(commits: Vec<Commit<'a>>) {
+        table.commits {
+            tbody {
+                @for [a, b, c, d] in Ditto::new(commits.iter().map(|a| format_commit(a))) {
+                    tr {
+                        td {
+                            @a
                         }
-                        br;
-                        @format_timestamp(commit.0)
+                        td {
+                            @b
+                        }
+                        td {
+                            @c
+                        }
+                        td {
+                            @d
+                        }
                     }
                 }
+            }
+            caption {
+                "Revisions" 
             }
         }
     }
