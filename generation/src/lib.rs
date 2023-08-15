@@ -1,3 +1,4 @@
+#![feature(iter_array_chunks)]
 #![feature(unboxed_closures)]
 #![deny(clippy::pedantic)]
 #![deny(clippy::nursery)]
@@ -8,6 +9,7 @@ mod author;
 pub mod cache;
 pub mod chrome_driver;
 pub mod crawl;
+pub mod ditto;
 pub mod favicon;
 pub mod generate;
 pub mod git;
