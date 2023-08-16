@@ -6,6 +6,7 @@
 #![allow(clippy::missing_panics_doc)]
 
 use std::io::Write;
+use git2::Repository;
 
 use generation::{
     cache::Cache,
@@ -15,13 +16,37 @@ use generation::{
     output::Output,
     page::Page,
     style::Style,
+    author::AuthorView,
+    github::Remote,
 };
 
 use std::path::Path;
 
+markup::define! {
+    FooterView(author: String, revisions: String) {
+        @markup::raw(author)
+        @markup::raw(revisions)
+    }
+}
+
 fn layout_for_page(factory: &Factory, body: &str, page: &Page) -> String {
-    let history = page.history();
-    let footer = generation::history::History { commits: history }.to_string();
+    let commits = page.history();
+    let revisions = generation::history::History { commits }.to_string();
+    let repo = Repository::open(".").unwrap();
+    let github_user = (&repo.remotes().unwrap()).into_iter().find_map(|remote_name| {
+        match Remote::try_from(repo.find_remote(remote_name.unwrap()).unwrap()) {
+            Ok(remote) => Some(remote.user()),
+            _ => None
+        }
+    }).unwrap();
+
+    let author = AuthorView {
+        name: "Tommy Gilligan".to_string(),
+        email: "thomas.gilligan@icloud.com".to_string(),
+        image_url_for: |size| github_user.avatar(size)
+    }.to_string();
+
+    let footer = FooterView { author, revisions }.to_string();
     Layout {
         title: &factory.title,
         language: &factory.language,

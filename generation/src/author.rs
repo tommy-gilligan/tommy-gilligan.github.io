@@ -1,31 +1,27 @@
 use url::Url;
 
-pub struct Author {
-    pub name: String,
-    pub email: String,
-}
-
-impl Author {
-    pub fn gravatar_url(&self, size: Option<u16>) -> Url {
-        let sum = md5::compute(self.email.trim().to_lowercase().as_bytes());
-        let mut url: Url = "https://www.gravatar.com/avatar/".parse().unwrap();
-        url.path_segments_mut()
-            .unwrap()
-            .pop_if_empty()
-            .push(&format!("{sum:x}"));
-        url.query_pairs_mut()
-            .append_pair("s", &(size.unwrap_or(80).to_string()));
-        url
-    }
+pub fn srcset<F>(image_url_for: F) -> String where F: Fn(u16) -> Url {
+    format!(
+        "{} 1x, {} 2x, {} 3x",
+        image_url_for(120),
+        image_url_for(240),
+        image_url_for(360),
+    )
 }
 
 markup::define! {
-    AuthorView(author: Author) {
-        figure.author {
-            img[src = author.gravatar_url(None).to_string(), alt = &author.name];
-            figcaption {
-                author.name;
-            }
+    AuthorView<F>(name: String, email: String, image_url_for: F) where F: Fn(u16) -> Url {
+        div.author {
+            @name
+            br;
+            img[
+                loading = "lazy",
+                fetchpriority = "low",
+                decoding = "aync",
+                src = image_url_for(120).to_string(),
+                srcset = srcset(image_url_for),
+                alt = &name
+            ];
         }
     }
 }
