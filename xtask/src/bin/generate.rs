@@ -9,7 +9,6 @@ use git2::Repository;
 use std::io::Write;
 
 use generation::{
-    author::AuthorView,
     cache::Cache,
     favicon::Favicon,
     github::Remote,
@@ -18,38 +17,33 @@ use generation::{
     output::Output,
     article::Article,
     style::Style,
+    view::{Author, Link, Footer, History},
 };
 
 use std::path::Path;
 
-markup::define! {
-    FooterView(author: String, revisions: String) {
-        @markup::raw(author)
-        @markup::raw(revisions)
-    }
-}
-
 fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
-    let commits = article.history();
-    let revisions = generation::history::History { commits }.to_string();
     let repo = Repository::open(".").unwrap();
-    let github_user = (&repo.remotes().unwrap())
+    let github = (&repo.remotes().unwrap())
         .into_iter()
         .find_map(|remote_name| {
             match Remote::try_from(repo.find_remote(remote_name.unwrap()).unwrap()) {
-                Ok(remote) => Some(remote.user()),
+                Ok(remote) => Some(remote),
                 _ => None,
             }
         })
         .unwrap();
+    let commits = article.history();
+    let revisions = History { remote: &github, commits }.to_string();
+    let github_user = github.user();
 
-    let author = AuthorView {
+    let author = Author {
         name: "Tommy Gilligan".to_string(),
         image_url_for: |size| github_user.avatar(size),
     }
     .to_string();
 
-    let footer = FooterView { author, revisions }.to_string();
+    let footer = Footer { author, revisions }.to_string();
     Layout {
         title: &factory.title,
         language: &factory.language,
@@ -61,17 +55,6 @@ fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
         author: "",
     }
     .to_string()
-}
-
-markup::define! {
-    Link<'a>(href: &'a str, text: &'a str, favicon: Option<&'a str>) {
-        a [href = href] {
-            @if favicon.is_some() {
-                img [src = favicon.unwrap()];
-            }
-            @text
-        }
-    }
 }
 
 fn main() {

@@ -12,6 +12,7 @@ pub use crate::article::frontmatter::Frontmatter;
 use crate::git::Git;
 use git2::Commit;
 use url::Url;
+use crate::view::CodeContainer;
 
 const EXTENSION: &str = "md";
 
@@ -19,19 +20,6 @@ const EXTENSION: &str = "md";
 pub struct Article {
     path: PathBuf,
     repo: Git,
-}
-
-markup::define! {
-    CodeContainer<'a>(
-        formatted_code: &'a str,
-        language: &'a str,
-    ) {
-        pre {
-            code.{format!("language-{}", language)} {
-                @markup::raw(formatted_code)
-            }
-        }
-    }
 }
 
 pub fn replace_code(contents: &mut String) {
