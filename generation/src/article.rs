@@ -7,7 +7,7 @@ use std::{
 
 mod frontmatter;
 mod markdown_options;
-pub use crate::page::frontmatter::Frontmatter;
+pub use crate::article::frontmatter::Frontmatter;
 
 use crate::git::Git;
 use git2::Commit;
@@ -16,7 +16,7 @@ use url::Url;
 const EXTENSION: &str = "md";
 
 #[derive(Debug)]
-pub struct Page {
+pub struct Article {
     path: PathBuf,
     repo: Git,
 }
@@ -66,7 +66,7 @@ pub fn replace_code(contents: &mut String) {
     }
 }
 
-impl Page {
+impl Article {
     fn new(path: PathBuf) -> Self {
         Self {
             path,

@@ -16,7 +16,7 @@ use generation::{
     layout::{Factory, Layout},
     markdown::Markdown,
     output::Output,
-    page::Page,
+    article::Article,
     style::Style,
 };
 
@@ -29,8 +29,8 @@ markup::define! {
     }
 }
 
-fn layout_for_page(factory: &Factory, body: &str, page: &Page) -> String {
-    let commits = page.history();
+fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
+    let commits = article.history();
     let revisions = generation::history::History { commits }.to_string();
     let repo = Repository::open(".").unwrap();
     let github_user = (&repo.remotes().unwrap())
@@ -54,9 +54,9 @@ fn layout_for_page(factory: &Factory, body: &str, page: &Page) -> String {
         title: &factory.title,
         language: &factory.language,
         style: &factory.style.style(),
-        description: &page.description(),
+        description: &article.description(),
         body,
-        page_title: Some(&page.title()),
+        page_title: Some(&article.title()),
         footer: &footer,
         author: "",
     }
@@ -82,8 +82,8 @@ fn main() {
         title: "My Blog".to_string(),
         language: "en-AU".to_string(),
     };
-    for page in Page::from_dir("./pages").unwrap() {
-        let mut m = Markdown::new(page.contents());
+    for article in Article::from_dir("./articles").unwrap() {
+        let mut m = Markdown::new(article.contents());
         m.replace(|node| match node {
             markdown::mdast::Node::Link(markdown::mdast::Link { url, children, .. }) => {
                 let values = children
@@ -119,9 +119,9 @@ fn main() {
             _ => None,
         });
 
-        let mut output_file = output.page(page.file_stem());
+        let mut output_file = output.page(article.file_stem());
         output_file
-            .write_all(layout_for_page(&layout_factory, &m.render(), &page).as_bytes())
+            .write_all(layout_for_page(&layout_factory, &m.render(), &article).as_bytes())
             .unwrap();
     }
 }

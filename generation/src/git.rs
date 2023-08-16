@@ -1,4 +1,4 @@
-use git2::{Commit, Repository, Revwalk};
+use git2::{Commit, Repository, Revwalk, DiffFindOptions};
 use std::collections::HashSet;
 
 use std::fmt::Debug;
@@ -46,13 +46,19 @@ impl Git {
 
     #[must_use]
     pub fn files(&self, a: &Commit, b: &Commit) -> HashSet<PathBuf> {
-        let diff = self
+        let mut diff_find_options = DiffFindOptions::new();
+        diff_find_options.renames(true);
+        diff_find_options.copies(true);
+
+        let mut diff = self
             .repo
             .diff_tree_to_tree(Some(&a.tree().unwrap()), Some(&b.tree().unwrap()), None)
             .unwrap();
+        diff.find_similar(Some(&mut diff_find_options)).unwrap();
+
         let paths = diff
             .deltas()
-            .filter_map(|delta| delta.old_file().path().map(std::path::Path::to_path_buf))
+            .filter_map(|delta| delta.new_file().path().map(std::path::Path::to_path_buf))
             .collect::<Vec<PathBuf>>();
         let mut hash: HashSet<PathBuf> = HashSet::new();
         for path in paths {
