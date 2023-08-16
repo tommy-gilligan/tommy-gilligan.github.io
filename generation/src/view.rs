@@ -44,14 +44,6 @@ markup::define! {
     }
 }
 
-// markup::define! {
-//     SocialLink(service_name: String, url: Url) {
-//         a[url = url] {
-//             @service_name
-//         }
-//     }
-// }
-
 markup::define! {
     LinkList(links: Vec<(String, String)>) {
         ol {
@@ -97,10 +89,8 @@ markup::define! {
 }
 
 markup::define! {
-    Author<F>(name: String, image_url_for: F) where F: Fn(u16) -> Url {
+    Author<F>(name: String, image_url_for: F, social_links: Vec<(String, Url)>) where F: Fn(u16) -> Url {
         div.author {
-            @name
-            br;
             img[
                 loading = "lazy",
                 fetchpriority = "low",
@@ -109,6 +99,18 @@ markup::define! {
                 srcset = srcset(image_url_for, 120),
                 alt = &name
             ];
+            span {
+                div {
+                    @name
+                    br;
+                    @for (service_name, url) in social_links {
+                        a[href = url.to_string()] {
+                            @service_name
+                        }
+                        br;
+                    }
+                }
+            }
         }
     }
 }

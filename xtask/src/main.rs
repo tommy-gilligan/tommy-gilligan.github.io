@@ -130,7 +130,7 @@ async fn main() {
             serve().await.unwrap();
         }
         Cli::VisualDiff(_) => {
-            let repo = match Repository::open(".") {
+            let repo = match Repository::open_from_env() {
                 Ok(repo) => repo,
                 Err(e) => panic!("failed to open: {e}"),
             };

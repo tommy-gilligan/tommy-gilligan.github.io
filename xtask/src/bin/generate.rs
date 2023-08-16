@@ -17,13 +17,13 @@ use generation::{
     output::Output,
     article::Article,
     style::Style,
-    view::{Author, Link, Footer, History},
+    view::{Author, Link, Footer, History, LinkList},
 };
 
 use std::path::Path;
 
 fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
-    let repo = Repository::open(".").unwrap();
+    let repo = Repository::open_from_env().unwrap();
     let github = (&repo.remotes().unwrap())
         .into_iter()
         .find_map(|remote_name| {
@@ -40,6 +40,10 @@ fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
     let author = Author {
         name: "Tommy Gilligan".to_string(),
         image_url_for: |size| github_user.avatar(size),
+        social_links: vec![
+            ("Github".to_string(), "https://example.com".parse().unwrap()),
+            ("Mastodon".to_string(), "https://example.com".parse().unwrap()),
+        ]
     }
     .to_string();
 
@@ -57,14 +61,29 @@ fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
     .to_string()
 }
 
+fn layout_for_index(factory: &Factory, body: &str) -> String {
+    Layout {
+        title: &factory.title,
+        language: &factory.language,
+        style: &factory.style.style(),
+        description: "",
+        body,
+        page_title: None,
+        footer: "",
+        author: "",
+    }
+    .to_string()
+}
+
 fn main() {
     let output = Output::new("./_site");
     let style = Style::new(Path::new("style.css"));
     let layout_factory = Factory {
         style,
-        title: "My Blog".to_string(),
+        title: "Tommy's Blog".to_string(),
         language: "en-AU".to_string(),
     };
+    let mut index_entries: Vec<(String, String)> = Vec::new();
     for article in Article::from_dir("./articles").unwrap() {
         let mut m = Markdown::new(article.contents());
         m.replace(|node| match node {
@@ -103,8 +122,15 @@ fn main() {
         });
 
         let mut output_file = output.page(article.file_stem());
+        index_entries.push((output.page_path(article.file_stem()).strip_prefix("./_site/").unwrap().to_str().unwrap().to_owned(), article.title()));
+        
         output_file
             .write_all(layout_for_page(&layout_factory, &m.render(), &article).as_bytes())
             .unwrap();
     }
+    let link_list = LinkList { links: index_entries }.to_string();
+    let mut index_file = output.index();
+    index_file
+        .write_all(layout_for_index(&layout_factory, &link_list).as_bytes())
+        .unwrap();
 }
