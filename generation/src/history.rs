@@ -1,8 +1,8 @@
-use chrono::{TimeZone, Datelike, Utc};
-use git2::{Commit, Time};
+use crate::ditto::Ditto;
+use chrono::{Datelike, TimeZone, Utc};
+use git2::Commit;
 use ordinal::Ordinal;
 use url::Url;
-use crate::ditto::Ditto;
 
 const WEB_REPO_URL: &str = "https://github.com/tomgilligan/tomgilligan.github.io/commit/";
 
@@ -33,7 +33,7 @@ markup::define! {
     History<'a>(commits: Vec<Commit<'a>>) {
         table.commits {
             tbody {
-                @for [a, b, c, d] in Ditto::new(commits.iter().map(|a| format_commit(a))) {
+                @for [a, b, c, d] in Ditto::new(commits.iter().map(format_commit)) {
                     tr {
                         td {
                             @a
@@ -51,7 +51,7 @@ markup::define! {
                 }
             }
             caption {
-                "Revisions" 
+                "Revisions"
             }
         }
     }

@@ -21,5 +21,6 @@ mod link_list;
 pub mod markdown;
 pub mod output;
 pub mod page;
+pub mod srcset;
 pub mod style;
 mod syntax_highlighting;

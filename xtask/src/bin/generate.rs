@@ -5,19 +5,19 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 
-use std::io::Write;
 use git2::Repository;
+use std::io::Write;
 
 use generation::{
+    author::AuthorView,
     cache::Cache,
     favicon::Favicon,
+    github::Remote,
     layout::{Factory, Layout},
     markdown::Markdown,
     output::Output,
     page::Page,
     style::Style,
-    author::AuthorView,
-    github::Remote,
 };
 
 use std::path::Path;
@@ -33,18 +33,21 @@ fn layout_for_page(factory: &Factory, body: &str, page: &Page) -> String {
     let commits = page.history();
     let revisions = generation::history::History { commits }.to_string();
     let repo = Repository::open(".").unwrap();
-    let github_user = (&repo.remotes().unwrap()).into_iter().find_map(|remote_name| {
-        match Remote::try_from(repo.find_remote(remote_name.unwrap()).unwrap()) {
-            Ok(remote) => Some(remote.user()),
-            _ => None
-        }
-    }).unwrap();
+    let github_user = (&repo.remotes().unwrap())
+        .into_iter()
+        .find_map(|remote_name| {
+            match Remote::try_from(repo.find_remote(remote_name.unwrap()).unwrap()) {
+                Ok(remote) => Some(remote.user()),
+                _ => None,
+            }
+        })
+        .unwrap();
 
     let author = AuthorView {
         name: "Tommy Gilligan".to_string(),
-        email: "thomas.gilligan@icloud.com".to_string(),
-        image_url_for: |size| github_user.avatar(size)
-    }.to_string();
+        image_url_for: |size| github_user.avatar(size),
+    }
+    .to_string();
 
     let footer = FooterView { author, revisions }.to_string();
     Layout {

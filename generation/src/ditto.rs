@@ -10,20 +10,26 @@ where
     Different(R),
 }
 
-impl <R>std::fmt::Display for Option<R> where R: std::fmt::Display + std::cmp::PartialEq {
+impl<R> std::fmt::Display for Option<R>
+where
+    R: std::fmt::Display + std::cmp::PartialEq,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             crate::ditto::Option::Same => write!(f, ""),
-            crate::ditto::Option::Different(inner) => write!(f, "{}", inner)
+            crate::ditto::Option::Different(inner) => write!(f, "{}", inner),
         }
     }
 }
 
-impl <R>Render for Option<R> where R: std::fmt::Display + std::cmp::PartialEq {
+impl<R> Render for Option<R>
+where
+    R: std::fmt::Display + std::cmp::PartialEq,
+{
     fn render(&self, writer: &mut impl Write) -> std::fmt::Result {
         match self {
             crate::ditto::Option::Same => write!(writer, ""),
-            crate::ditto::Option::Different(inner) => write!(writer, "{}", inner)
+            crate::ditto::Option::Different(inner) => write!(writer, "{}", inner),
         }
     }
 }

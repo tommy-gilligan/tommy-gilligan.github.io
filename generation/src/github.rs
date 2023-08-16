@@ -1,11 +1,8 @@
+use regex::Regex;
 use std::fmt;
 use url::Url;
-use regex::Regex;
 
-pub struct Remote {
-    username: String,
-    repo_name: String
-}
+pub struct Remote { username: String }
 
 #[derive(Debug, Clone)]
 pub struct DoubleError;
@@ -20,8 +17,10 @@ fn try_remote_from_ssh(url: &str) -> Option<Remote> {
     let re = Regex::new(r"\Agit@github.com:([^/]+)/(.+)\z").unwrap();
     let matcher = re.captures_iter(url);
     let x = match matcher.map(|c| c.extract()).next() {
-        Some((_, [username, repo_name])) => Some(Remote { username: username.to_string(), repo_name: repo_name.to_string() }),
-        None => None
+        Some((_, [username, _])) => Some(Remote {
+            username: username.to_string(),
+        }),
+        None => None,
     };
     x
 }
@@ -30,8 +29,10 @@ fn try_remote_from_https(url: &str) -> Option<Remote> {
     let re = Regex::new(r"\Ahttps://github.com/([^/]+)/(.+)\z").unwrap();
     let matcher = re.captures_iter(url);
     let x = match matcher.map(|c| c.extract()).next() {
-        Some((_, [username, repo_name])) => Some(Remote { username: username.to_string(), repo_name: repo_name.to_string() }),
-        None => None
+        Some((_, [username, _])) => Some(Remote {
+            username: username.to_string(),
+        }),
+        None => None,
     };
     x
 }
@@ -55,6 +56,8 @@ pub struct User(String);
 
 impl User {
     pub fn avatar(&self, size: u16) -> Url {
-        format!("https://github.com/{}.png?size={}", self.0, size).parse().unwrap()
+        format!("https://github.com/{}.png?size={}", self.0, size)
+            .parse()
+            .unwrap()
     }
 }
