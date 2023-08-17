@@ -1,4 +1,4 @@
-use git2::{Commit, Repository, Revwalk, DiffFindOptions};
+use git2::{Commit, DiffFindOptions, Repository, Revwalk};
 use std::collections::HashSet;
 
 use std::fmt::Debug;
@@ -68,14 +68,23 @@ impl Git {
     }
 
     #[must_use]
-    pub fn path_in_diff(&self, old_commit: &Commit, new_commit: &Commit, new_path: &Path) -> Option<PathBuf> {
+    pub fn path_in_diff(
+        &self,
+        old_commit: &Commit,
+        new_commit: &Commit,
+        new_path: &Path,
+    ) -> Option<PathBuf> {
         let mut diff_find_options = DiffFindOptions::new();
         diff_find_options.renames(true);
         diff_find_options.copies(true);
 
         let mut diff = self
             .repo
-            .diff_tree_to_tree(Some(&old_commit.tree().unwrap()), Some(&new_commit.tree().unwrap()), None)
+            .diff_tree_to_tree(
+                Some(&old_commit.tree().unwrap()),
+                Some(&new_commit.tree().unwrap()),
+                None,
+            )
             .unwrap();
         diff.find_similar(Some(&mut diff_find_options)).unwrap();
 
@@ -91,26 +100,40 @@ impl Git {
     #[must_use]
     pub fn commits_for(&self, a_path: &Path) -> Vec<Commit> {
         let workdir = self.repo.workdir().unwrap();
-        let mut a_path = workdir.join(a_path).canonicalize().unwrap().strip_prefix(workdir).unwrap().to_path_buf();
-        self.commits().windows(2).filter_map(|commit_pair| {
-            let new_commit = &commit_pair[0];
-            let old_commit = &commit_pair[1];
+        let mut a_path = workdir
+            .join(a_path)
+            .canonicalize()
+            .unwrap()
+            .strip_prefix(workdir)
+            .unwrap()
+            .to_path_buf();
+        self.commits()
+            .windows(2)
+            .filter_map(|commit_pair| {
+                let new_commit = &commit_pair[0];
+                let old_commit = &commit_pair[1];
 
-            if let Some(another_path) = self.path_in_diff(&old_commit, &new_commit, &a_path) {
-                a_path = another_path.clone();
-                Some(new_commit.clone())
-            } else {
-                None
-            }
-        })
-        .collect()
+                self.path_in_diff(old_commit, new_commit, &a_path)
+                    .map_or_else(
+                        || None,
+                        |another_path| {
+                            a_path = another_path;
+                            Some(new_commit.clone())
+                        },
+                    )
+            })
+            .collect()
     }
 }
 
 #[test]
 fn test_commits_for() {
     let git = Git::new();
-    let commits: Vec<String> = git.commits_for(Path::new("Cargo.toml")).into_iter().map(|c| c.id().to_string()).collect();
+    let commits: Vec<String> = git
+        .commits_for(Path::new("Cargo.toml"))
+        .into_iter()
+        .map(|c| c.id().to_string())
+        .collect();
 
     assert_eq!(
         commits,
@@ -143,7 +166,11 @@ fn test_commits_for() {
 #[test]
 fn test_commits_for_rename() {
     let git = Git::new();
-    let commits: Vec<String> = git.commits_for(Path::new("articles/git-config.md")).into_iter().map(|c| c.id().to_string()).collect();
+    let commits: Vec<String> = git
+        .commits_for(Path::new("articles/git-config.md"))
+        .into_iter()
+        .map(|c| c.id().to_string())
+        .collect();
 
     assert_eq!(
         commits,

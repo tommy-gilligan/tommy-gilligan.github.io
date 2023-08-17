@@ -6,10 +6,12 @@ const GRAVATAR_URL: &str = "https://www.gravatar.com/avatar/";
 pub struct User(String);
 
 impl User {
+    #[must_use]
     pub const fn new(email: String) -> Self {
         Self(email)
     }
 
+    #[must_use]
     pub fn avatar(&self, size: u16) -> Url {
         let sum = compute(self.0.trim().to_lowercase().as_bytes());
         let mut url: Url = GRAVATAR_URL.parse().unwrap();

@@ -10,9 +10,9 @@ mod markdown_options;
 pub use crate::article::frontmatter::Frontmatter;
 
 use crate::git::Git;
+use crate::view::CodeContainer;
 use git2::Commit;
 use url::Url;
-use crate::view::CodeContainer;
 
 const EXTENSION: &str = "md";
 
@@ -131,7 +131,7 @@ impl Article {
 
     #[must_use]
     pub fn output_path(&self, dir: &Path, extension: &str) -> PathBuf {
-        let mut path = dir.clone().join(self.path.file_name().unwrap());
+        let mut path = dir.join(self.path.file_name().unwrap());
         path.set_extension(extension);
         path
     }

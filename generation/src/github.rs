@@ -1,9 +1,12 @@
+use git2::Commit;
 use regex::Regex;
 use std::fmt;
 use url::Url;
-use git2::Commit;
 
-pub struct Remote { username: String, repo_name: String }
+pub struct Remote {
+    username: String,
+    repo_name: String,
+}
 
 #[derive(Debug, Clone)]
 pub struct DoubleError;
@@ -17,26 +20,26 @@ impl fmt::Display for DoubleError {
 fn try_remote_from_ssh(url: &str) -> Option<Remote> {
     let re = Regex::new(r"\Agit@github.com:([^/]+)/(.+)\z").unwrap();
     let matcher = re.captures_iter(url);
-    let x = match matcher.map(|c| c.extract()).next() {
-        Some((_, [username, repo_name])) => Some(Remote {
+    let x = matcher
+        .map(|c| c.extract())
+        .next()
+        .map(|(_, [username, repo_name])| Remote {
             username: username.to_string(),
-            repo_name: repo_name.to_string()
-        }),
-        None => None,
-    };
+            repo_name: repo_name.to_string(),
+        });
     x
 }
 
 fn try_remote_from_https(url: &str) -> Option<Remote> {
     let re = Regex::new(r"\Ahttps://github.com/([^/]+)/(.+)\z").unwrap();
     let matcher = re.captures_iter(url);
-    let x = match matcher.map(|c| c.extract()).next() {
-        Some((_, [username, repo_name])) => Some(Remote {
+    let x = matcher
+        .map(|c| c.extract())
+        .next()
+        .map(|(_, [username, repo_name])| Remote {
             username: username.to_string(),
-            repo_name: repo_name.to_string()
-        }),
-        None => None,
-    };
+            repo_name: repo_name.to_string(),
+        });
     x
 }
 
@@ -50,17 +53,24 @@ impl std::convert::TryFrom<git2::Remote<'_>> for Remote {
 }
 
 impl Remote {
+    #[must_use]
     pub fn user(&self) -> User {
         User(self.username.clone())
     }
 
     fn webpage(&self) -> Url {
-        format!("https://github.com/{}/{}", self.username, self.repo_name).parse().unwrap()
+        format!("https://github.com/{}/{}", self.username, self.repo_name)
+            .parse()
+            .unwrap()
     }
 
+    #[must_use]
     pub fn page_for(&self, commit: &Commit) -> Url {
         let mut url = self.webpage();
-        url.path_segments_mut().unwrap().push("commits").push(&commit.id().to_string());
+        url.path_segments_mut()
+            .unwrap()
+            .push("commits")
+            .push(&commit.id().to_string());
         url
     }
 }
@@ -68,6 +78,7 @@ impl Remote {
 pub struct User(String);
 
 impl User {
+    #[must_use]
     pub fn avatar(&self, size: u16) -> Url {
         format!("https://github.com/{}.png?size={}", self.0, size)
             .parse()

@@ -60,7 +60,6 @@ impl ChromeDriver {
 
     pub async fn quit(self) {
         self.web_driver.quit().await.unwrap();
-        let error_re = Regex::new(r"error").unwrap();
         let ignore_re =
             Regex::new(r"alternate_error_pages|org\.freedesktop\.portal\.Settings\.Read").unwrap();
         let path = Path::new("chromedriver.log");
@@ -69,7 +68,7 @@ impl ChromeDriver {
         if let Some(error_line) = BufReader::new(f)
             .lines()
             .map(std::result::Result::unwrap)
-            .filter(|l| error_re.is_match(l))
+            .filter(|l| l.contains("error"))
             .find(|l| !ignore_re.is_match(l))
         {
             panic!(

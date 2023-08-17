@@ -1,7 +1,7 @@
 use markup::Render;
 use std::fmt::Write;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Option<R>
 where
     R: std::cmp::PartialEq + std::fmt::Display,
@@ -16,8 +16,8 @@ where
 {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            crate::ditto::Option::Same => write!(f, ""),
-            crate::ditto::Option::Different(inner) => write!(f, "{}", inner),
+            Self::Same => write!(f, ""),
+            Self::Different(inner) => write!(f, "{inner}"),
         }
     }
 }
@@ -28,8 +28,8 @@ where
 {
     fn render(&self, writer: &mut impl Write) -> std::fmt::Result {
         match self {
-            crate::ditto::Option::Same => write!(writer, ""),
-            crate::ditto::Option::Different(inner) => write!(writer, "{}", inner),
+            Self::Same => write!(writer, ""),
+            Self::Different(inner) => write!(writer, "{inner}"),
         }
     }
 }
@@ -68,7 +68,7 @@ impl<
                     let result = next
                         .clone()
                         .into_iter()
-                        .zip(prev.clone().into_iter())
+                        .zip(prev.clone())
                         .map(|(a, b)| {
                             if a == b {
                                 Option::Same

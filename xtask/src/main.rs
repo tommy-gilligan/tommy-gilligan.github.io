@@ -167,13 +167,12 @@ async fn main() {
                     ..
                 }) = res
                 {
-                    child.try_wait().unwrap().map_or((), |status| {
-                        if status.success() {
-                            child = run_generate();
-                        } else {
-                            panic!()
-                        }
-                    });
+                    let status = child.try_wait().unwrap().unwrap();
+                    if status.success() {
+                        child = run_generate();
+                    } else {
+                        panic!()
+                    }
                 }
             })
             .unwrap();

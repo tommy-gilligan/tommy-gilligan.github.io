@@ -29,6 +29,7 @@ impl Output {
         File::create(self.page_path(file_stem)).unwrap()
     }
 
+    #[must_use]
     pub fn page_path(&self, file_stem: &OsStr) -> PathBuf {
         self.path.clone().join(file_stem).with_extension("html")
     }

@@ -9,15 +9,15 @@ use git2::Repository;
 use std::io::Write;
 
 use generation::{
+    article::Article,
     cache::Cache,
     favicon::Favicon,
     github::Remote,
     layout::{Factory, Layout},
     markdown::Markdown,
     output::Output,
-    article::Article,
     style::Style,
-    view::{Author, Link, Footer, History, LinkList},
+    view::{Author, Footer, History, Link, LinkList},
 };
 
 use std::path::Path;
@@ -27,14 +27,15 @@ fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
     let github = (&repo.remotes().unwrap())
         .into_iter()
         .find_map(|remote_name| {
-            match Remote::try_from(repo.find_remote(remote_name.unwrap()).unwrap()) {
-                Ok(remote) => Some(remote),
-                _ => None,
-            }
+            Remote::try_from(repo.find_remote(remote_name.unwrap()).unwrap()).ok()
         })
         .unwrap();
     let commits = article.history();
-    let revisions = History { remote: &github, commits }.to_string();
+    let revisions = History {
+        remote: &github,
+        commits,
+    }
+    .to_string();
     let github_user = github.user();
 
     let author = Author {
@@ -42,8 +43,11 @@ fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
         image_url_for: |size| github_user.avatar(size),
         social_links: vec![
             ("Github".to_string(), "https://example.com".parse().unwrap()),
-            ("Mastodon".to_string(), "https://example.com".parse().unwrap()),
-        ]
+            (
+                "Mastodon".to_string(),
+                "https://example.com".parse().unwrap(),
+            ),
+        ],
     }
     .to_string();
 
@@ -122,13 +126,25 @@ fn main() {
         });
 
         let mut output_file = output.page(article.file_stem());
-        index_entries.push((output.page_path(article.file_stem()).strip_prefix("./_site/").unwrap().to_str().unwrap().to_owned(), article.title()));
-        
+        index_entries.push((
+            output
+                .page_path(article.file_stem())
+                .strip_prefix("./_site/")
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_owned(),
+            article.title(),
+        ));
+
         output_file
             .write_all(layout_for_page(&layout_factory, &m.render(), &article).as_bytes())
             .unwrap();
     }
-    let link_list = LinkList { links: index_entries }.to_string();
+    let link_list = LinkList {
+        links: index_entries,
+    }
+    .to_string();
     let mut index_file = output.index();
     index_file
         .write_all(layout_for_index(&layout_factory, &link_list).as_bytes())
