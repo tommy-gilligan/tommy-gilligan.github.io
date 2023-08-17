@@ -5,301 +5,35 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 
+mod crawl;
 mod generate;
-use generate::{Args, channel_builder, layout_for_index, layout_for_page};
+mod screenshot;
+mod serve;
+mod visual_diff;
+mod watch;
 
-use rss::{ItemBuilder};
 use clap::Parser;
-use generation::{
-    article::Article,
-    cache::Cache,
-    chrome_driver,
-    crawl::Crawler,
-    favicon::Favicon,
-    layout::Factory,
-    markdown::Markdown,
-    output::Output,
-    style::Style,
-    view::{Link, LinkList},
-};
-use git2::Repository;
-use hyper::{
-    service::{make_service_fn, service_fn},
-    Body, Request, Response, Server,
-};
-use notify::{
-    recommended_watcher, Event,
-    EventKind::{Modify, Remove},
-    RecursiveMode, Watcher,
-};
-
-
-use std::{
-    convert::Infallible,
-    fs::{create_dir_all},
-    io::Write,
-    net::SocketAddr,
-    path::Path,
-    process::{Child, Command},
-};
-use tokio::task::JoinHandle;
-use viuer::{print_from_file, Config};
 
 #[derive(Parser)]
 #[command(name = "xtask")]
 #[command(bin_name = "xtask")]
 enum Cli {
-    Crawl(CrawlArgs),
-    Generate(Args),
-    Screenshot(ScreenshotArgs),
-    Serve(ServeArgs),
-    VisualDiff(VisualDiffArgs),
-    Watch(WatchArgs),
-}
-
-#[derive(clap::Args, Debug)]
-#[command(author, version, about, long_about = None)]
-struct CrawlArgs {
-    host: String,
-}
-
-#[derive(clap::Args, Debug)]
-#[command(author, version, about, long_about = None)]
-struct ScreenshotArgs;
-
-#[derive(clap::Args, Debug)]
-#[command(author, version, about, long_about = None)]
-struct ServeArgs;
-
-#[derive(clap::Args, Debug)]
-#[command(author, version, about, long_about = None)]
-struct VisualDiffArgs;
-
-#[derive(clap::Args, Debug)]
-#[command(author, version, about, long_about = None)]
-struct WatchArgs;
-
-fn run_generate() -> Child {
-    Command::new("cargo")
-        .arg("xtask")
-        .arg("generate")
-        .arg("--error")
-        .spawn()
-        .expect("failed to execute process")
-}
-
-async fn handle(req: Request<Body>) -> Result<Response<Body>, Infallible> {
-    Ok(hyper_staticfile::Static::new("_site")
-        .serve(req)
-        .await
-        .unwrap())
-}
-
-fn serve() -> JoinHandle<()> {
-    let make_service = make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(handle)) });
-    let serve = Server::bind(&SocketAddr::from(([127, 0, 0, 1], 62394))).serve(make_service);
-    let local_addr = serve.local_addr();
-    println!("Serving at {local_addr:?}");
-
-    tokio::spawn(async move {
-        if let Err(e) = serve.await {
-            eprintln!("server error: {e}");
-        }
-    })
+    Crawl(crawl::Args),
+    Generate(generate::Args),
+    Screenshot(screenshot::Args),
+    Serve(serve::Args),
+    VisualDiff(visual_diff::Args),
+    Watch(watch::Args),
 }
 
 #[tokio::main]
 async fn main() {
     match Cli::parse() {
-        Cli::Generate(config) => {
-            let mut channel = &mut channel_builder(&config);
-            let output = Output::new(&config.output);
-            let style = Style::new(Path::new("style.css"));
-            let layout_factory = Factory {
-                style,
-                title: config.title,
-                language: config.language,
-            };
-            let mut index_entries: Vec<(String, String)> = Vec::new();
-            for article in Article::from_dir(&config.articles).unwrap() {
-                let mut m = Markdown::new(article.contents());
-                m.replace(|node| match node {
-                    markdown::mdast::Node::Link(markdown::mdast::Link {
-                        url, children, ..
-                    }) => {
-                        let values = children
-                            .iter()
-                            .filter_map(|node| match node {
-                                markdown::mdast::Node::InlineCode(
-                                    markdown::mdast::InlineCode { value, .. },
-                                )
-                                | markdown::mdast::Node::Text(markdown::mdast::Text {
-                                    value,
-                                    ..
-                                }) => Some(value),
-                                _ => None,
-                            })
-                            .fold(String::new(), |acc, x| format!("{acc} {x}"));
-                        let cache = Cache::new(&config.cache);
-                        let furl = url.parse().unwrap();
-                        let favicon = Favicon::for_url(&furl, cache);
-                        let file_name = format!("{}.ico", favicon.hash());
-                        let file = std::fs::File::create(
-                            Path::new(&config.output).join(file_name.clone()),
-                        )
-                        .unwrap();
-                        favicon.write(file);
-
-                        Some(
-                            Link {
-                                href: url,
-                                text: &values,
-                                favicon: Some(&file_name),
-                            }
-                            .to_string(),
-                        )
-                    }
-                    _ => None,
-                });
-
-                let mut item_builder = ItemBuilder::default();
-                let item = item_builder
-                    .title(article.title())
-                    .description(article.description())
-                    .pub_date(
-                        article.published_at()
-                            .format("%a, %d %b %Y %H:%M:%S %z")
-                            .to_string(),
-                    );
-
-                channel = channel.item(item.build());
-
-                let mut output_file = output.page(article.file_stem());
-                index_entries.push((
-                    output
-                        .page_path(article.file_stem())
-                        .file_name()
-                        .unwrap()
-                        .to_str()
-                        .unwrap()
-                        .to_owned(),
-                    article.title(),
-                ));
-
-                output_file
-                    .write_all(layout_for_page(&layout_factory, &m.render(), &article).as_bytes())
-                    .unwrap();
-            }
-            let link_list = LinkList {
-                links: index_entries,
-            }
-            .to_string();
-            let mut index_file = output.index();
-            index_file
-                .write_all(layout_for_index(&layout_factory, &link_list).as_bytes())
-                .unwrap();
-
-            let channel = channel.build();
-            let feed = output.feed();
-            channel.write_to(feed).unwrap();
-        }
-        Cli::Crawl(CrawlArgs { host }) => {
-            let mut sitemap = Output::new("./_site").sitemap().create();
-
-            for mut url in Crawler::new() {
-                url.set_host(Some(&host)).unwrap();
-                url.set_port(None).unwrap();
-                sitemap.push(&url);
-            }
-        }
-        Cli::Screenshot(_) => {
-            let screenshots_dir = Path::new("./screenshots");
-            create_dir_all(screenshots_dir).unwrap();
-
-            let server_child = serve();
-            let abort_handle = server_child.abort_handle();
-            server_child.await.unwrap();
-            let mut driver = chrome_driver::ChromeDriver::new().await;
-
-            for url in Output::new("./_site").sitemap().open() {
-                assert!(!abort_handle.is_finished());
-                driver.goto(url.clone()).await;
-
-                let path = url.path().strip_prefix('/').unwrap();
-                let mut joined_path = screenshots_dir.join(path);
-                joined_path = joined_path.with_extension("png");
-
-                driver.screenshot(&joined_path).await;
-            }
-
-            abort_handle.abort();
-
-            driver.quit().await;
-        }
-        Cli::Serve(_) => {
-            serve().await.unwrap();
-        }
-        Cli::VisualDiff(_) => {
-            let repo = match Repository::open_from_env() {
-                Ok(repo) => repo,
-                Err(e) => panic!("failed to open: {e}"),
-            };
-            let tree = repo.find_reference("HEAD").unwrap().peel_to_tree();
-            for d in repo
-                .diff_tree_to_workdir(Some(&tree.unwrap()), None)
-                .unwrap()
-                .deltas()
-            {
-                if d.old_file().path().unwrap().starts_with("screenshots/") {
-                    let old_conf = Config {
-                        x: 0,
-                        y: 0,
-                        width: Some(80),
-                        height: Some(25),
-                        ..Default::default()
-                    };
-                    print_from_file(d.old_file().path().unwrap(), &old_conf)
-                        .expect("Image printing failed.");
-                    panic!(
-                        "changes in screenshot {:?} detected",
-                        d.old_file().path().unwrap()
-                    );
-                }
-            }
-        }
-        Cli::Watch(_) => {
-            let mut child = run_generate();
-
-            let mut watcher = recommended_watcher(move |res| {
-                if let Ok(Event {
-                    kind: _e @ (Modify(_) | Remove(_)),
-                    paths: _,
-                    ..
-                }) = res
-                {
-                    let status = child.try_wait().unwrap().unwrap();
-                    if status.success() {
-                        child = run_generate();
-                    } else {
-                        panic!()
-                    }
-                }
-            })
-            .unwrap();
-            watcher
-                .watch(Path::new("pages"), RecursiveMode::NonRecursive)
-                .unwrap();
-            watcher
-                .watch(Path::new("src"), RecursiveMode::Recursive)
-                .unwrap();
-            watcher
-                .watch(Path::new("Cargo.toml"), RecursiveMode::NonRecursive)
-                .unwrap();
-            watcher
-                .watch(Path::new("Cargo.lock"), RecursiveMode::NonRecursive)
-                .unwrap();
-
-            serve().await.unwrap();
-        }
+        Cli::Generate(args) => generate::generate(&args),
+        Cli::Crawl(args) => crawl::crawl(&args),
+        Cli::Screenshot(args) => screenshot::screenshot(&args).await,
+        Cli::Serve(args) => serve::serve(&args).await.unwrap(),
+        Cli::VisualDiff(args) => visual_diff::visual_diff(&args),
+        Cli::Watch(args) => watch::watch(&args).await,
     }
 }

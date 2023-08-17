@@ -11,9 +11,9 @@ pub use crate::article::frontmatter::Frontmatter;
 
 use crate::git::Git;
 use crate::view::CodeContainer;
+use chrono::{DateTime, TimeZone, Utc};
 use git2::Commit;
 use url::Url;
-use chrono::{TimeZone, DateTime, Utc};
 
 const EXTENSION: &str = "md";
 
@@ -96,7 +96,8 @@ impl Article {
 
     #[must_use]
     pub fn published_at(&self) -> DateTime<Utc> {
-        Utc.timestamp_opt(self.history().first().unwrap().time().seconds(), 0).unwrap()
+        Utc.timestamp_opt(self.history().first().unwrap().time().seconds(), 0)
+            .unwrap()
     }
 
     #[must_use]

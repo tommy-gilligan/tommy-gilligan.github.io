@@ -48,8 +48,8 @@ markup::define! {
 use crate::style::Style;
 
 #[derive(Clone)]
-pub struct Factory {
-    pub title: String,
-    pub language: String,
+pub struct Factory<'a> {
+    pub title: &'a str,
+    pub language: &'a str,
     pub style: Style,
 }
