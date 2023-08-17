@@ -5,6 +5,10 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::missing_panics_doc)]
 
+mod generate;
+use generate::{Args, channel_builder, layout_for_index, layout_for_page};
+
+use rss::{ItemBuilder};
 use clap::Parser;
 use generation::{
     article::Article,
@@ -12,12 +16,11 @@ use generation::{
     chrome_driver,
     crawl::Crawler,
     favicon::Favicon,
-    github::Remote,
-    layout::{Factory, Layout},
+    layout::Factory,
     markdown::Markdown,
     output::Output,
     style::Style,
-    view::{Author, Footer, History, Link, LinkList},
+    view::{Link, LinkList},
 };
 use git2::Repository;
 use hyper::{
@@ -30,9 +33,10 @@ use notify::{
     RecursiveMode, Watcher,
 };
 
+
 use std::{
     convert::Infallible,
-    fs::create_dir_all,
+    fs::{create_dir_all},
     io::Write,
     net::SocketAddr,
     path::Path,
@@ -46,7 +50,7 @@ use viuer::{print_from_file, Config};
 #[command(bin_name = "xtask")]
 enum Cli {
     Crawl(CrawlArgs),
-    Generate(GenerateArgs),
+    Generate(Args),
     Screenshot(ScreenshotArgs),
     Serve(ServeArgs),
     VisualDiff(VisualDiffArgs),
@@ -58,10 +62,6 @@ enum Cli {
 struct CrawlArgs {
     host: String,
 }
-
-#[derive(clap::Args, Debug)]
-#[command(author, version, about, long_about = None)]
-struct GenerateArgs;
 
 #[derive(clap::Args, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -79,68 +79,11 @@ struct VisualDiffArgs;
 #[command(author, version, about, long_about = None)]
 struct WatchArgs;
 
-fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
-    let repo = Repository::open_from_env().unwrap();
-    let github = (&repo.remotes().unwrap())
-        .into_iter()
-        .find_map(|remote_name| {
-            Remote::try_from(repo.find_remote(remote_name.unwrap()).unwrap()).ok()
-        })
-        .unwrap();
-    let commits = article.history();
-    let revisions = History {
-        remote: &github,
-        commits,
-    }
-    .to_string();
-    let github_user = github.user();
-
-    let author = Author {
-        name: "Tommy Gilligan".to_string(),
-        image_url_for: |size| github_user.avatar(size),
-        social_links: vec![
-            ("Github".to_string(), "https://example.com".parse().unwrap()),
-            (
-                "Mastodon".to_string(),
-                "https://example.com".parse().unwrap(),
-            ),
-        ],
-    }
-    .to_string();
-
-    let footer = Footer { author, revisions }.to_string();
-    Layout {
-        title: &factory.title,
-        language: &factory.language,
-        style: &factory.style.style(),
-        description: &article.description(),
-        body,
-        page_title: Some(&article.title()),
-        footer: &footer,
-        author: "",
-    }
-    .to_string()
-}
-
-fn layout_for_index(factory: &Factory, body: &str) -> String {
-    Layout {
-        title: &factory.title,
-        language: &factory.language,
-        style: &factory.style.style(),
-        description: "",
-        body,
-        page_title: None,
-        footer: "",
-        author: "",
-    }
-    .to_string()
-}
-
 fn run_generate() -> Child {
     Command::new("cargo")
-        .arg("run")
-        .arg("--bin")
+        .arg("xtask")
         .arg("generate")
+        .arg("--error")
         .spawn()
         .expect("failed to execute process")
 }
@@ -168,16 +111,17 @@ fn serve() -> JoinHandle<()> {
 #[tokio::main]
 async fn main() {
     match Cli::parse() {
-        Cli::Generate(GenerateArgs) => {
-            let output = Output::new("./_site");
+        Cli::Generate(config) => {
+            let mut channel = &mut channel_builder(&config);
+            let output = Output::new(&config.output);
             let style = Style::new(Path::new("style.css"));
             let layout_factory = Factory {
                 style,
-                title: "Tommy's Blog".to_string(),
-                language: "en-AU".to_string(),
+                title: config.title,
+                language: config.language,
             };
             let mut index_entries: Vec<(String, String)> = Vec::new();
-            for article in Article::from_dir("./articles").unwrap() {
+            for article in Article::from_dir(&config.articles).unwrap() {
                 let mut m = Markdown::new(article.contents());
                 m.replace(|node| match node {
                     markdown::mdast::Node::Link(markdown::mdast::Link {
@@ -196,13 +140,14 @@ async fn main() {
                                 _ => None,
                             })
                             .fold(String::new(), |acc, x| format!("{acc} {x}"));
-                        let cache = Cache::new("./cache");
+                        let cache = Cache::new(&config.cache);
                         let furl = url.parse().unwrap();
                         let favicon = Favicon::for_url(&furl, cache);
                         let file_name = format!("{}.ico", favicon.hash());
-                        let file =
-                            std::fs::File::create(Path::new("_site").join(file_name.clone()))
-                                .unwrap();
+                        let file = std::fs::File::create(
+                            Path::new(&config.output).join(file_name.clone()),
+                        )
+                        .unwrap();
                         favicon.write(file);
 
                         Some(
@@ -217,11 +162,23 @@ async fn main() {
                     _ => None,
                 });
 
+                let mut item_builder = ItemBuilder::default();
+                let item = item_builder
+                    .title(article.title())
+                    .description(article.description())
+                    .pub_date(
+                        article.published_at()
+                            .format("%a, %d %b %Y %H:%M:%S %z")
+                            .to_string(),
+                    );
+
+                channel = channel.item(item.build());
+
                 let mut output_file = output.page(article.file_stem());
                 index_entries.push((
                     output
                         .page_path(article.file_stem())
-                        .strip_prefix("./_site/")
+                        .file_name()
                         .unwrap()
                         .to_str()
                         .unwrap()
@@ -241,6 +198,10 @@ async fn main() {
             index_file
                 .write_all(layout_for_index(&layout_factory, &link_list).as_bytes())
                 .unwrap();
+
+            let channel = channel.build();
+            let feed = output.feed();
+            channel.write_to(feed).unwrap();
         }
         Cli::Crawl(CrawlArgs { host }) => {
             let mut sitemap = Output::new("./_site").sitemap().create();

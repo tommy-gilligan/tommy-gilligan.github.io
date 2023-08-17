@@ -13,6 +13,7 @@ use crate::git::Git;
 use crate::view::CodeContainer;
 use git2::Commit;
 use url::Url;
+use chrono::{TimeZone, DateTime, Utc};
 
 const EXTENSION: &str = "md";
 
@@ -93,10 +94,10 @@ impl Article {
             .collect()
     }
 
-    // #[must_use]
-    // pub fn published_at(&self) -> DateTime<Utc> {
-    //     self.history().first().unwrap().0
-    // }
+    #[must_use]
+    pub fn published_at(&self) -> DateTime<Utc> {
+        Utc.timestamp_opt(self.history().first().unwrap().time().seconds(), 0).unwrap()
+    }
 
     #[must_use]
     pub fn file_stem(&self) -> &OsStr {
@@ -125,7 +126,6 @@ impl Article {
 
     #[must_use]
     pub fn history(&self) -> Vec<Commit> {
-        println!("{:?}", self.path);
         self.repo.commits_for(&self.path)
     }
 

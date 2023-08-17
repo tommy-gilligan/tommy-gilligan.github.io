@@ -1,9 +1,6 @@
 [package]
 name = "generation"
-description = "my blog"
 authors = [ "Tommy Gilligan" ]
-repository = "git@github.com:tomgilligan/tomgilligan.github.io.git"
-homepage = "https://tomgilligan.github.io/abc.htm?ab=1"
 version = "0.1.0"
 edition = "2021"
 
