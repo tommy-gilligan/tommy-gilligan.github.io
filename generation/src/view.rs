@@ -26,7 +26,7 @@ markup::define! {
     Link<'a>(href: &'a str, text: &'a str, favicon: Option<&'a str>) {
         a [href = href] {
             @if favicon.is_some() {
-                img [src = favicon.unwrap()];
+                img [src = favicon.unwrap(), alt = format!("Favicon for {}", text)];
             }
             @text
         }
