@@ -70,7 +70,12 @@ jobs:
             xtask/target
             generation/target
           key: ${{ runner.os }}-generate-${{ hashFiles('**/Cargo.toml') }}
-      - uses: actions/configure-pages@v3
+      - id: configure-pages
+        uses: actions/configure-pages@v3
+      # base_url: origin: host: base_path:
+      - run: echo ${{steps.configure-pages.outputs.host}}
+        env:
+          THEHOST: ${{steps.configure-pages.outputs.host}}
       - run: cargo run --bin generate
       - run: cargo xtask crawl https://localhost/
       - uses: actions/upload-artifact@v3
