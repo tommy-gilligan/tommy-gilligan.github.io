@@ -70,6 +70,9 @@ markup::define! {
 markup::define! {
     History<'a>(remote: &'a Remote, commits: Vec<Commit<'a>>) {
         table.commits {
+            caption {
+                "Revisions"
+            }
             tbody {
                 @for [a, b, c, d] in Ditto::new(commits.iter().map(|c| format_commit(remote, c))) {
                     tr {
@@ -77,34 +80,31 @@ markup::define! {
                     }
                 }
             }
-            caption {
-                "Revisions"
-            }
         }
     }
 }
+
+// validator doesn't like these attributes on img
+// loading = "lazy",
+// fetchpriority = "low",
+// decoding = "aync",
 
 markup::define! {
     Author<F>(name: String, image_url_for: F, social_links: Vec<(String, Url)>) where F: Fn(u16) -> Url {
         div.author {
             img[
-                loading = "lazy",
-                fetchpriority = "low",
-                decoding = "aync",
                 src = image_url_for(120).to_string(),
                 srcset = srcset(image_url_for, 120),
                 alt = &name
             ];
             span {
-                div {
-                    @name
-                    br;
-                    @for (service_name, url) in social_links {
-                        a[href = url.to_string()] {
-                            @service_name
-                        }
-                        br;
+                @name
+                br;
+                @for (service_name, url) in social_links {
+                    a[href = url.to_string()] {
+                        @service_name
                     }
+                    br;
                 }
             }
         }

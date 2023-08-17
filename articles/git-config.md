@@ -256,9 +256,11 @@ Your Own Adventure
 - [Signing Your Work](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work)
 - [Signing commits - GitHub Docs](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
 
-branch.<name>.description
-   Branch description, can be edited with git branch --edit-description. Branch description is automatically added in the format-patch cover letter or
-   request-pull summary.
+```
+ branch.<name>.description
+    Branch description, can be edited with git branch --edit-description. Branch description is automatically added in the format-patch cover letter or
+    request-pull summary.
+```
 
 merge.branchdesc defaults to false .  branchdesc is not really shared between different copies
 
