@@ -9,6 +9,6 @@ where
     DENSITIES
         .into_iter()
         .map(|density| format!("{} {}x", image_url_for(density * base_size), density))
-        .reduce(|memo, obj| format!("{}, {}", memo, obj))
+        .reduce(|memo, obj| format!("{memo}, {obj}"))
         .unwrap()
 }

@@ -104,7 +104,7 @@ fn main() {
                         }
                         _ => None,
                     })
-                    .fold(String::new(), |acc, x| format!("{} {}", acc, x));
+                    .fold(String::new(), |acc, x| format!("{acc} {x}"));
                 let cache = Cache::new("./cache");
                 let furl = url.parse().unwrap();
                 let favicon = Favicon::for_url(&furl, cache);
