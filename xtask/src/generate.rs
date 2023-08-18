@@ -2,14 +2,13 @@ use build_time::build_time_local;
 use generation::{
     article::Article,
     cache::Cache,
-    favicon::Favicon,
     github::Remote,
     layout::{Factory, Layout},
     markdown::Markdown,
     output::Output,
     style::Style,
+    view::LinkList,
     view::{Author, Footer, History},
-    view::{Link, LinkList},
 };
 use git2::Repository;
 use git_version::git_version;
@@ -144,42 +143,10 @@ pub fn generate(config: &Args) {
         language: &config.language,
     };
     let mut index_entries: Vec<(String, String)> = Vec::new();
+    let cache = Cache::new(&config.cache);
     for article in Article::from_dir(&config.articles).unwrap() {
         let mut m = Markdown::new(article.contents());
-        m.replace(|node| match node {
-            markdown::mdast::Node::Link(markdown::mdast::Link { url, children, .. }) => {
-                let values = children
-                    .iter()
-                    .filter_map(|node| match node {
-                        markdown::mdast::Node::InlineCode(markdown::mdast::InlineCode {
-                            value,
-                            ..
-                        })
-                        | markdown::mdast::Node::Text(markdown::mdast::Text { value, .. }) => {
-                            Some(value)
-                        }
-                        _ => None,
-                    })
-                    .fold(String::new(), |acc, x| format!("{acc} {x}"));
-                let cache = Cache::new(&config.cache);
-                let furl = url.parse().unwrap();
-                let favicon = Favicon::for_url(&furl, cache);
-                let file_name = format!("{}.ico", favicon.hash());
-                let file = std::fs::File::create(Path::new(&config.output).join(file_name.clone()))
-                    .unwrap();
-                favicon.write(file);
-
-                Some(
-                    Link {
-                        href: url,
-                        text: &values,
-                        favicon: Some(&file_name),
-                    }
-                    .to_string(),
-                )
-            }
-            _ => None,
-        });
+        m.replace(|node| generation::favicon::decorate_link(&cache, &config.output, node));
 
         let mut item_builder = ItemBuilder::default();
         let item = item_builder

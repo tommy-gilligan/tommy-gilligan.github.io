@@ -1,23 +1,24 @@
 use crate::cache::Cache;
 use image::ImageFormat;
+use markdown::mdast::{InlineCode, Link, Node, Text};
 use tl::Node::Tag;
-use url::Position;
-use url::Url;
+use url::{Position, Url};
 
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
+    path::Path,
     str::from_utf8,
 };
 
-pub struct Favicon {
+pub struct Favicon<'a> {
     url: Url,
-    cache: Cache,
+    cache: &'a Cache,
 }
 
-impl Favicon {
+impl<'a> Favicon<'a> {
     #[must_use]
-    pub fn for_url(url: &Url, cache: Cache) -> Self {
+    pub fn for_url(url: &Url, cache: &'a Cache) -> Self {
         let body_bytes = cache.blocking_get(url).unwrap();
         let body = from_utf8(&body_bytes).unwrap();
         let dom = tl::parse(body, tl::ParserOptions::default()).unwrap();
@@ -82,5 +83,35 @@ impl Favicon {
                 .write_to(&mut w, ImageFormat::Ico)
                 .unwrap();
         }
+    }
+}
+
+#[must_use]
+pub fn decorate_link(cache: &Cache, output: &str, node: &Node) -> Option<String> {
+    if let Node::Link(Link { url, children, .. }) = node {
+        let values = children
+            .iter()
+            .filter_map(|node| match node {
+                Node::InlineCode(InlineCode { value, .. }) | Node::Text(Text { value, .. }) => {
+                    Some(value)
+                }
+                _ => None,
+            })
+            .fold(String::new(), |acc, x| format!("{acc} {x}"));
+        let favicon = Favicon::for_url(&url.parse().unwrap(), cache);
+        let file_name = format!("{}.ico", favicon.hash());
+        let file = std::fs::File::create(Path::new(&output).join(file_name.clone())).unwrap();
+        favicon.write(file);
+
+        Some(
+            crate::view::Link {
+                href: url,
+                text: &values,
+                favicon: Some(&file_name),
+            }
+            .to_string(),
+        )
+    } else {
+        None
     }
 }
