@@ -18,7 +18,7 @@ pub async fn screenshot(config: &Args) {
     let screenshots_dir = Path::new(&config.screenshots);
     create_dir_all(screenshots_dir).unwrap();
 
-    let server_child = serve::serve(&serve::Args);
+    let server_child = serve::serve(&serve::Args::default());
     let abort_handle = server_child.abort_handle();
     server_child.await.unwrap();
     let mut driver = ChromeDriver::new().await;

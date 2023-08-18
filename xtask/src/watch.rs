@@ -37,5 +37,7 @@ pub async fn watch(config: &Args) {
         .watch(Path::new(&config.articles), RecursiveMode::NonRecursive)
         .unwrap();
 
-    crate::serve::serve(&crate::serve::Args).await.unwrap();
+    crate::serve::serve(&crate::serve::Args::default())
+        .await
+        .unwrap();
 }
