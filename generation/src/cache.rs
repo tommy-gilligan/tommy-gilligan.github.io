@@ -61,16 +61,18 @@ impl Cache {
         } else if path.exists() {
             Some(read(path).unwrap())
         } else {
-            let response = reqwest::blocking::get(url.clone()).unwrap();
-            let status = response.status();
-            if status.is_client_error() {
-                write(error_path, status.as_str()).unwrap();
-                None
-            } else {
-                let body = response.bytes().unwrap();
-                write(path, body.clone()).unwrap();
-                Some(Vec::from(body))
-            }
+            futures::executor::block_on(async {
+                let response = reqwest::get(url.clone()).await.unwrap();
+                let status = response.status();
+                if status.is_client_error() {
+                    write(error_path, status.as_str()).unwrap();
+                    None
+                } else {
+                    let body = response.bytes().await.unwrap();
+                    write(path, body.clone()).unwrap();
+                    Some(Vec::from(body))
+                }
+            })
         }
     }
 }

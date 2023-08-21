@@ -22,13 +22,22 @@ pub struct Args {
     pub language: String,
 }
 
-pub fn run() -> Child {
-    Command::new("cargo")
-        .arg("xtask")
-        .arg("generate")
-        .arg("--error")
-        .spawn()
-        .expect("failed to execute process")
+pub fn run(base_url: &Url) -> Child {
+    Command::new(
+        std::path::Path::new(env!("OUT_DIR"))
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .join(env!("CARGO_BIN_NAME")),
+    )
+    .arg("generate")
+    .arg("--base-url")
+    .arg(&base_url.to_string())
+    .spawn()
+    .expect("failed to execute process")
 }
 
 pub fn generate(config: &Args) {

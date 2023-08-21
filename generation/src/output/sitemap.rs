@@ -44,7 +44,6 @@ pub struct Builder {
 
 impl Builder {
     pub fn push(&mut self, url: &Url) {
-        assert_eq!(url.scheme(), "https");
         self.url_writer
             .url(UrlEntry::builder().loc(url.to_string()))
             .expect("Unable to write url");

@@ -30,10 +30,11 @@ enum Cli {
 async fn main() {
     match Cli::parse() {
         Cli::Generate(args) => generate::generate(&args),
-        Cli::Crawl(args) => crawl::crawl(&args),
-        Cli::Screenshot(args) => screenshot::screenshot(&args).await,
-        Cli::Serve(args) => serve::serve(&args).await.unwrap(),
-        Cli::VisualDiff(args) => visual_diff::visual_diff(&args),
+        Cli::Crawl(args) => crawl::crawl(&args).await,
+        Cli::Serve(args) => serve::serve(&args).await,
         Cli::Watch(args) => watch::watch(&args).await,
+
+        Cli::Screenshot(args) => screenshot::screenshot(&args).await,
+        Cli::VisualDiff(args) => visual_diff::visual_diff(&args),
     }
 }

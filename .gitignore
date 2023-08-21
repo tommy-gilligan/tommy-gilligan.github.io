@@ -5,3 +5,6 @@ tags.lock
 tags.temp
 tags
 _site
+
+favicon-cache
+cache

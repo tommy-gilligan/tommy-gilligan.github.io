@@ -6,6 +6,7 @@ env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: "-D warnings"
   DISPLAY: ":99"
+  RUST_BACKTRACE: 1
 
 jobs:
   clippy:

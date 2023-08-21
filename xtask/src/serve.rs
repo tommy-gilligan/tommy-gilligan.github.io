@@ -1,12 +1,9 @@
-use hyper::{
-    service::{make_service_fn, service_fn},
-    Body, Request, Response, Server,
-};
-use std::sync::OnceLock;
-use std::{convert::Infallible, net::SocketAddr};
-use tokio::task::JoinHandle;
+use std::net::IpAddr;
 
-static OUTPUT: OnceLock<String> = OnceLock::new();
+use std::net::SocketAddr;
+use tokio::net::TcpListener;
+
+use generation::tokiort::TokioIo;
 
 #[derive(clap::Args, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -15,7 +12,7 @@ pub struct Args {
     pub output: String,
     #[arg(short, long, default_value_t = 0)]
     pub port: u16,
-    #[arg(short, long, default_value = "127.0.0.1")]
+    #[arg(long, default_value = "127.0.0.1")]
     pub host: String,
 }
 
@@ -29,25 +26,23 @@ impl Default for Args {
     }
 }
 
-async fn handle(req: Request<Body>) -> Result<Response<Body>, Infallible> {
-    Ok(hyper_staticfile::Static::new(OUTPUT.get().unwrap())
-        .serve(req)
-        .await
-        .unwrap())
-}
+pub async fn serve(config: &Args) {
+    let ip: IpAddr = config.host.parse().unwrap();
+    let addr: SocketAddr = (ip, config.port).into();
 
-pub fn serve(config: &Args) -> JoinHandle<()> {
-    OUTPUT.set(config.output.clone()).unwrap();
+    let listener = TcpListener::bind(addr).await.unwrap();
+    println!("Listening on http://{}", listener.local_addr().unwrap());
 
-    let make_service = make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(handle)) });
-    let ip: std::net::IpAddr = config.host.parse().unwrap();
-    let serve = Server::bind(&SocketAddr::from((ip, config.port))).serve(make_service);
-    let local_addr = serve.local_addr();
-    println!("Serving at {local_addr:?}");
+    loop {
+        let (stream, _) = listener.accept().await.unwrap();
+        let io = TokioIo::new(stream);
 
-    tokio::spawn(async move {
-        if let Err(e) = serve.await {
-            eprintln!("server error: {e}");
-        }
-    })
+        let service = generation::serve::Service::new(config.output.clone().into());
+        tokio::task::spawn(async move {
+            hyper::server::conn::http1::Builder::new()
+                .serve_connection(io, service)
+                .await
+                .unwrap();
+        });
+    }
 }

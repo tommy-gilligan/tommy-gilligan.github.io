@@ -1,4 +1,7 @@
+#![feature(async_closure)]
+#![feature(impl_trait_projections)]
 #![feature(iter_array_chunks)]
+#![feature(allocator_api)]
 #![feature(unboxed_closures)]
 #![deny(clippy::pedantic)]
 #![deny(clippy::nursery)]
@@ -17,7 +20,9 @@ pub mod gravatar;
 pub mod layout;
 pub mod markdown;
 pub mod output;
+pub mod serve;
 pub mod srcset;
 pub mod style;
 mod syntax_highlighting;
+pub mod tokiort;
 pub mod view;

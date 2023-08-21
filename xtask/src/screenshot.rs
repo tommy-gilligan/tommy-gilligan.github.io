@@ -1,6 +1,8 @@
-use crate::serve;
-use generation::{chrome_driver::ChromeDriver, output::Output};
+use generation::tokiort::TokioIo;
+use std::net::IpAddr;
+use std::net::SocketAddr;
 use std::{fs::create_dir_all, path::Path};
+use tokio::net::TcpListener;
 use url::Url;
 
 #[derive(clap::Args, Debug)]
@@ -15,16 +17,36 @@ pub struct Args {
 }
 
 pub async fn screenshot(config: &Args) {
+    let ip: IpAddr = "127.0.0.1".parse().unwrap();
+    let addr: SocketAddr = (ip, 0).into();
+    let listener = TcpListener::bind(addr).await.unwrap();
+
+    let output = config.output.clone();
+    tokio::task::spawn(async move {
+        let output = output.clone();
+        loop {
+            let (stream, _) = listener.accept().await.unwrap();
+            let io = TokioIo::new(stream);
+
+            let service = generation::serve::Service::new(output.clone().into());
+            tokio::task::spawn(async move {
+                hyper::server::conn::http1::Builder::new()
+                    .serve_connection(io, service)
+                    .await
+                    .unwrap();
+            });
+        }
+    });
+
     let screenshots_dir = Path::new(&config.screenshots);
     create_dir_all(screenshots_dir).unwrap();
 
-    let server_child = serve::serve(&serve::Args::default());
-    let abort_handle = server_child.abort_handle();
-    server_child.await.unwrap();
-    let mut driver = ChromeDriver::new().await;
+    let mut driver = generation::chrome_driver::ChromeDriver::new().await;
 
-    for url in Output::new(&config.output).sitemap().open() {
-        assert!(!abort_handle.is_finished());
+    for url in generation::output::Output::new(&config.output)
+        .sitemap()
+        .open()
+    {
         driver.goto(url.clone()).await;
 
         let path = url.path_segments().unwrap().last().unwrap();
@@ -33,8 +55,6 @@ pub async fn screenshot(config: &Args) {
 
         driver.screenshot(&joined_path).await;
     }
-
-    abort_handle.abort();
 
     driver.quit().await;
 }
