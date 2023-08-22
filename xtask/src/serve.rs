@@ -18,11 +18,11 @@ pub struct Args {
 
 impl Default for Args {
     fn default() -> Self {
-        Self {
-            output: "_site".to_string(),
+        return Self {
+            output: "_site".to_owned(),
             port: 0,
-            host: "127.0.0.1".to_string(),
-        }
+            host: "127.0.0.1".to_owned(),
+        };
     }
 }
 

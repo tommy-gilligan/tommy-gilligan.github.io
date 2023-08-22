@@ -37,7 +37,6 @@ pub async fn watch(config: &Args) {
     let mut watcher = recommended_watcher(move |res| {
         if let Ok(Event {
             kind: _e @ (Modify(_) | Remove(_)),
-            paths: _,
             ..
         }) = res
         {

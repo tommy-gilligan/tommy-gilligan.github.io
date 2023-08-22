@@ -6,7 +6,7 @@ use rss::ChannelBuilder;
 use rss::ItemBuilder;
 
 pub fn generator() -> String {
-    if env!("CARGO_PKG_REPOSITORY").is_empty() {
+    return if env!("CARGO_PKG_REPOSITORY").is_empty() {
         format!(
             "{} version: {}",
             env!("CARGO_PKG_NAME"),
@@ -18,7 +18,7 @@ pub fn generator() -> String {
             env!("CARGO_PKG_REPOSITORY"),
             git_version!()
         )
-    }
+    };
 }
 
 pub fn channel_builder(config: &crate::generate::Args) -> ChannelBuilder {
@@ -29,12 +29,12 @@ pub fn channel_builder(config: &crate::generate::Args) -> ChannelBuilder {
         //.description(crate::config::description())
         // should only change when content has changed
         .last_build_date(Some(
-            build_time_local!("%a, %d %b %Y %H:%M:%S %z").to_string(),
+            build_time_local!("%a, %d %b %Y %H:%M:%S %z").to_owned(),
         ))
         .language(config.language.clone())
-        .ttl("600".to_string())
+        .ttl("600".to_owned())
         .generator(generator());
-    channel
+    return channel;
 }
 
 pub fn feed(config: &crate::generate::Args) {

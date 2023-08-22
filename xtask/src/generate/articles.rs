@@ -17,7 +17,7 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
     let github = (&repo.remotes().unwrap())
         .into_iter()
         .find_map(|remote_name| {
-            Remote::try_from(repo.find_remote(remote_name.unwrap()).unwrap()).ok()
+            return Remote::try_from(repo.find_remote(remote_name.unwrap()).unwrap()).ok();
         })
         .unwrap();
     let commits = article.truncated_history();
@@ -29,12 +29,12 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
     let github_user = github.user();
 
     let author = Author {
-        name: "Tommy Gilligan".to_string(),
-        image_url_for: |size| github_user.avatar(size),
+        name: "Tommy Gilligan".to_owned(),
+        image_url_for: |size| return github_user.avatar(size),
         social_links: vec![
-            ("Github".to_string(), "https://example.com".parse().unwrap()),
+            ("Github".to_owned(), "https://example.com".parse().unwrap()),
             (
-                "Mastodon".to_string(),
+                "Mastodon".to_owned(),
                 "https://example.com".parse().unwrap(),
             ),
         ],
@@ -42,7 +42,7 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
     .to_string();
 
     let footer = Footer { author, revisions }.to_string();
-    Layout {
+    return Layout {
         title: factory.title,
         language: factory.language,
         style: &factory.style.style(),
@@ -52,7 +52,7 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
         footer: &footer,
         author: "",
     }
-    .to_string()
+    .to_string();
 }
 
 static USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
@@ -66,7 +66,7 @@ pub fn render(config: &crate::generate::Args) {
         language: &config.language,
     };
     let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::new(10, 0))
+        .timeout(core::time::Duration::new(10, 0))
         .user_agent(USER_AGENT)
         .http1_title_case_headers()
         .build()
@@ -74,7 +74,7 @@ pub fn render(config: &crate::generate::Args) {
     let cache = Cache::new(&config.cache, client);
     for article in Article::from_dir(&config.articles).unwrap() {
         let mut m = Markdown::new(article.contents());
-        m.replace(|node| generation::favicon::decorate_link(&cache, &config.output, node));
+        m.replace(|node| return generation::favicon::decorate_link(&cache, &config.output, node));
         output
             .page(article.file_stem())
             .write_all(layout_for_page(&layout_factory, &m.render(), &article).as_bytes())

@@ -46,10 +46,10 @@ pub async fn crawl(config: &Args) {
     crawler.push(config.base_url.clone());
     let origin = config.base_url.origin();
     let urls: std::collections::HashSet<Url> = crawler
-        .filter(|url| url.origin() == origin)
+        .filter(|url| return url.origin() == origin)
         .map(|mut v| {
             v.set_fragment(None);
-            v
+            return v;
         })
         .collect();
     for url in urls {

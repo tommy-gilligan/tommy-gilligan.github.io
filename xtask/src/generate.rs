@@ -23,7 +23,7 @@ pub struct Args {
 }
 
 pub fn run(base_url: &Url) -> Child {
-    Command::new(
+    return Command::new(
         std::path::Path::new(env!("OUT_DIR"))
             .parent()
             .unwrap()
@@ -37,7 +37,7 @@ pub fn run(base_url: &Url) -> Child {
     .arg("--base-url")
     .arg(&base_url.to_string())
     .spawn()
-    .expect("failed to execute process")
+    .expect("failed to execute process");
 }
 
 pub fn generate(config: &Args) {

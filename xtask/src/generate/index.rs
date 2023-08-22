@@ -9,7 +9,7 @@ use generation::{
 use std::{io::Write, path::Path};
 
 pub fn layout_for(factory: &Factory, body: &str) -> String {
-    Layout {
+    return Layout {
         title: factory.title,
         language: factory.language,
         style: &factory.style.style(),
@@ -19,7 +19,7 @@ pub fn layout_for(factory: &Factory, body: &str) -> String {
         footer: "",
         author: "",
     }
-    .to_string()
+    .to_string();
 }
 
 pub fn render(config: &crate::generate::Args) {
@@ -35,7 +35,7 @@ pub fn render(config: &crate::generate::Args) {
         .unwrap()
         .into_iter()
         .map(|article| {
-            (
+            return (
                 output
                     .page_path(article.file_stem())
                     .file_name()
@@ -44,7 +44,7 @@ pub fn render(config: &crate::generate::Args) {
                     .unwrap()
                     .to_owned(),
                 article.title(),
-            )
+            );
         })
         .collect();
     output
