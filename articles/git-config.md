@@ -1,6 +1,7 @@
 +++
 title = "Git Config"
 description = "Some nice git config"
+published = 2023-08-22T07:32:00+10:00
 +++
 genesis of article: coming across fsmonitor, re-evaluating config, mark nvim, making a tool that integrates tightly with it
 

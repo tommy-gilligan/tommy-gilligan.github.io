@@ -96,24 +96,32 @@ impl Article {
 
     #[must_use]
     pub fn published_at(&self) -> DateTime<Utc> {
-        Utc.timestamp_opt(self.history().first().unwrap().time().seconds(), 0)
-            .unwrap()
+        Utc.timestamp_opt(
+            self.truncated_history().first().unwrap().time().seconds(),
+            0,
+        )
+        .unwrap()
+    }
+
+    #[must_use]
+    pub fn truncated_history(&self) -> Vec<Commit> {
+        let published = self.frontmatter().published;
+        let truncated: Vec<_> = self
+            .history()
+            .into_iter()
+            .filter(|commit| Utc.timestamp_opt(commit.time().seconds(), 0).unwrap() >= published)
+            .collect();
+        if truncated.is_empty() {
+            vec![self.history().into_iter().last().unwrap()]
+        } else {
+            truncated
+        }
     }
 
     #[must_use]
     pub fn file_stem(&self) -> &OsStr {
         self.path.file_stem().unwrap()
     }
-
-    // #[must_use]
-    // pub fn updated_at(&self) -> Option<DateTime<Utc>> {
-    //     let updated_at = self.history().last().unwrap().0;
-    //     if updated_at == self.published_at() {
-    //         None
-    //     } else {
-    //         Some(updated_at)
-    //     }
-    // }
 
     #[must_use]
     pub fn title(&self) -> String {

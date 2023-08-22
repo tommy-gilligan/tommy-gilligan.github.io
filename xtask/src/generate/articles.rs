@@ -20,7 +20,7 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
             Remote::try_from(repo.find_remote(remote_name.unwrap()).unwrap()).ok()
         })
         .unwrap();
-    let commits = article.history();
+    let commits = article.truncated_history();
     let revisions = History {
         remote: &github,
         commits,

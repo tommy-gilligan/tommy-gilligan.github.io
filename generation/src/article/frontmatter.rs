@@ -9,6 +9,8 @@ use serde::Deserialize;
 pub struct Frontmatter {
     pub title: String,
     pub description: String,
+    #[serde(with = "toml_datetime_compat")]
+    pub published: chrono::DateTime<chrono::FixedOffset>,
 }
 
 pub fn frontmatter(contents: &str, parse_options: &ParseOptions) -> Frontmatter {
