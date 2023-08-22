@@ -1,6 +1,5 @@
 use generation::tokiort::TokioIo;
-use std::net::IpAddr;
-use std::net::SocketAddr;
+
 use std::{fs::create_dir_all, path::Path};
 use tokio::net::TcpListener;
 use url::Url;
@@ -17,9 +16,12 @@ pub struct Args {
 }
 
 pub async fn screenshot(config: &Args) {
-    let ip: IpAddr = "127.0.0.1".parse().unwrap();
-    let addr: SocketAddr = (ip, 0).into();
-    let listener = TcpListener::bind(addr).await.unwrap();
+    let listener = TcpListener::bind(std::net::SocketAddrV4::new(
+        std::net::Ipv4Addr::LOCALHOST,
+        0,
+    ))
+    .await
+    .unwrap();
 
     let output = config.output.clone();
     tokio::task::spawn(async move {
