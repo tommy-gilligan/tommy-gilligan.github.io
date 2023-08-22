@@ -55,6 +55,8 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
     .to_string()
 }
 
+static USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
+
 pub fn render(config: &crate::generate::Args) {
     let output = Output::new(&config.output);
     let style = Style::new(Path::new("style.css"));
@@ -63,7 +65,13 @@ pub fn render(config: &crate::generate::Args) {
         title: &config.title,
         language: &config.language,
     };
-    let cache = Cache::new(&config.cache);
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::new(10, 0))
+        .user_agent(USER_AGENT)
+        .http1_title_case_headers()
+        .build()
+        .unwrap();
+    let cache = Cache::new(&config.cache, client);
     for article in Article::from_dir(&config.articles).unwrap() {
         let mut m = Markdown::new(article.contents());
         m.replace(|node| generation::favicon::decorate_link(&cache, &config.output, node));

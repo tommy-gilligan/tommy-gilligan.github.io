@@ -8,7 +8,6 @@ genesis of article: coming across fsmonitor, re-evaluating config, mark nvim, ma
 [Git - git-config Documentation](https://git-scm.com/docs/git-config)
 [Improve Git monorepo performance with a file system monitor](https://github.blog/2022-06-29-improve-git-monorepo-performance-with-a-file-system-monitor/)
 
-
 this is just stuff i came across that i found interesting
 there is easily much more you can learn about git, other details etc
 revisit config from time to time
@@ -255,9 +254,9 @@ Your Own Adventure
 - [`githooks` Documentation](https://git-scm.com/docs/githooks) `git help hooks`
 - [Pro Git Book](https://git-scm.com/book/en/v2)
 - [Signing Your Work](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work)
-- [Signing commits - GitHub Docs](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
 
 ```
+- [Signing commits - GitHub Docs](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
  branch.<name>.description
     Branch description, can be edited with git branch --edit-description. Branch description is automatically added in the format-patch cover letter or
     request-pull summary.
@@ -298,7 +297,7 @@ communication config maybe doesn't make sense to dig too much into.  especially 
 
 you can use policies to force a migration to a particular type of remote
 
-[^oldgrep]: When I'm talking about plain old grep, I'm talking about [Apple's BSD grep](https://opensource.apple.com/source/text_cmds/text_cmds-101.40.1/grep/) or [GNU grep](https://ftp.gnu.org/gnu/grep/) or [FreeBSD grep](https://cgit.freebsd.org/src/tree/usr.bin/grep/).  The `grep` that came with your operating system is probably one of these (or one of its distant relatives).
+[^oldgrep]: When I'm talking about plain old grep, I'm talking about `[Apple's BSD grep](https://opensource.apple.com/source/text_cmds/text_cmds-101.40.1/grep/)` or `[GNU grep](https://ftp.gnu.org/gnu/grep/)` or `[FreeBSD grep](https://cgit.freebsd.org/src/tree/usr.bin/grep/)`.  The `grep` that came with your operating system is probably one of these (or one of its distant relatives).
 
 Regular expressions (REs), as defined in IEEE Std 1003.1-2004 (“POSIX.1”), come in two forms: basic regular expressions (BREs) and extended regular expressions (EREs).
 man re_format 

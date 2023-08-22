@@ -70,11 +70,12 @@ jobs:
             target/
             xtask/target
             generation/target
+            cache
           key: ${{ runner.os }}-generate-${{ hashFiles('**/Cargo.toml') }}
       - id: configure-pages
         uses: actions/configure-pages@v3
       - run: cargo xtask generate --base-url ${{steps.configure-pages.outputs.base_url}}
-      - run: cargo xtask crawl https://localhost/
+      - run: cargo xtask crawl --base-url ${{steps.configure-pages.outputs.base_url}}
       - uses: actions/upload-artifact@v3
         with:
           name: site
