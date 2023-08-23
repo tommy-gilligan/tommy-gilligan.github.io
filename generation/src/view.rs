@@ -41,14 +41,35 @@ markup::define! {
 }
 
 markup::define! {
-    LinkList(links: Vec<(String, String)>) {
-        ol {
-            @for (href, text) in links.iter() {
-                li {
-                    a [href = href] {
-                        @text
-                    }
+    ArticleItem<'a>(article: &'a crate::article::Article) {
+        // TODO: set ping attribute
+        a[href = format!("{}.html", article.file_stem().to_str().unwrap())] {
+            @article.title()
+        }
+        br;
+        time[datetime = article.published_at().format("%+").to_string()] {
+            @crate::locale::format(article.published_at())
+        }
+        @if let Some(updated_at) = article.updated_at() {
+            br;
+            em {
+                "Updated: "
+                time[datetime = updated_at.format("%+").to_string()] {
+                    @crate::locale::format(updated_at)
                 }
+            }
+        }
+    }
+}
+
+markup::define! {
+    ArticleList(articles: Vec<crate::article::Article>) {
+        h2 {
+            "Articles"
+        }
+        @for article in articles.iter() {
+            div {
+                @ArticleItem { article }
             }
         }
     }

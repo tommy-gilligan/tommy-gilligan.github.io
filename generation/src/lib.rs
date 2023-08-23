@@ -18,6 +18,7 @@ pub mod git;
 pub mod github;
 pub mod gravatar;
 pub mod layout;
+pub mod locale;
 pub mod markdown;
 pub mod output;
 pub mod serve;

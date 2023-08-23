@@ -3,7 +3,7 @@ use generation::{
     layout::{Factory, Layout},
     output::Output,
     style::Style,
-    view::LinkList,
+    view::ArticleList,
 };
 
 use std::{io::Write, path::Path};
@@ -31,33 +31,12 @@ pub fn render(config: &crate::generate::Args) {
         title: &config.title,
         language: &config.language,
     };
-    let index_entries: Vec<(String, String)> = Article::from_dir(&config.articles)
+    let articles: Vec<Article> = Article::from_dir(&config.articles)
         .unwrap()
         .into_iter()
-        .map(|article| {
-            return (
-                output
-                    .page_path(article.file_stem())
-                    .file_name()
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_owned(),
-                article.title(),
-            );
-        })
         .collect();
     output
         .index()
-        .write_all(
-            layout_for(
-                &layout_factory,
-                &LinkList {
-                    links: index_entries,
-                }
-                .to_string(),
-            )
-            .as_bytes(),
-        )
+        .write_all(layout_for(&layout_factory, &ArticleList { articles }.to_string()).as_bytes())
         .unwrap();
 }

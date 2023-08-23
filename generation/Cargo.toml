@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 base64 = ">=0.21.2"
-chrono = { version = "0.4.26", default-features = false, features = [ "std", "clock" ] }
+chrono = { version = "0.4.26", default-features = false, features = [ "std", "clock", "unstable-locales" ] }
 git2 = "0.17.2"
 hyper = { version = "1.0.0-rc.4", features = [ "full" ] }
 hyper-staticfile = "0.10.0-alpha.7"
@@ -33,3 +33,4 @@ image = "0.24.7"
 futures-util = "0.3.28"
 pin-project-lite="0.2.12"
 futures = "0.3.28"
+pure-rust-locales = "0.6"

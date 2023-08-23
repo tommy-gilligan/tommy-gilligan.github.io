@@ -95,9 +95,27 @@ impl Article {
     }
 
     #[must_use]
+    pub fn updated_at(&self) -> Option<DateTime<Utc>> {
+        let updated_at = self
+            .history()
+            .into_iter()
+            .map(|commit| Utc.timestamp_opt(commit.time().seconds(), 0).unwrap())
+            .max()
+            .unwrap();
+        if updated_at > self.published_at() {
+            Some(updated_at)
+        } else {
+            None
+        }
+    }
+
+    #[must_use]
     pub fn published_at(&self) -> DateTime<Utc> {
         self.frontmatter().published_at.unwrap_or_else(|| {
-            Utc.timestamp_opt(self.history().first().unwrap().time().seconds(), 0)
+            self.history()
+                .into_iter()
+                .map(|commit| Utc.timestamp_opt(commit.time().seconds(), 0).unwrap())
+                .min()
                 .unwrap()
         })
     }
@@ -148,10 +166,7 @@ impl Article {
 
     #[must_use]
     pub fn is_published(&self) -> bool {
-        match self.frontmatter().published {
-            Some(true) => true,
-            _ => false,
-        }
+        matches!(self.frontmatter().published, Some(true))
     }
 
     #[must_use]
