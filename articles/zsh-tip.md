@@ -1,7 +1,7 @@
 +++
 title = "Zsh Keybinding Reminder"
 description = "A small masochism to use Zsh more efficiently"
-published = 2023-08-22T07:32:00+10:00
+published = true
 +++
 I love using Neovim but at the shell I still prefer to use Emacs style
 keybindings. I've never been able to remember them all, so lets build a script

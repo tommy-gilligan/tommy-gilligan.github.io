@@ -96,32 +96,27 @@ impl Article {
 
     #[must_use]
     pub fn published_at(&self) -> DateTime<Utc> {
-        Utc.timestamp_opt(
-            self.truncated_history().first().unwrap().time().seconds(),
-            0,
-        )
-        .unwrap()
+        self.frontmatter().published_at.unwrap_or_else(|| {
+            Utc.timestamp_opt(self.history().first().unwrap().time().seconds(), 0)
+                .unwrap()
+        })
     }
 
     #[must_use]
     pub fn truncated_history(&self) -> Vec<Commit> {
-        self.frontmatter().published.map_or_else(
-            || self.history(),
-            |published| {
-                let truncated: Vec<_> = self
-                    .history()
-                    .into_iter()
-                    .filter(|commit| {
-                        Utc.timestamp_opt(commit.time().seconds(), 0).unwrap() >= published
-                    })
-                    .collect();
-                if truncated.is_empty() {
-                    vec![self.history().into_iter().last().unwrap()]
-                } else {
-                    truncated
-                }
-            },
-        )
+        let truncated: Vec<_> = self
+            .history()
+            .into_iter()
+            .filter(|commit| {
+                Utc.timestamp_opt(commit.time().seconds(), 0).unwrap() >= self.published_at()
+            })
+            .collect();
+
+        if truncated.is_empty() {
+            vec![self.history().into_iter().last().unwrap()]
+        } else {
+            truncated
+        }
     }
 
     #[must_use]
@@ -153,7 +148,10 @@ impl Article {
 
     #[must_use]
     pub fn is_published(&self) -> bool {
-        self.frontmatter().published.is_some()
+        match self.frontmatter().published {
+            Some(true) => true,
+            _ => false,
+        }
     }
 
     #[must_use]

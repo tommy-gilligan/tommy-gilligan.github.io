@@ -11,7 +11,8 @@ pub struct Frontmatter {
     pub title: String,
     pub description: String,
     #[serde_as(as = "Option<toml_datetime_compat::TomlDateTime>")]
-    pub published: Option<chrono::DateTime<chrono::FixedOffset>>,
+    pub published_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub published: Option<bool>,
 }
 
 pub fn frontmatter(contents: &str, parse_options: &ParseOptions) -> Frontmatter {
