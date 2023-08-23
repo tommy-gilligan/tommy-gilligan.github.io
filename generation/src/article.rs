@@ -24,7 +24,7 @@ pub struct Article {
 }
 
 pub fn replace_code(contents: &mut String) {
-    // fix mixing bytes with chars
+    // BROKEN: multibyte characters
     let mdast = markdown::to_mdast(contents, &markdown_options::MARKDOWN_OPTIONS.parse).unwrap();
 
     let mut file_offset_accum: isize = 0;
@@ -105,17 +105,23 @@ impl Article {
 
     #[must_use]
     pub fn truncated_history(&self) -> Vec<Commit> {
-        let published = self.frontmatter().published;
-        let truncated: Vec<_> = self
-            .history()
-            .into_iter()
-            .filter(|commit| Utc.timestamp_opt(commit.time().seconds(), 0).unwrap() >= published)
-            .collect();
-        if truncated.is_empty() {
-            vec![self.history().into_iter().last().unwrap()]
-        } else {
-            truncated
-        }
+        self.frontmatter().published.map_or_else(
+            || self.history(),
+            |published| {
+                let truncated: Vec<_> = self
+                    .history()
+                    .into_iter()
+                    .filter(|commit| {
+                        Utc.timestamp_opt(commit.time().seconds(), 0).unwrap() >= published
+                    })
+                    .collect();
+                if truncated.is_empty() {
+                    vec![self.history().into_iter().last().unwrap()]
+                } else {
+                    truncated
+                }
+            },
+        )
     }
 
     #[must_use]
@@ -146,6 +152,11 @@ impl Article {
     }
 
     #[must_use]
+    pub fn is_published(&self) -> bool {
+        self.frontmatter().published.is_some()
+    }
+
+    #[must_use]
     pub fn contents(&self) -> String {
         let input_file = File::open(&self.path).unwrap();
         let mut buf_reader = BufReader::new(input_file);
@@ -164,7 +175,6 @@ impl Article {
         frontmatter::frontmatter(&self.contents(), &markdown_options::MARKDOWN_OPTIONS.parse)
     }
 
-    // probably should exclude index.md
     pub fn from_dir(path_str: &str) -> std::io::Result<Vec<Self>> {
         let path = Path::new(path_str);
         assert!(path.is_dir());
@@ -173,7 +183,12 @@ impl Article {
                 e.map_or(None, |f| match f.file_type() {
                     Ok(file_type) if file_type.is_file() => match f.path().extension() {
                         Some(extension) if extension == OsStr::new(EXTENSION) => {
-                            Some(Self::new(f.path()))
+                            let article = Self::new(f.path());
+                            if article.is_published() {
+                                Some(article)
+                            } else {
+                                None
+                            }
                         }
                         _ => None,
                     },

@@ -1,12 +1,12 @@
 +++
 title = "Git Config"
 description = "Some nice git config"
-published = 2023-08-22T07:32:00+10:00
 +++
 genesis of article: coming across fsmonitor, re-evaluating config, mark nvim, making a tool that integrates tightly with it
 
 [Git - git-config Documentation](https://git-scm.com/docs/git-config)
 [Improve Git monorepo performance with a file system monitor](https://github.blog/2022-06-29-improve-git-monorepo-performance-with-a-file-system-monitor/)
+recent release of git 2.42: sha-1 warnings decreased, force pushing more normalised (github doesn't really know about this yet)
 
 this is just stuff i came across that i found interesting
 there is easily much more you can learn about git, other details etc
@@ -18,34 +18,43 @@ periodic re-evaluation
 
 ### Eliminate Unintended Aliases
 
-Over the life of a `git` repository, a single committer will end up committing
+Over the life of a `git` repository, a single committer can end up committing
 to the repository under different aliases.  This can happen for a variety of
 reasons:
 
-- The author may have
+- The author may have changed their real name intentionally
+- Author may have changed 
 
-This can impede the understanding of a repository
+For me personally, this has usually happened unintentionally.  An annoying ambivalence or inattentiveness for the name or email address I"m using.
+
+This can make reading the history of the repository slightly confusing.  Whether you're looking at the log
 ```
 commit c13dc9d768ed1708dea41e7e70952ea835328d63 (origin/main)
-Author: Tom Gilligan <tom@example.com>
+Author: Bob Taylor <bob@example.com>
 Date:   Tue Aug 8 23:18:28 2023 +1000
 
     Refactor the changes
 
 commit 487e282a9483d8c08051147eb8331d5c16c4237b
-Author: Tommy J Gilligan <tom@example.com>
+Author: Bobby J Taylor <bob@example.com>
 Date:   Tue Aug 8 23:18:28 2023 +1000
 
     Some changes
 
 commit 96b50f824765bcb5ef936bf602cbd8c270ad245e
-Author: Tommy Gilligan <tommy@example.com>
+Author: Bobby Taylor <bobby@example.com>
 Date:   Tue Aug 8 23:18:28 2023 +1000
 
     Initial checkin
 ```
+or a blame view:
+
+Thankfully `git` provides a way to coallesce multiple aliases for the same person: [`gitmailmap`](https://git-scm.com/docs/gitmailmap).  All you need to do is provide a `.mailmap` file at the root of the repository.  Description of file format.  So if Bob wanted to be called ... then ... the resulting log looks like this.
 
 ### Make Conflict Resolution Less Error Prone
+
+Working with branches can result in conflicts.
+It's so important to be careful when resolving conflicts because you can end up with a result that had nothing to do with actual history of either branch.
 
 merge.tool
 reasoning about conflicts can be tricky
@@ -274,8 +283,6 @@ git config does not give you value if default is being used.  unhelpful when doc
 sometimes defaults are conditional so something like that would be helpful
 documentation's warnings of danger seem ill-advised on pull.rebase
 useForceIfIncludes is fairly benign
-
-
 
 https://ldpreload.com/blog/ssh-control
 no official documentation on if they like this or not?

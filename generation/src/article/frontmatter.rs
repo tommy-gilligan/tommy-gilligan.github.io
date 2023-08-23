@@ -2,15 +2,16 @@ use markdown::{
     mdast::{Node, Toml},
     ParseOptions,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use serde_with::serde_as;
 
-#[derive(Debug, PartialEq, Eq, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde_as]
+#[derive(Deserialize, Serialize)]
 pub struct Frontmatter {
     pub title: String,
     pub description: String,
-    #[serde(with = "toml_datetime_compat")]
-    pub published: chrono::DateTime<chrono::FixedOffset>,
+    #[serde_as(as = "Option<toml_datetime_compat::TomlDateTime>")]
+    pub published: Option<chrono::DateTime<chrono::FixedOffset>>,
 }
 
 pub fn frontmatter(contents: &str, parse_options: &ParseOptions) -> Frontmatter {
