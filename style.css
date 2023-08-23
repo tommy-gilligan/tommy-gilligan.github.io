@@ -1,17 +1,60 @@
-root {
-  --foreground-color: black;
-  --background-color: white;
-  --background-darkened: #ddd;
-  --foreground-lightened: #222;
+:root {
+  --link-color: rgb(0, 0, 238);
+  --visited-color: rgb(85, 26, 139);
+  --background-color: #fff;
+  --foreground-color: #222;
+}
+@media screen and (prefers-contrast: more) {
+  :root {
+    --link-color: #0000da;
+    --visited-color: #750075;
+    --background-color: #fff;
+    --foreground-color: #000;
+  }
+}
+@media screen and (prefers-color-scheme: dark) {
+  :root {
+    --link-color: #4a96f9;
+    --visited-color: #ff68fb;
+    --background-color: #222;
+    --foreground-color: #fff;
+  }
+}
+@media screen and (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root {
+    --link-color: #4a96f9;
+    --visited-color: #ff68fb;
+    --background-color: #000;
+    --foreground-color: #fff;
+  }
+}
+a {
+  color: var(--link-color);
+}
+a:visited {
+  color: var(--visited-color);
 }
 body {
+  color: var(--foreground-color);
+  background-color: var(--background-color);
+}
+
+body {
   font-family: sans-serif;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20px;
+  justify-content: space-around;
+}
+header {
+  flex: 1 1 min-content;
 }
 main {
   max-width: 60ch;
   text-align: justify;
   hyphens: auto;
   white-space: normal;
+  flex: 1 1 max-content;
 }
 summary {
   cursor: pointer;

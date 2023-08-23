@@ -1,5 +1,5 @@
 use lightningcss::{
-    stylesheet::{MinifyOptions, ParserFlags, ParserOptions, PrinterOptions, StyleSheet},
+    stylesheet::{ParserFlags, ParserOptions, PrinterOptions, StyleSheet},
     targets::{Browsers, Targets},
 };
 use std::io::Read;
@@ -20,16 +20,9 @@ fn targets() -> Targets {
 
 fn printer_options<'a>() -> PrinterOptions<'a> {
     PrinterOptions {
-        minify: true,
+        minify: false,
         targets: targets(),
         ..PrinterOptions::default()
-    }
-}
-
-fn minify_options() -> MinifyOptions {
-    MinifyOptions {
-        targets: targets(),
-        ..MinifyOptions::default()
     }
 }
 
@@ -59,8 +52,7 @@ impl Style {
         let mut data = String::new();
         file.read_to_string(&mut data).unwrap();
 
-        let mut stylesheet = StyleSheet::parse(&data, parser_options()).unwrap();
-        stylesheet.minify(minify_options()).unwrap();
+        let stylesheet = StyleSheet::parse(&data, parser_options()).unwrap();
         stylesheet.to_css(printer_options()).unwrap().code
     }
 }
