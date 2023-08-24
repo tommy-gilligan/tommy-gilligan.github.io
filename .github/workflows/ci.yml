@@ -2,6 +2,10 @@ name: CI
 
 on: [push]
 
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: "-D warnings"
@@ -162,7 +166,7 @@ jobs:
         with:
           name: site
           path: _site
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@nightly
       - uses: actions/cache@v3
         with:
           path: |
