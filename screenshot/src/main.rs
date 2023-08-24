@@ -1,18 +1,24 @@
 use generation::tokiort::TokioIo;
-use generation::{crawl::Crawler, output::Output};
+
+use clap::Parser;
+use std::{fs::create_dir_all, path::Path};
 use tokio::net::TcpListener;
 use url::Url;
 
-#[derive(clap::Args, Debug)]
+#[derive(Parser)]
 #[command(author, version, about, long_about = None)]
-pub struct Args {
+pub struct Config {
     #[arg(short, long, default_value = "_site")]
     output: String,
+    #[arg(short, long, default_value = "screenshots")]
+    screenshots: String,
     #[arg(short, long)]
     base_url: Url,
 }
 
-pub async fn crawl(config: &Args) {
+#[tokio::main]
+async fn main() {
+    let config = Config::parse();
     let listener = TcpListener::bind(std::net::SocketAddrV4::new(
         std::net::Ipv4Addr::LOCALHOST,
         0,
@@ -21,8 +27,8 @@ pub async fn crawl(config: &Args) {
     .unwrap();
 
     let output = config.output.clone();
-    let local_addr = listener.local_addr().unwrap();
     tokio::task::spawn(async move {
+        let output = output.clone();
         loop {
             let (stream, _) = listener.accept().await.unwrap();
             let io = TokioIo::new(stream);
@@ -37,10 +43,23 @@ pub async fn crawl(config: &Args) {
         }
     });
 
-    let mut crawler = Crawler::new(local_addr);
-    crawler.push(config.base_url.clone());
-    let mut sitemap = Output::new(&config.output).sitemap().create();
-    for url in crawler {
-        sitemap.push(&url);
+    let screenshots_dir = Path::new(&config.screenshots);
+    create_dir_all(screenshots_dir).unwrap();
+
+    let mut driver = generation::chrome_driver::ChromeDriver::new().await;
+
+    for url in generation::output::Output::new(&config.output)
+        .sitemap()
+        .open()
+    {
+        driver.goto(url.clone()).await;
+
+        let path = url.path_segments().unwrap().last().unwrap();
+        let mut joined_path = screenshots_dir.join(path);
+        joined_path = joined_path.with_extension("png");
+
+        driver.screenshot(&joined_path).await;
     }
+
+    driver.quit().await;
 }

@@ -4,4 +4,9 @@ members = [
     "generation",
     "xtask",
     "crawl",
+    "generate",
+    "screenshot",
+    "serve",
+    "visual_diff",
+    "watch",
 ]

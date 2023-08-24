@@ -30,7 +30,7 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
 
     let author = Author {
         name: "Tommy Gilligan".to_owned(),
-        image_url_for: |size| return github_user.avatar(size),
+        image_url_for: |size| github_user.avatar(size),
         social_links: vec![
             ("Github".to_owned(), "https://example.com".parse().unwrap()),
             (
@@ -42,7 +42,7 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
     .to_string();
 
     let footer = Footer { author, revisions }.to_string();
-    return Layout {
+    Layout {
         title: factory.title,
         language: factory.language,
         style: &factory.style.style(),
@@ -52,12 +52,12 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
         footer: &footer,
         author: "",
     }
-    .to_string();
+    .to_string()
 }
 
 static USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
 
-pub fn render(config: &crate::generate::Args) {
+pub fn render(config: &crate::Config) {
     let output = Output::new(&config.output);
     let style = Style::new(Path::new("style.css"));
     let layout_factory = Factory {
@@ -74,7 +74,7 @@ pub fn render(config: &crate::generate::Args) {
     let cache = Cache::new(&config.cache, client);
     for article in Article::from_dir(&config.articles).unwrap() {
         let mut m = Markdown::new(article.contents());
-        m.replace(|node| return generation::favicon::decorate_link(&cache, &config.output, node));
+        m.replace(|node| generation::favicon::decorate_link(&cache, &config.output, node));
         output
             .page(article.file_stem())
             .write_all(layout_for_page(&layout_factory, &m.render(), &article).as_bytes())

@@ -6,7 +6,7 @@ use rss::ChannelBuilder;
 use rss::ItemBuilder;
 
 pub fn generator() -> String {
-    return if env!("CARGO_PKG_REPOSITORY").is_empty() {
+    if env!("CARGO_PKG_REPOSITORY").is_empty() {
         format!(
             "{} version: {}",
             env!("CARGO_PKG_NAME"),
@@ -18,10 +18,10 @@ pub fn generator() -> String {
             env!("CARGO_PKG_REPOSITORY"),
             git_version!()
         )
-    };
+    }
 }
 
-pub fn channel_builder(config: &crate::generate::Args) -> ChannelBuilder {
+pub fn channel_builder(config: &crate::Config) -> ChannelBuilder {
     let mut channel = ChannelBuilder::default();
     channel
         .title(config.title.clone())
@@ -34,10 +34,10 @@ pub fn channel_builder(config: &crate::generate::Args) -> ChannelBuilder {
         .language(config.language.clone())
         .ttl("600".to_owned())
         .generator(generator());
-    return channel;
+    channel
 }
 
-pub fn feed(config: &crate::generate::Args) {
+pub fn feed(config: &crate::Config) {
     let mut channel = &mut channel_builder(config);
     let output = Output::new(&config.output);
     for article in Article::from_dir(&config.articles).unwrap() {

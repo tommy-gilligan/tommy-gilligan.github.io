@@ -1,13 +1,12 @@
-use std::net::IpAddr;
-
-use std::net::SocketAddr;
-use tokio::net::TcpListener;
-
+use clap::Parser;
 use generation::tokiort::TokioIo;
 
-#[derive(clap::Args, Debug)]
+use std::net::{IpAddr, SocketAddr};
+use tokio::net::TcpListener;
+
+#[derive(Parser)]
 #[command(author, version, about, long_about = None)]
-pub struct Args {
+pub struct Config {
     #[arg(short, long, default_value = "_site")]
     pub output: String,
     #[arg(short, long, default_value_t = 0)]
@@ -16,17 +15,10 @@ pub struct Args {
     pub host: String,
 }
 
-impl Default for Args {
-    fn default() -> Self {
-        return Self {
-            output: "_site".to_owned(),
-            port: 0,
-            host: "127.0.0.1".to_owned(),
-        };
-    }
-}
+#[tokio::main]
+async fn main() {
+    let config = Config::parse();
 
-pub async fn serve(config: &Args) {
     let ip: IpAddr = config.host.parse().unwrap();
     let addr: SocketAddr = (ip, config.port).into();
 

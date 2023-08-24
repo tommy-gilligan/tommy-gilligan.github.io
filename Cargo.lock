@@ -995,6 +995,26 @@ dependencies = [
 [[package]]
 name = "generate"
 version = "0.1.0"
+dependencies = [
+ "build-time",
+ "clap",
+ "generation",
+ "git-version",
+ "git2",
+ "hyper 1.0.0-rc.4",
+ "hyper-staticfile",
+ "markdown",
+ "markup",
+ "notify",
+ "reqwest",
+ "rss",
+ "sitemap",
+ "tl",
+ "tokio",
+ "traversal",
+ "url",
+ "viuer",
+]
 
 [[package]]
 name = "generation"
@@ -2447,6 +2467,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
+name = "screenshot"
+version = "0.1.0"
+dependencies = [
+ "build-time",
+ "clap",
+ "generation",
+ "git-version",
+ "git2",
+ "hyper 1.0.0-rc.4",
+ "hyper-staticfile",
+ "markdown",
+ "markup",
+ "notify",
+ "reqwest",
+ "rss",
+ "sitemap",
+ "tl",
+ "tokio",
+ "traversal",
+ "url",
+ "viuer",
+]
+
+[[package]]
 name = "sct"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2566,6 +2610,30 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.28",
+]
+
+[[package]]
+name = "serve"
+version = "0.1.0"
+dependencies = [
+ "build-time",
+ "clap",
+ "generation",
+ "git-version",
+ "git2",
+ "hyper 1.0.0-rc.4",
+ "hyper-staticfile",
+ "markdown",
+ "markup",
+ "notify",
+ "reqwest",
+ "rss",
+ "sitemap",
+ "tl",
+ "tokio",
+ "traversal",
+ "url",
+ "viuer",
 ]
 
 [[package]]
@@ -3100,6 +3168,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
+name = "visual_diff"
+version = "0.1.0"
+dependencies = [
+ "build-time",
+ "clap",
+ "generation",
+ "git-version",
+ "git2",
+ "hyper 1.0.0-rc.4",
+ "hyper-staticfile",
+ "markdown",
+ "markup",
+ "notify",
+ "reqwest",
+ "rss",
+ "sitemap",
+ "tl",
+ "tokio",
+ "traversal",
+ "url",
+ "viuer",
+]
+
+[[package]]
 name = "viuer"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3217,6 +3309,30 @@ name = "wasm-bindgen-shared"
 version = "0.2.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ca6ad05a4870b2bf5fe995117d3728437bd27d7cd5f06f13c17443ef369775a1"
+
+[[package]]
+name = "watch"
+version = "0.1.0"
+dependencies = [
+ "build-time",
+ "clap",
+ "generation",
+ "git-version",
+ "git2",
+ "hyper 1.0.0-rc.4",
+ "hyper-staticfile",
+ "markdown",
+ "markup",
+ "notify",
+ "reqwest",
+ "rss",
+ "sitemap",
+ "tl",
+ "tokio",
+ "traversal",
+ "url",
+ "viuer",
+]
 
 [[package]]
 name = "web-sys"

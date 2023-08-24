@@ -9,7 +9,7 @@ use generation::{
 use std::{io::Write, path::Path};
 
 pub fn layout_for(factory: &Factory, body: &str) -> String {
-    return Layout {
+    Layout {
         title: factory.title,
         language: factory.language,
         style: &factory.style.style(),
@@ -19,10 +19,10 @@ pub fn layout_for(factory: &Factory, body: &str) -> String {
         footer: "",
         author: "",
     }
-    .to_string();
+    .to_string()
 }
 
-pub fn render(config: &crate::generate::Args) {
+pub fn render(config: &crate::Config) {
     let output = Output::new(&config.output);
     let style = Style::new(Path::new("style.css"));
 

@@ -1,14 +1,17 @@
+use clap::Parser;
 use git2::Repository;
-use viuer::{print_from_file, Config};
+use viuer::print_from_file;
 
-#[derive(clap::Args, Debug)]
+#[derive(Parser)]
 #[command(author, version, about, long_about = None)]
-pub struct Args {
+pub struct Config {
     #[arg(short, long, default_value = "screenshots")]
     screenshots: String,
 }
 
-pub fn visual_diff(config: &Args) {
+#[tokio::main]
+async fn main() {
+    let config = Config::parse();
     let repo = Repository::open_from_env().unwrap();
     let tree = repo.find_reference("HEAD").unwrap().peel_to_tree();
     for d in repo
@@ -21,7 +24,7 @@ pub fn visual_diff(config: &Args) {
             .unwrap()
             .starts_with(&config.screenshots)
         {
-            let old_conf = Config {
+            let old_conf = viuer::Config {
                 x: 0,
                 y: 0,
                 width: Some(80),

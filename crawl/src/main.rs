@@ -1,8 +1,8 @@
+use clap::Parser;
 use generation::tokiort::TokioIo;
 use generation::{crawl::Crawler, output::Output};
 use tokio::net::TcpListener;
 use url::Url;
-use clap::Parser;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
