@@ -291,7 +291,7 @@ dependencies = [
  "iana-time-zone",
  "js-sys",
  "num-traits",
- "pure-rust-locales 0.5.6",
+ "pure-rust-locales",
  "serde",
  "time 0.1.45",
  "wasm-bindgen",
@@ -421,24 +421,19 @@ checksum = "e496a50fda8aacccc86d7529e2c1e0892dbd0f898a6b5645b5561b89c3210efa"
 name = "crawl"
 version = "0.1.0"
 dependencies = [
- "build-time",
  "clap",
  "generation",
- "git-version",
  "git2",
  "hyper 1.0.0-rc.4",
  "hyper-staticfile",
  "markdown",
  "markup",
- "notify",
  "reqwest",
- "rss",
  "sitemap",
  "tl",
  "tokio",
  "traversal",
  "url",
- "viuer",
 ]
 
 [[package]]
@@ -1005,7 +1000,6 @@ dependencies = [
  "hyper-staticfile",
  "markdown",
  "markup",
- "notify",
  "reqwest",
  "rss",
  "sitemap",
@@ -1013,7 +1007,6 @@ dependencies = [
  "tokio",
  "traversal",
  "url",
- "viuer",
 ]
 
 [[package]]
@@ -1034,7 +1027,6 @@ dependencies = [
  "md5",
  "ordinal",
  "pin-project-lite",
- "pure-rust-locales 0.6.0",
  "regex",
  "reqwest",
  "serde",
@@ -2131,12 +2123,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b45c49fc4f91f35bae654f85ebb3a44d60ac64f11b3166ffa609def390c732d8"
 
 [[package]]
-name = "pure-rust-locales"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b856d7d028ebb0011d78eded5bc9185932412f36c12c67930f222d6b407526b"
-
-[[package]]
 name = "qoi"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2470,24 +2456,19 @@ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 name = "screenshot"
 version = "0.1.0"
 dependencies = [
- "build-time",
  "clap",
  "generation",
- "git-version",
  "git2",
  "hyper 1.0.0-rc.4",
  "hyper-staticfile",
  "markdown",
  "markup",
- "notify",
  "reqwest",
- "rss",
  "sitemap",
  "tl",
  "tokio",
  "traversal",
  "url",
- "viuer",
 ]
 
 [[package]]
@@ -2616,24 +2597,19 @@ dependencies = [
 name = "serve"
 version = "0.1.0"
 dependencies = [
- "build-time",
  "clap",
  "generation",
- "git-version",
  "git2",
  "hyper 1.0.0-rc.4",
  "hyper-staticfile",
  "markdown",
  "markup",
- "notify",
  "reqwest",
- "rss",
  "sitemap",
  "tl",
  "tokio",
  "traversal",
  "url",
- "viuer",
 ]
 
 [[package]]
