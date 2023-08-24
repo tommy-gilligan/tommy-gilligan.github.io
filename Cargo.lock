@@ -418,6 +418,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e496a50fda8aacccc86d7529e2c1e0892dbd0f898a6b5645b5561b89c3210efa"
 
 [[package]]
+name = "crawl"
+version = "0.1.0"
+dependencies = [
+ "build-time",
+ "clap",
+ "generation",
+ "git-version",
+ "git2",
+ "hyper 1.0.0-rc.4",
+ "hyper-staticfile",
+ "markdown",
+ "markup",
+ "notify",
+ "reqwest",
+ "rss",
+ "sitemap",
+ "tl",
+ "tokio",
+ "traversal",
+ "url",
+ "viuer",
+]
+
+[[package]]
 name = "crc32fast"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -967,6 +991,10 @@ checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
 dependencies = [
  "byteorder",
 ]
+
+[[package]]
+name = "generate"
+version = "0.1.0"
 
 [[package]]
 name = "generation"
