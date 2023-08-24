@@ -15,6 +15,7 @@ where
         .arg("run")
         .arg("--package")
         .arg(package)
+        .arg("--")
         .args(args)
         .status()
         .unwrap()
