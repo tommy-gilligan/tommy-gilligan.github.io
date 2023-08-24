@@ -1,7 +1,10 @@
-use std::env::{args_os, var};
+use std::env::{current_exe, args_os, var};
 use std::ffi::OsStr;
-use std::process::Command;
-use std::process::ExitStatus;
+use std::process::{Command, ExitStatus};
+use std::fs::{hard_link, metadata};
+use std::env::consts::EXE_EXTENSION;
+
+mod pre_commit;
 
 fn cargo<I, S>(package: &str, args: I) -> ExitStatus
 where
@@ -17,28 +20,56 @@ where
         .unwrap()
 }
 
-fn main() {
-    let mut args = args_os().skip(1);
+fn install_hook() {
+    let target = git2::Repository::open_from_env()
+        .unwrap()
+        .workdir()
+        .unwrap()
+        .join(".git")
+        .join("hooks")
+        .join("pre-commit")
+        .with_extension(EXE_EXTENSION);
+    let source = current_exe().unwrap();
 
-    match args.next().unwrap().to_str().unwrap() {
-        "crawl" => {
-            cargo("crawl", args);
+    if !target.exists() {
+        hard_link(source, &target).unwrap()
+    }
+}
+
+fn main() {
+    let mut args = args_os();
+    let binding = args.next().unwrap();
+    let name = binding.to_str().unwrap();
+    match name {
+        "pre-commit" => {
+            pre_commit::run()
         }
-        "serve" => {
-            cargo("serve", args);
+        _ => {
+            install_hook();
+
+            if let Some(subcommand) = args.next() {
+                match subcommand.to_str().unwrap() {
+                    "crawl" => {
+                        cargo("crawl", args);
+                    }
+                    "serve" => {
+                        cargo("serve", args);
+                    }
+                    "screenshot" => {
+                        cargo("screenshot", args);
+                    }
+                    "visual_diff" => {
+                        cargo("visual_diff", args);
+                    }
+                    "generate" => {
+                        cargo("generate", args);
+                    }
+                    "watch" => {
+                        cargo("watch", args);
+                    }
+                    _ => unimplemented!(),
+                }
+            }
         }
-        "screenshot" => {
-            cargo("screenshot", args);
-        }
-        "visual_diff" => {
-            cargo("visual_diff", args);
-        }
-        "generate" => {
-            cargo("generate", args);
-        }
-        "watch" => {
-            cargo("watch", args);
-        }
-        _ => unimplemented!(),
     }
 }
