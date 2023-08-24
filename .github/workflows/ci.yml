@@ -152,3 +152,45 @@ jobs:
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/Cargo.toml') }}
       - run: cargo install cargo-udeps -Z install-upgrade
       - run: cargo udeps
+  screenshot:
+    needs: [generate]
+    name: Screenshot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: site
+          path: _site
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/.crates.toml
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+            xtask/target
+            generation/target
+          key: ${{ runner.os }}-screenshot-${{ hashFiles('**/Cargo.toml') }}
+      - uses: browser-actions/setup-chrome@v1
+      - uses: nanasess/setup-chromedriver@v2
+        with:
+          chromedriver-version: '115.0.5790.102'
+      - run: |
+          chromedriver --verbose --enable-chrome-logs --log-path=chromedriver.log &
+          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+      - run: cargo xtask screenshot --base-url http://example.com
+      - run: cargo xtask visual_diff
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: screenshots
+          path: screenshots
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: chromedriver-log
+          path: chromedriver.log`
