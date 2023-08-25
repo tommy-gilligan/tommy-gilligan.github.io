@@ -62,6 +62,7 @@ fn flatten_yaml(repository: &Repository, _head: &Tree) {
         assert!(Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
             .arg("xtask")
             .arg("flattenyaml")
+            .arg("--check")
             .arg(ci_yaml)
             .arg(target)
             .status()
