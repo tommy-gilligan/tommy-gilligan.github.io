@@ -3,6 +3,7 @@ use std::env::{args_os, var};
 use std::ffi::OsStr;
 use std::process::{Command, ExitStatus};
 
+mod flatten_yaml;
 mod pre_commit_hook;
 
 fn git_directory() -> std::path::PathBuf {

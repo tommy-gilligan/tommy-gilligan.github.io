@@ -52,15 +52,7 @@ fn flatten_yaml(repository: &Repository, _head: &Tree) {
         .unwrap()
         .contains(git2::Status::INDEX_MODIFIED)
     {
-        assert!(Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
-            .arg("xtask")
-            .arg("flattenyaml")
-            .arg("--check")
-            .arg(ci_yaml)
-            .arg(target)
-            .status()
-            .expect("Could not flatten")
-            .success());
+        crate::flatten_yaml::check(ci_yaml, target);
     }
 }
 

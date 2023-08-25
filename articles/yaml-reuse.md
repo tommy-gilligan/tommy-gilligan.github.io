@@ -222,3 +222,16 @@ Ignore installation entirely for now.
 Tried something similar to what devx was doing but didn't like it because: silent over-write, no guarantee you're up to date.
 There is an assumption that the files you're checking are not interdependent.
 Is somebody using a dark pattern or not? How do you test for that?
+
+
+
+```
+Format Rust code
+
+usage: rustfmt [options] <file>...
+
+Options:
+        --check         Run in 'check' mode. Exits with 0 if input is
+                        formatted correctly. Exits with 1 and prints a diff if
+                        formatting is required.
+```
