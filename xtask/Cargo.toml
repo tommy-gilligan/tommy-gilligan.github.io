@@ -6,7 +6,7 @@ default-run = "xtask"
 autobins = false
 
 [[bin]]
-name = "flattenyaml"
+name = "flatten_yaml"
 
 [[bin]]
 name = "xtask"
