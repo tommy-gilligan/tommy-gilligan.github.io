@@ -41,20 +41,20 @@ fn fmt(repository: &Repository, head: &Tree) {
     }
 }
 
-fn flatten_yaml(repository: &Repository, head: &Tree) {
+fn flatten_yaml(repository: &Repository, _head: &Tree) {
     let ci_yaml = Path::new("ci.yml");
     let target = Path::new(".github/workflows/ci.yml");
     assert!(ci_yaml.exists());
     assert!(target.exists());
 
     if repository
-        .status_file(&ci_yaml)
+        .status_file(ci_yaml)
         .unwrap()
         .contains(git2::Status::INDEX_MODIFIED)
     {
         assert!(
             !repository
-                .status_file(&target)
+                .status_file(target)
                 .unwrap()
                 .contains(git2::Status::WT_MODIFIED),
             "deadly combination"
@@ -62,15 +62,15 @@ fn flatten_yaml(repository: &Repository, head: &Tree) {
         assert!(Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
             .arg("xtask")
             .arg("flattenyaml")
-            .arg(&ci_yaml)
-            .arg(&target)
+            .arg(ci_yaml)
+            .arg(target)
             .status()
             .expect("Could not flatten")
             .success());
 
         assert!(
             !repository
-                .status_file(&target)
+                .status_file(target)
                 .unwrap()
                 .contains(git2::Status::WT_MODIFIED),
             "flattening resulted in unstaged changes"
