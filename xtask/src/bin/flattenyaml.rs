@@ -1,6 +1,9 @@
 use std::io::Read;
 
-fn flatten_yaml<W>(input: clio::Input, output: &mut W) -> serde_yaml::Result<()> where W: std::io::Write {
+fn flatten_yaml<W>(input: clio::Input, output: &mut W) -> serde_yaml::Result<()>
+where
+    W: std::io::Write,
+{
     let flattened: serde_yaml::Value = serde_yaml::from_reader(input)?;
     serde_yaml::to_writer(output, &flattened)
 }
@@ -21,14 +24,14 @@ fn main() -> clio::Result<()> {
             output.read_to_end(&mut old_buffer).unwrap();
 
             assert!(old_buffer == new_buffer);
-        },
+        }
         Some(input_arg) => {
             let input = clio::Input::new(&input_arg)?;
             let mut output = clio::Output::new(&args.next().expect("Output argument absent"))?;
 
             flatten_yaml(input, &mut output).unwrap();
-        },
-        _ => panic!("panic")
+        }
+        _ => panic!("panic"),
     }
 
     Ok(())

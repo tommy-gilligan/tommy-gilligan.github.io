@@ -79,7 +79,7 @@ fn main() {
                         cargo("watch", args);
                     }
                     "flattenyaml" => {
-                        cargo_self("flattenyaml", args);
+                        assert!(cargo_self("flattenyaml", args).success());
                     }
                     _ => unimplemented!(),
                 }
