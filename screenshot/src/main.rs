@@ -3,7 +3,7 @@ use generation::tokiort::TokioIo;
 use clap::Parser;
 use std::{fs::create_dir_all, path::Path};
 use tokio::net::TcpListener;
-use url::Url;
+use url::{Position, Url};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -25,6 +25,7 @@ async fn main() {
     ))
     .await
     .unwrap();
+    let local_addr = listener.local_addr().unwrap();
 
     let output = config.output.clone();
     tokio::task::spawn(async move {
@@ -52,7 +53,18 @@ async fn main() {
         .sitemap()
         .open()
     {
-        driver.goto(url.clone()).await;
+        driver
+            .goto(
+                format!(
+                    "http://{}:{}{}",
+                    local_addr.ip(),
+                    local_addr.port(),
+                    &url[Position::BeforePath..]
+                )
+                .parse()
+                .unwrap(),
+            )
+            .await;
 
         let path = url.path_segments().unwrap().last().unwrap();
         let mut joined_path = screenshots_dir.join(path);
