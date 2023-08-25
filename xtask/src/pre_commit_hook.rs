@@ -1,24 +1,31 @@
-use std::env::consts::EXE_EXTENSION;
-use std::env::current_exe;
-
+use std::env::{consts::EXE_EXTENSION, current_exe, var};
+use std::process::Command;
 use std::fs::hard_link;
+use crate::git_directory;
+
+fn fmt() {
+    assert!(
+        Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
+            .arg("fmt")
+            .current_dir(git_directory())
+            .status()
+            .unwrap()
+            .success()
+        )
+}
 
 pub fn install() {
-    let target = git2::Repository::open_from_env()
-        .unwrap()
-        .workdir()
-        .unwrap()
+    let target = git_directory()
         .join(".git")
         .join("hooks")
         .join("pre-commit")
         .with_extension(EXE_EXTENSION);
-    let source = current_exe().unwrap();
 
     if !target.exists() {
-        hard_link(source, &target).unwrap()
+        hard_link(current_exe().unwrap(), &target).unwrap()
     }
 }
 
 pub fn run() {
-    println!("pre-commit hook");
+    fmt();
 }

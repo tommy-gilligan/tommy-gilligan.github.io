@@ -1,9 +1,17 @@
 use std::env::{args_os, var};
 use std::ffi::OsStr;
-
 use std::process::{Command, ExitStatus};
+use git2::Repository;
 
 mod pre_commit_hook;
+
+fn git_directory() -> std::path::PathBuf {
+    Repository::open_from_env()
+        .unwrap()
+        .workdir()
+        .unwrap()
+        .to_path_buf()
+}
 
 fn cargo<I, S>(package: &str, args: I) -> ExitStatus
 where
@@ -16,6 +24,7 @@ where
         .arg(package)
         .arg("--")
         .args(args)
+        .current_dir(git_directory())
         .status()
         .unwrap()
 }
