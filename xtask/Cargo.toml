@@ -16,4 +16,3 @@ git2.workspace = true
 url.workspace = true
 serde.workspace = true
 serde_yaml.workspace = true
-clio.workspace = true

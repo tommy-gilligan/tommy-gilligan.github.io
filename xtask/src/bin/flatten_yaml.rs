@@ -22,6 +22,7 @@ pub fn check(source: &Path, target: &Path) {
     assert!(read(target).unwrap() == new_buffer);
 }
 
+#[allow(dead_code)]
 fn main() {
     let mut args = args_os().skip(1);
     let check_flag = OsString::from("--check");
