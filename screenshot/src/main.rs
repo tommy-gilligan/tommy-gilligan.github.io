@@ -26,6 +26,7 @@ async fn main() {
     .await
     .unwrap();
     let local_addr = listener.local_addr().unwrap();
+    println!("{:?}", local_addr);
 
     let output = config.output.clone();
     tokio::task::spawn(async move {
@@ -53,18 +54,15 @@ async fn main() {
         .sitemap()
         .open()
     {
-        driver
-            .goto(
-                format!(
-                    "http://{}:{}{}",
-                    local_addr.ip(),
-                    local_addr.port(),
-                    &url[Position::BeforePath..]
-                )
-                .parse()
-                .unwrap(),
-            )
-            .await;
+        let url: Url = format!(
+            "http://{}:{}{}",
+            local_addr.ip(),
+            local_addr.port(),
+            &url[Position::BeforePath..]
+        )
+        .parse()
+        .unwrap();
+        driver.goto(url.clone()).await;
 
         let path = url.path_segments().unwrap().last().unwrap();
         let mut joined_path = screenshots_dir.join(path);
