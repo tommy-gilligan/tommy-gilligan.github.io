@@ -27,6 +27,7 @@ jobs:
           target/
           xtask/target
           generation/target
+          cache
         key: ${{ runner.os }}-clippy-${{ hashFiles('**/Cargo.toml') }}
     - run: cargo clippy --all-targets
       env:
@@ -49,21 +50,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
     - uses: dtolnay/rust-toolchain@nightly
     - uses: actions/cache@v3
       with:
-        path: |
-          ~/.cargo/.crates.toml
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-          xtask/target
-          generation/target
-          cache
+        path: *cache_path
         key: ${{ runner.os }}-generate-${{ hashFiles('**/Cargo.toml') }}
     - id: configure-pages
       uses: actions/configure-pages@v3
@@ -91,20 +81,10 @@ jobs:
     - uses: dtolnay/rust-toolchain@nightly
     - uses: actions/cache@v3
       with:
-        path: |
-          ~/.cargo/.crates.toml
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-          xtask/target
-          generation/target
+        path: *cache_path
         key: ${{ runner.os }}-browser-${{ hashFiles('**/Cargo.toml') }}
     - uses: browser-actions/setup-chrome@v1
     - uses: nanasess/setup-chromedriver@v2
-      with:
-        chromedriver-version: 115.0.5790.102
     - run: |
         chromedriver --verbose --enable-chrome-logs --log-path=chromedriver.log &
         sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
@@ -113,6 +93,7 @@ jobs:
     - clippy
     - format
     - browser
+    - screenshot
     name: Deploy
     runs-on: ubuntu-latest
     permissions:
@@ -136,16 +117,7 @@ jobs:
     - uses: dtolnay/rust-toolchain@nightly
     - uses: actions/cache@v3
       with:
-        path: |
-          ~/.cargo/.crates.toml
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-          xtask/target
-          generation/target
-          cache
+        path: *cache_path
         key: ${{ runner.os }}-dependencies-${{ hashFiles('**/Cargo.toml') }}
     - run: cargo install cargo-udeps -Z install-upgrade
     - run: cargo udeps
@@ -171,7 +143,6 @@ jobs:
         chromedriver --log-level=ALL --log-path=chromedriver.log &
         sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
     - run: cargo xtask screenshot --base-url http://example.com
-    - run: cargo xtask visual_diff
     - uses: actions/upload-artifact@v3
       if: always()
       with:

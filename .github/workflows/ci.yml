@@ -28,6 +28,7 @@ jobs:
           target/
           xtask/target
           generation/target
+          cache
         key: ${{ runner.os }}-clippy-${{ hashFiles('**/Cargo.toml') }}
     - run: cargo clippy --all-targets
       env:
@@ -51,6 +52,7 @@ jobs:
           target/
           xtask/target
           generation/target
+          cache
         key: ${{ runner.os }}-format-${{ hashFiles('**/Cargo.toml') }}
     - run: cargo fmt --check
   generate:
@@ -58,8 +60,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
     - uses: dtolnay/rust-toolchain@nightly
     - uses: actions/cache@v3
       with:
@@ -109,6 +109,7 @@ jobs:
           target/
           xtask/target
           generation/target
+          cache
         key: ${{ runner.os }}-browser-${{ hashFiles('**/Cargo.toml') }}
     - uses: browser-actions/setup-chrome@v1
     - uses: nanasess/setup-chromedriver@v2
@@ -120,6 +121,7 @@ jobs:
     - clippy
     - format
     - browser
+    - screenshot
     name: Deploy
     runs-on: ubuntu-latest
     permissions:
@@ -179,6 +181,7 @@ jobs:
           target/
           xtask/target
           generation/target
+          cache
         key: ${{ runner.os }}-screenshot-${{ hashFiles('**/Cargo.toml') }}
     - uses: browser-actions/setup-chrome@v1
     - uses: nanasess/setup-chromedriver@v2
@@ -186,7 +189,6 @@ jobs:
         chromedriver --log-level=ALL --log-path=chromedriver.log &
         sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
     - run: cargo xtask screenshot --base-url http://example.com
-    - run: cargo xtask visual_diff
     - uses: actions/upload-artifact@v3
       if: always()
       with:
