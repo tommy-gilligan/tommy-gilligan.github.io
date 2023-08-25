@@ -23,7 +23,7 @@ impl ChromeDriver {
         caps.set_disable_gpu().unwrap();
         let web_driver = WebDriver::new("http://127.0.0.1:9515", caps).await.unwrap();
         Self {
-            server_addr: server_addr.clone(),
+            server_addr: *server_addr,
             web_driver: web_driver.clone(),
             dev_tools: ChromeDevTools::new(web_driver.handle),
         }

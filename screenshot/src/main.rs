@@ -3,7 +3,7 @@ use generation::tokiort::TokioIo;
 use clap::Parser;
 use std::{fs::create_dir_all, path::Path};
 use tokio::net::TcpListener;
-use url::{Position, Url};
+use url::Url;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]

@@ -1,16 +1,20 @@
-use git2::{Repository, Status, Tree};
+use git2::{Repository, Status};
 use std::path::Path;
 
-pub fn flatten_yaml(repository: &Repository, _head: &Tree) {
+pub fn run(force: bool) {
     let ci_yaml = Path::new("ci.yml");
     let target = Path::new(".github/workflows/ci.yml");
     assert!(ci_yaml.exists());
     assert!(target.exists());
 
+    let repository = Repository::open_from_env().unwrap();
+    let _head = repository.head().unwrap().peel_to_tree().unwrap();
+
     if repository
         .status_file(ci_yaml)
         .unwrap()
         .contains(Status::INDEX_MODIFIED)
+        || force
     {
         crate::flatten_yaml::check(ci_yaml, target);
     }

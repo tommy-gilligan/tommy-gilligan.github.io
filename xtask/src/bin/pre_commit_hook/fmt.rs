@@ -1,14 +1,17 @@
 use crate::git_directory;
-use git2::{Repository, Tree};
+use git2::Repository;
 use std::env::var;
 use std::ffi::OsStr;
 use std::process::Command;
 
-pub fn fmt(repository: &Repository, head: &Tree) {
+pub fn run(force: bool) {
+    let repository = Repository::open_from_env().unwrap();
+    let head = repository.head().unwrap().peel_to_tree().unwrap();
+
     let rust_extension = OsStr::new("rs");
 
     let mut staged = repository
-        .diff_tree_to_index(Some(head), None, None)
+        .diff_tree_to_index(Some(&head), None, None)
         .unwrap();
     staged.find_similar(None).unwrap();
     let mut staged_rust_files = staged
@@ -23,17 +26,17 @@ pub fn fmt(repository: &Repository, head: &Tree) {
         })
         .peekable();
 
-    if staged_rust_files.peek().is_some()
-        && !Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
+    if staged_rust_files.peek().is_some() || force {
+        let mut command = Command::new(var("CARGO").unwrap_or("cargo".to_owned()));
+        command
             .arg("fmt")
             .arg("--check")
-            .arg("--")
-            .args(staged_rust_files)
-            .current_dir(git_directory())
-            .status()
-            .unwrap()
-            .success()
-    {
-        std::process::exit(1);
+            .current_dir(git_directory());
+        if !force {
+            command.arg("--").args(staged_rust_files);
+        }
+        if !command.status().unwrap().success() {
+            std::process::exit(1);
+        }
     }
 }

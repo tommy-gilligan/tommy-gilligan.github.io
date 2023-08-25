@@ -33,8 +33,8 @@ jobs:
     - run: cargo clippy --all-targets
       env:
         RUSTFLAGS: -D warnings
-  format:
-    name: Format
+  ci:
+    name: ci
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -53,8 +53,8 @@ jobs:
           xtask/target
           generation/target
           cache
-        key: ${{ runner.os }}-format-${{ hashFiles('**/Cargo.toml') }}
-    - run: cargo fmt --check
+        key: ${{ runner.os }}-ci-${{ hashFiles('**/Cargo.toml') }}
+    - run: cargo xtask ci
   generate:
     name: Generate
     runs-on: ubuntu-latest
@@ -119,7 +119,7 @@ jobs:
   deploy:
     needs:
     - clippy
-    - format
+    - ci
     - browser
     - screenshot
     name: Deploy

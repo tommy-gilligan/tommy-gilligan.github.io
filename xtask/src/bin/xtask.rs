@@ -67,12 +67,15 @@ fn main() {
         .unwrap()
         .to_str()
     {
-        Some("pre-commit") => pre_commit_hook::run(),
+        Some("pre-commit") => pre_commit_hook::run(false),
         _ => {
             setup_environment();
 
             if let Some(subcommand) = args.next() {
                 match subcommand.to_str() {
+                    Some("ci") => {
+                        pre_commit_hook::run(true);
+                    }
                     Some("crawl") => {
                         cargo("crawl", args);
                     }
