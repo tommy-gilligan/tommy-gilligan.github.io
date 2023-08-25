@@ -3,14 +3,16 @@ use git2::{Repository, Tree};
 use std::env::{consts::EXE_EXTENSION, current_exe, var};
 use std::ffi::OsStr;
 use std::fs::hard_link;
+use std::path::Path;
 use std::process::Command;
 
 fn fmt(repository: &Repository, head: &Tree) {
     let rust_extension = OsStr::new("rs");
 
-    let staged = repository
+    let mut staged = repository
         .diff_tree_to_index(Some(head), None, None)
         .unwrap();
+    staged.find_similar(None).unwrap();
     let mut staged_rust_files = staged
         .deltas()
         .filter_map(|diff_delta| {
@@ -27,6 +29,7 @@ fn fmt(repository: &Repository, head: &Tree) {
         assert!(
             Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
                 .arg("fmt")
+                .arg("--check")
                 .arg("--")
                 .args(staged_rust_files)
                 .current_dir(git_directory())
@@ -35,6 +38,43 @@ fn fmt(repository: &Repository, head: &Tree) {
                 .success(),
             "Aborting commit due to bad formatting"
         )
+    }
+}
+
+fn flatten_yaml(repository: &Repository, head: &Tree) {
+    let ci_yaml = Path::new("ci.yml");
+    let target = Path::new(".github/workflows/ci.yml");
+    assert!(ci_yaml.exists());
+    assert!(target.exists());
+
+    if repository
+        .status_file(&ci_yaml)
+        .unwrap()
+        .contains(git2::Status::INDEX_MODIFIED)
+    {
+        assert!(
+            !repository
+                .status_file(&target)
+                .unwrap()
+                .contains(git2::Status::WT_MODIFIED),
+            "deadly combination"
+        );
+        assert!(Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
+            .arg("xtask")
+            .arg("flattenyaml")
+            .arg(&ci_yaml)
+            .arg(&target)
+            .status()
+            .expect("Could not flatten")
+            .success());
+
+        assert!(
+            !repository
+                .status_file(&target)
+                .unwrap()
+                .contains(git2::Status::WT_MODIFIED),
+            "flattening resulted in unstaged changes"
+        );
     }
 }
 
@@ -55,20 +95,5 @@ pub fn run() {
     let head = repository.head().unwrap().peel_to_tree().unwrap();
 
     fmt(&repository, &head);
-
-    // let unstaged = repository.diff_tree_to_workdir(Some(&head), None).unwrap();
-
-    // let unstaged_files: HashSet<PathBuf> = unstaged
-    //     .deltas()
-    //     .map(|diff_delta| diff_delta.new_file().path().unwrap().to_path_buf())
-    //     .collect();
-
-    // let intersection = staged_files.intersection(&unstaged_files);
-    // if intersection.clone().count() != 0 {
-    //     eprintln!("Aborting commit because these files have changed");
-    //     for file in intersection {
-    //         eprintln!("{}", file.display());
-    //     }
-    //     std::process::exit(1);
-    // }
+    flatten_yaml(&repository, &head);
 }

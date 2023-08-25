@@ -29,6 +29,22 @@ where
         .unwrap()
 }
 
+fn cargo_self<I, S>(package: &str, args: I) -> ExitStatus
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
+        .arg("run")
+        .arg("--bin")
+        .arg(package)
+        .arg("--")
+        .args(args)
+        .current_dir(git_directory())
+        .status()
+        .unwrap()
+}
+
 fn setup_environment() {
     pre_commit_hook::install();
 }
@@ -61,6 +77,9 @@ fn main() {
                     }
                     "watch" => {
                         cargo("watch", args);
+                    }
+                    "flattenyaml" => {
+                        cargo_self("flattenyaml", args);
                     }
                     _ => unimplemented!(),
                 }

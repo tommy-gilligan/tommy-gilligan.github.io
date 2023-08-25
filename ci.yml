@@ -1,6 +1,5 @@
 name: CI
-on:
-- push
+on: [push]
 concurrency:
   group: ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
   cancel-in-progress: true
@@ -19,7 +18,7 @@ jobs:
         components: clippy
     - uses: actions/cache@v3
       with:
-        path: |
+        path: &cache_path | 
           ~/.cargo/.crates.toml
           ~/.cargo/bin/
           ~/.cargo/registry/index/
@@ -42,15 +41,7 @@ jobs:
         components: rustfmt
     - uses: actions/cache@v3
       with:
-        path: |
-          ~/.cargo/.crates.toml
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-          xtask/target
-          generation/target
+        path: *cache_path
         key: ${{ runner.os }}-format-${{ hashFiles('**/Cargo.toml') }}
     - run: cargo fmt --check
   generate:
@@ -172,15 +163,7 @@ jobs:
     - uses: dtolnay/rust-toolchain@nightly
     - uses: actions/cache@v3
       with:
-        path: |
-          ~/.cargo/.crates.toml
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-          xtask/target
-          generation/target
+        path: *cache_path
         key: ${{ runner.os }}-screenshot-${{ hashFiles('**/Cargo.toml') }}
     - uses: browser-actions/setup-chrome@v1
     - uses: nanasess/setup-chromedriver@v2

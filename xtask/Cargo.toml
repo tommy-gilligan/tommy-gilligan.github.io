@@ -3,7 +3,17 @@ name = "xtask"
 version = "0.1.0"
 edition = "2021"
 default-run = "xtask"
+autobins = false
+
+[[bin]]
+name = "flattenyaml"
+
+[[bin]]
+name = "xtask"
 
 [dependencies]
 git2.workspace = true
 url.workspace = true
+serde.workspace = true
+serde_yaml.workspace = true
+clio.workspace = true
