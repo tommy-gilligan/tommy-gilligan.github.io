@@ -20,7 +20,7 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
+    let status = Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
         .arg("run")
         .arg("--package")
         .arg(package)
@@ -28,7 +28,9 @@ where
         .args(args)
         .current_dir(git_directory())
         .status()
-        .unwrap()
+        .unwrap();
+
+    std::process::exit(status.code().unwrap());
 }
 
 fn cargo_self<I, S>(package: &str, args: I) -> ExitStatus
