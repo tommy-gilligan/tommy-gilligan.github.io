@@ -1,10 +1,9 @@
-use std::env::consts::EXE_EXTENSION;
-use std::env::{args_os, current_exe, var};
+use std::env::{args_os, var};
 use std::ffi::OsStr;
-use std::fs::hard_link;
+
 use std::process::{Command, ExitStatus};
 
-mod pre_commit;
+mod pre_commit_hook;
 
 fn cargo<I, S>(package: &str, args: I) -> ExitStatus
 where
@@ -21,20 +20,8 @@ where
         .unwrap()
 }
 
-fn install_hook() {
-    let target = git2::Repository::open_from_env()
-        .unwrap()
-        .workdir()
-        .unwrap()
-        .join(".git")
-        .join("hooks")
-        .join("pre-commit")
-        .with_extension(EXE_EXTENSION);
-    let source = current_exe().unwrap();
-
-    if !target.exists() {
-        hard_link(source, &target).unwrap()
-    }
+fn setup_environment() {
+    pre_commit_hook::install();
 }
 
 fn main() {
@@ -42,9 +29,9 @@ fn main() {
     let binding = args.next().unwrap();
     let name = binding.to_str().unwrap();
     match name {
-        "pre-commit" => pre_commit::run(),
+        "pre-commit" => pre_commit_hook::run(),
         _ => {
-            install_hook();
+            setup_environment();
 
             if let Some(subcommand) = args.next() {
                 match subcommand.to_str().unwrap() {
