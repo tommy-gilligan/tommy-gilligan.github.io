@@ -23,18 +23,17 @@ pub fn fmt(repository: &Repository, head: &Tree) {
         })
         .peekable();
 
-    if staged_rust_files.peek().is_some() {
-        assert!(
-            Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
-                .arg("fmt")
-                .arg("--check")
-                .arg("--")
-                .args(staged_rust_files)
-                .current_dir(git_directory())
-                .status()
-                .unwrap()
-                .success(),
-            "Aborting commit due to bad formatting"
-        )
+    if staged_rust_files.peek().is_some()
+        && !Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
+            .arg("fmt")
+            .arg("--check")
+            .arg("--")
+            .args(staged_rust_files)
+            .current_dir(git_directory())
+            .status()
+            .unwrap()
+            .success()
+    {
+        std::process::exit(1);
     }
 }

@@ -19,7 +19,14 @@ pub fn check(source: &Path, target: &Path) {
     let mut new_buffer: Vec<u8> = Vec::new();
 
     flatten_yaml(&mut File::open(source).unwrap(), &mut new_buffer).unwrap();
-    assert!(read(target).unwrap() == new_buffer);
+    if read(target).unwrap() != new_buffer {
+        eprintln!(
+            "{} needs to be flattened to {}",
+            source.display(),
+            target.display()
+        );
+        std::process::exit(1);
+    }
 }
 
 #[allow(dead_code)]

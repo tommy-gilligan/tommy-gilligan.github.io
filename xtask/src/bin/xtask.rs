@@ -1,6 +1,7 @@
 use git2::Repository;
 use std::env::{args_os, var};
 use std::ffi::OsStr;
+use std::path::Path;
 use std::process::{Command, ExitStatus};
 
 mod flatten_yaml;
@@ -35,7 +36,7 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
+    let status = Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
         .arg("run")
         .arg("--bin")
         .arg(package)
@@ -43,7 +44,9 @@ where
         .args(args)
         .current_dir(git_directory())
         .status()
-        .unwrap()
+        .unwrap();
+
+    std::process::exit(status.code().unwrap());
 }
 
 fn setup_environment() {
@@ -52,34 +55,41 @@ fn setup_environment() {
 
 fn main() {
     let mut args = args_os();
-    let binding = args.next().unwrap();
-    let name = binding.to_str().unwrap();
-    match name {
-        ".git/hooks/pre-commit" => pre_commit_hook::run(),
+
+    match args
+        .next()
+        .as_deref()
+        .map(Path::new)
+        .unwrap()
+        .file_name()
+        .unwrap()
+        .to_str()
+    {
+        Some("pre-commit") => pre_commit_hook::run(),
         _ => {
             setup_environment();
 
             if let Some(subcommand) = args.next() {
-                match subcommand.to_str().unwrap() {
-                    "crawl" => {
+                match subcommand.to_str() {
+                    Some("crawl") => {
                         cargo("crawl", args);
                     }
-                    "serve" => {
+                    Some("serve") => {
                         cargo("serve", args);
                     }
-                    "screenshot" => {
+                    Some("screenshot") => {
                         cargo("screenshot", args);
                     }
-                    "visual_diff" => {
+                    Some("visual_diff") => {
                         cargo("visual_diff", args);
                     }
-                    "generate" => {
+                    Some("generate") => {
                         cargo("generate", args);
                     }
-                    "watch" => {
+                    Some("watch") => {
                         cargo("watch", args);
                     }
-                    "flatten_yaml" => {
+                    Some("flatten_yaml") => {
                         assert!(cargo_self("flatten_yaml", args).success());
                     }
                     _ => unimplemented!(),
