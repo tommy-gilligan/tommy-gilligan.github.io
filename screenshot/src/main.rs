@@ -48,22 +48,13 @@ async fn main() {
     let screenshots_dir = Path::new(&config.screenshots);
     create_dir_all(screenshots_dir).unwrap();
 
-    let mut driver = generation::chrome_driver::ChromeDriver::new().await;
+    let mut driver = generation::chrome_driver::ChromeDriver::new(&local_addr).await;
 
     for url in generation::output::Output::new(&config.output)
         .sitemap()
         .open()
     {
-        let url: Url = format!(
-            "http://{}:{}{}",
-            local_addr.ip(),
-            local_addr.port(),
-            &url[Position::BeforePath..]
-        )
-        .parse()
-        .unwrap();
-        println!("{}", url);
-        driver.goto(url.clone()).await;
+        driver.goto(&url).await;
 
         let path = url.path_segments().unwrap().last().unwrap();
         let mut joined_path = screenshots_dir.join(path);

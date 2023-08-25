@@ -4,6 +4,7 @@ use base64::{engine::general_purpose, Engine as _};
 use regex::Regex;
 use serde_json::json;
 use std::io::BufReader;
+use std::net::SocketAddr;
 use thirtyfour::{
     extensions::cdp::ChromeDevTools, ChromiumLikeCapabilities, DesiredCapabilities, WebDriver,
 };
@@ -12,15 +13,17 @@ use url::Url;
 pub struct ChromeDriver {
     web_driver: WebDriver,
     dev_tools: ChromeDevTools,
+    server_addr: SocketAddr,
 }
 
 impl ChromeDriver {
-    pub async fn new() -> Self {
+    pub async fn new(server_addr: &SocketAddr) -> Self {
         let mut caps = DesiredCapabilities::chrome();
         // GPU doesn't get used on GH runner
         caps.set_disable_gpu().unwrap();
         let web_driver = WebDriver::new("http://127.0.0.1:9515", caps).await.unwrap();
         Self {
+            server_addr: server_addr.clone(),
             web_driver: web_driver.clone(),
             dev_tools: ChromeDevTools::new(web_driver.handle),
         }
@@ -46,10 +49,14 @@ impl ChromeDriver {
             .unwrap();
     }
 
-    pub async fn goto(&mut self, url: Url) {
+    pub async fn goto(&mut self, url: &Url) {
         let mut rewritten_url = url.clone();
-        rewritten_url.set_host(Some("localhost")).unwrap();
-        rewritten_url.set_port(Some(62394)).unwrap();
+        rewritten_url
+            .set_host(Some(&self.server_addr.ip().to_string()))
+            .unwrap();
+        rewritten_url
+            .set_port(Some(self.server_addr.port()))
+            .unwrap();
         rewritten_url.set_scheme("http").unwrap();
 
         self.web_driver
