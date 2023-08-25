@@ -1,7 +1,7 @@
+use git2::Repository;
 use std::env::{args_os, var};
 use std::ffi::OsStr;
 use std::process::{Command, ExitStatus};
-use git2::Repository;
 
 mod pre_commit_hook;
 
@@ -38,7 +38,7 @@ fn main() {
     let binding = args.next().unwrap();
     let name = binding.to_str().unwrap();
     match name {
-        "pre-commit" => pre_commit_hook::run(),
+        ".git/hooks/pre-commit" => pre_commit_hook::run(),
         _ => {
             setup_environment();
 
