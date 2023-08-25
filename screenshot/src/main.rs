@@ -62,6 +62,7 @@ async fn main() {
         )
         .parse()
         .unwrap();
+        println!("{}", url);
         driver.goto(url.clone()).await;
 
         let path = url.path_segments().unwrap().last().unwrap();
