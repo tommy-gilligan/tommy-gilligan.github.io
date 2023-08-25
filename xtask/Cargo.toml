@@ -5,5 +5,5 @@ edition = "2021"
 default-run = "xtask"
 
 [dependencies]
-git2 = "0.17.2"
-url = "2.4.0"
+git2.workspace = true
+url.workspace = true

@@ -5,31 +5,30 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-base64 = ">=0.21.2"
-chrono = { version = "0.4.26", default-features = false, features = [ "std", "clock", "unstable-locales" ] }
-git2 = "0.17.2"
-hyper = { version = "1.0.0-rc.4", features = [ "full" ] }
-hyper-staticfile = "0.10.0-alpha.7"
-lightningcss = "1.0.0-alpha.44"
-markdown = "1.0.0-alpha.11"
-markup = "0.13.1"
-regex = "1.9.1"
-
-serde = { version = "1.0.152", features = ["derive"] }
-serde_with = "2.2.0"
-toml = "0.5.10"
-serde_json = ">0.1"
-site_map = { package = "sitemap", version = ">= 0.4" }
-thirtyfour = "0.32.0-rc.8"
-tokio = { version = "1.29.1", features = [ "full" ] }
-toml-datetime-compat = { version = "0.2.0", features = [ "chrono", "serde_with" ] }
-url = "2.4.0"
-md5 = "0.7.0"
-ordinal = "0.3.1"
-traversal = "0.1.2"
-reqwest = { version = "0.11", features = [ "blocking" ] }
-tl = "0.7.7"
-image = "0.24.7"
-futures-util = "0.3.28"
+base64.workspace = true
+chrono.workspace = true
+futures-util.workspace = true
+futures.workspace = true
+git2.workspace = true
+hyper-staticfile.workspace = true
+hyper.workspace = true
+image.workspace = true
+lightningcss.workspace = true
+markdown.workspace = true
+markup.workspace = true
+md5.workspace = true
+ordinal.workspace = true
 pin-project-lite="0.2.12"
-futures = "0.3.28"
+regex.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_with.workspace = true
+site_map.workspace = true
+thirtyfour.workspace = true
+tl.workspace = true
+tokio.workspace = true
+toml-datetime-compat.workspace = true
+toml.workspace = true
+traversal.workspace = true
+url.workspace = true

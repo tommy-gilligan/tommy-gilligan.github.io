@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap = { git = "https://github.com/clap-rs/clap.git", features = [ "wrap_help", "unstable-v5", "suggestions", "env", "cargo", "derive" ] }
-url = "2.4.0"
-tokio = { version = "1.29.1", features = [ "full" ] }
-viuer = { version = "0.6.2" }
-git2 = "0.17.2"
+clap.workspace = true
+git2.workspace = true
+tokio.workspace = true
+url.workspace = true
+viuer.workspace = true

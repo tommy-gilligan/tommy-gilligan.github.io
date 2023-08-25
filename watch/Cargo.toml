@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap = { git = "https://github.com/clap-rs/clap.git", features = [ "wrap_help", "unstable-v5", "suggestions", "env", "cargo", "derive" ] }
-notify = "6.0.1"
+clap.workspace = true
+notify.workspace = true
