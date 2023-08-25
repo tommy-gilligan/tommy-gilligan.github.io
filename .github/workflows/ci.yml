@@ -8,7 +8,6 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: "-D warnings"
   DISPLAY: ":99"
   RUST_BACKTRACE: 1
 
@@ -34,6 +33,8 @@ jobs:
             generation/target
           key: ${{ runner.os }}-clippy-${{ hashFiles('**/Cargo.toml') }}
       - run: cargo clippy --all-targets
+        env:
+          RUSTFLAGS: "-D warnings"
   format:
     name: Format
     runs-on: ubuntu-latest

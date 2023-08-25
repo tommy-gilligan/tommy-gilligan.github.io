@@ -1,8 +1,8 @@
-use std::env::{current_exe, args_os, var};
-use std::ffi::OsStr;
-use std::process::{Command, ExitStatus};
-use std::fs::{hard_link, metadata};
 use std::env::consts::EXE_EXTENSION;
+use std::env::{args_os, current_exe, var};
+use std::ffi::OsStr;
+use std::fs::hard_link;
+use std::process::{Command, ExitStatus};
 
 mod pre_commit;
 
@@ -42,9 +42,7 @@ fn main() {
     let binding = args.next().unwrap();
     let name = binding.to_str().unwrap();
     match name {
-        "pre-commit" => {
-            pre_commit::run()
-        }
+        "pre-commit" => pre_commit::run(),
         _ => {
             install_hook();
 
