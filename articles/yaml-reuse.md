@@ -231,7 +231,47 @@ Format Rust code
 usage: rustfmt [options] <file>...
 
 Options:
-        --check         Run in 'check' mode. Exits with 0 if input is
+        --check                Run in 'check' mode. Exits with 0 if input is
                         formatted correctly. Exits with 1 and prints a diff if
                         formatting is required.
 ```
+
+
+xtask ci should run pre-commit but because it is hard to know what has changed since last push, we run pre-commit hooks in a slower mode where they check everything (still fast)
+installation of a hook you probably want to make it so that your hook is happy being run from a hard-link, sym-link or from a shell script (easy composibility for people on the team)
+checking whether or not the hook is installed
+should make it easy to run without being installed (via xtask)
+
+running via cargo adds significant overhead (cargo overhead is rarely an issue for other programs but in the case of git hooks you can probably argue that it is significant.  a factor of 10)
+
+installation should always involve user, checking installation should be available and should be quick.  it may or may not be included in other xtasks.
+include a hash of the bin in the bin and read it?  (quicker than hash the bin on every check)
+but if the user has gone for composability
+
+should environment check only run on a clean repository?  i think so
+
+Because it's not a particularly onerous constraint, support all of these modes
+
+./.git/hooks/precommit -> ./target/debug/xtask
+
+cargo xtask pre-commit
+    ./target/debug/xtask pre-commit
+
+./.git/hooks/precommit
+    ./target/debug/xtask pre-commit
+
+./.git/hooks/precommit
+    cargo xtask pre-commit
+        ./target/debug/xtask pre-commit
+
+you can give the same program multiple names quite easily via Cargo.toml (but you will get warnings)
+what exit codes do we get in all of these situations?
+there are OS specific ways of getting information about parent process
+should probably avoid those
+use stdout (this has the added benefit of being obvious)
+
+we want to embed information in the binary to tell if it needs to be updated.  giving the binary build time (through build rs) should be enough.  when nothing has changed in xtask, a new binary (with new build time) is not generated.  (show how you verify this)
+when changes are made, a new binary is generated (show how you verify this other thing).
+now all you need is a reliable way to run pre-commit hook
+
+if you want to also run your personal hooks, provide instructions how to do that (git config on the repo to use repo hooks, then make sure your script calls our special hook and then global hooks)
