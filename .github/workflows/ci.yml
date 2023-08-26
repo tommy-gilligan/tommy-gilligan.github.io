@@ -23,10 +23,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-          xtask/target
-          generation/target
-          cache
-        key: ${{ runner.os }}-ci-${{ hashFiles('**/Cargo.toml') }}
+        key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.toml') }}
     - run: cargo xtask ci
   generate:
     name: Generate
@@ -44,14 +41,11 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-          xtask/target
-          generation/target
-          cache
-        key: ${{ runner.os }}-generate-${{ hashFiles('**/Cargo.toml') }}
+        key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.toml') }}
     - id: configure-pages
       uses: actions/configure-pages@v3
-    - run: cargo run --package generate -- --base-url ${{steps.configure-pages.outputs.base_url}}
-    - run: cargo run --package crawl -- --base-url ${{steps.configure-pages.outputs.base_url}}
+    - run: cargo run --bin generate -- --base-url ${{steps.configure-pages.outputs.base_url}}
+    - run: cargo run --bin crawl -- --base-url ${{steps.configure-pages.outputs.base_url}}
     - uses: actions/upload-artifact@v3
       with:
         name: site
@@ -80,10 +74,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-          xtask/target
-          generation/target
-          cache
-        key: ${{ runner.os }}-browser-${{ hashFiles('**/Cargo.toml') }}
+        key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.toml') }}
     - uses: browser-actions/setup-chrome@v1
     - uses: nanasess/setup-chromedriver@v2
     - run: |
@@ -123,10 +114,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-          xtask/target
-          generation/target
-          cache
-        key: ${{ runner.os }}-dependencies-${{ hashFiles('**/Cargo.toml') }}
+        key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.toml') }}
     - run: cargo install cargo-udeps
     - run: cargo udeps
   screenshot:
@@ -149,16 +137,13 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-          xtask/target
-          generation/target
-          cache
-        key: ${{ runner.os }}-screenshot-${{ hashFiles('**/Cargo.toml') }}
+        key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.toml') }}
     - uses: browser-actions/setup-chrome@v1
     - uses: nanasess/setup-chromedriver@v2
     - run: |
         chromedriver --log-level=ALL --log-path=chromedriver.log &
         sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-    - run: cargo run --package screenshot -- --base-url http://example.com
+    - run: cargo run --bin screenshot -- --base-url http://example.com
     - uses: actions/upload-artifact@v3
       if: always()
       with:
