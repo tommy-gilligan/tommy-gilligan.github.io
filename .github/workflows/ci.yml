@@ -85,7 +85,7 @@ jobs:
   deploy:
     needs:
     - ci
-    - browser
+    - validate
     - screenshot
     name: Deploy
     runs-on: ubuntu-latest
