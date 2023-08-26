@@ -9,30 +9,6 @@ env:
   DISPLAY: :99
   RUST_BACKTRACE: 1
 jobs:
-  clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: dtolnay/rust-toolchain@nightly
-      with:
-        components: clippy
-    - uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/.crates.toml
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-          xtask/target
-          generation/target
-          cache
-        key: ${{ runner.os }}-clippy-${{ hashFiles('**/Cargo.toml') }}
-    - run: cargo clippy --all-targets
-      env:
-        RUSTFLAGS: -D warnings
   ci:
     name: ci
     runs-on: ubuntu-latest
@@ -40,7 +16,9 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@nightly
       with:
-        components: rustfmt
+        components:
+        - rustfmt
+        - clippy
     - uses: actions/cache@v3
       with:
         path: |

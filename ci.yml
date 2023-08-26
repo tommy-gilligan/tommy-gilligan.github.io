@@ -8,14 +8,16 @@ env:
   DISPLAY: :99
   RUST_BACKTRACE: 1
 jobs:
-  clippy:
-    name: Clippy
+  ci:
+    name: ci
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@nightly
       with:
-        components: clippy
+        components:
+          - rustfmt
+          - clippy
     - uses: actions/cache@v3
       with:
         path: &cache_path | 
@@ -28,21 +30,6 @@ jobs:
           xtask/target
           generation/target
           cache
-        key: ${{ runner.os }}-clippy-${{ hashFiles('**/Cargo.toml') }}
-    - run: cargo clippy --all-targets
-      env:
-        RUSTFLAGS: -D warnings
-  ci:
-    name: ci
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: dtolnay/rust-toolchain@nightly
-      with:
-        components: rustfmt
-    - uses: actions/cache@v3
-      with:
-        path: *cache_path
         key: ${{ runner.os }}-ci-${{ hashFiles('**/Cargo.toml') }}
     - run: cargo xtask ci
   generate:
