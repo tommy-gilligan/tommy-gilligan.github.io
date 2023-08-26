@@ -26,7 +26,6 @@ async fn main() {
     .await
     .unwrap();
     let local_addr = listener.local_addr().unwrap();
-    println!("{:?}", local_addr);
 
     let output = config.output.clone();
     tokio::task::spawn(async move {
