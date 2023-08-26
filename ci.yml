@@ -17,7 +17,6 @@ jobs:
       uses: actions/cache@v3
       with: 
         path: | 
-          ~/.cargo/.crates.toml
           ~/.cargo/bin/
           ~/.cargo/registry/index/
           ~/.cargo/registry/cache/
@@ -82,15 +81,6 @@ jobs:
         path: _site
     - uses: actions/upload-pages-artifact@v2
     - uses: actions/deploy-pages@v2
-  dependencies:
-    name: Dependencies
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - run: cargo install cargo-udeps
-    - run: cargo udeps
   screenshot:
     needs:
     - generate

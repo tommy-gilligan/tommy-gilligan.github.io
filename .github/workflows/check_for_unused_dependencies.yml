@@ -1,0 +1,17 @@
+name: Check for Unused Dependencies
+on:
+  schedule:
+    - cron: 0 0 * * 0
+concurrency:
+  group: ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
+  cancel-in-progress: true
+jobs:
+  dependencies:
+    name: Dependencies
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - run: cargo install cargo-udeps
+    - run: cargo udeps
