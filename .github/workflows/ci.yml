@@ -26,6 +26,8 @@ jobs:
         key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.toml') }}
     - run: cargo xtask ci
   generate:
+    needs:
+    - ci
     name: Generate
     runs-on: ubuntu-latest
     steps:
