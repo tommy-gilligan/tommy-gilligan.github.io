@@ -15,24 +15,6 @@ fn git_directory() -> std::path::PathBuf {
         .to_path_buf()
 }
 
-fn cargo<I, S>(package: &str, args: I) -> ExitStatus
-where
-    I: IntoIterator<Item = S>,
-    S: AsRef<OsStr>,
-{
-    let status = Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
-        .arg("run")
-        .arg("--package")
-        .arg(package)
-        .arg("--")
-        .args(args)
-        .current_dir(git_directory())
-        .status()
-        .unwrap();
-
-    std::process::exit(status.code().unwrap());
-}
-
 fn cargo_self<I, S>(package: &str, args: I) -> ExitStatus
 where
     I: IntoIterator<Item = S>,
@@ -84,24 +66,6 @@ fn main() {
                     }
                     Some("check-environment") => {
                         check_environment();
-                    }
-                    Some("crawl") => {
-                        cargo("crawl", args);
-                    }
-                    Some("serve") => {
-                        cargo("serve", args);
-                    }
-                    Some("screenshot") => {
-                        cargo("screenshot", args);
-                    }
-                    Some("visual_diff") => {
-                        cargo("visual_diff", args);
-                    }
-                    Some("generate") => {
-                        cargo("generate", args);
-                    }
-                    Some("watch") => {
-                        cargo("watch", args);
                     }
                     Some("flatten_yaml") => {
                         assert!(cargo_self("flatten_yaml", args).success());

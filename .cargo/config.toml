@@ -1,2 +1,8 @@
 [alias]
 xtask = "run --package xtask --"
+crawl = "run --package crawl --"
+generate = "run --package generate --"
+screenshot = "run --package screenshot --"
+serve = "run --package serve --"
+visual_diff = "run --package visual_diff --"
+watch = "run --package watch --"
