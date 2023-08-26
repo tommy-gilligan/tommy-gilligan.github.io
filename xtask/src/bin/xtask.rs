@@ -51,9 +51,7 @@ where
     std::process::exit(status.code().unwrap());
 }
 
-fn setup_environment() {
-    pre_commit_hook::PreCommitHook::new().install();
-}
+fn setup_environment() {}
 
 fn check_environment() {
     pre_commit_hook::PreCommitHook::new().check_installation();

@@ -1,9 +1,7 @@
-
-
 use std::{
     env::{consts::EXE_EXTENSION, current_exe},
     fs::hard_link,
-    path::PathBuf,
+    path::{Path, PathBuf},
     process::Command,
 };
 mod flatten_yaml;
@@ -25,6 +23,22 @@ pub fn run(force: bool) {
 
 pub struct PreCommitHook {
     repository: Repository,
+}
+
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
+
+fn is_executable(path: &Path) -> bool {
+    match path.canonicalize().and_then(|f| f.metadata()) {
+        Ok(metadata) if metadata.is_file() => {
+            if cfg!(unix) {
+                (metadata.permissions().mode() & 0o111) != 0
+            } else {
+                true
+            }
+        }
+        _ => false,
+    }
 }
 
 impl PreCommitHook {
@@ -52,19 +66,9 @@ impl PreCommitHook {
         self.run_as_child(HEADER_WITH_BUILD_TIME)
     }
 
-    pub fn install(&self) {
-        let target = self.pre_commit_path();
-
-        if !target.exists() {
-            hard_link(current_exe().unwrap(), &target).unwrap()
-        } else {
-            // is the file text or binary? + prompt user
-        }
-    }
-
     pub fn check_installation(&self) {
         if !self.is_up_to_date() {
-            eprintln!("advice on installing");
+            eprintln!("advice on installing {:?}", current_exe().unwrap());
             std::process::exit(1);
         }
     }
@@ -72,15 +76,21 @@ impl PreCommitHook {
     pub fn run_as_child(&self, search_term: &str) -> bool {
         let mut status_options = git2::StatusOptions::new();
         status_options.include_ignored(false);
-        if !self.repository.statuses(Some(&mut status_options)).unwrap().is_empty() {
+        if !self
+            .repository
+            .statuses(Some(&mut status_options))
+            .unwrap()
+            .is_empty()
+        {
             eprintln!("advice on cleaning");
             std::process::exit(1);
         }
-
-        let stdout = Command::new(self.pre_commit_path())
-            .output()
-            .unwrap()
-            .stdout;
+        let path = self.pre_commit_path();
+        if !is_executable(&path) {
+            eprintln!("not valid exectuable");
+            std::process::exit(1);
+        }
+        let stdout = Command::new(path).output().unwrap().stdout;
         String::from_utf8_lossy(&stdout).contains(search_term)
     }
 }
