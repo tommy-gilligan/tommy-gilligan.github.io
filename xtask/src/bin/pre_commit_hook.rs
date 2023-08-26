@@ -1,4 +1,4 @@
-use crate::git_directory;
+
 
 use std::{
     env::{consts::EXE_EXTENSION, current_exe},
@@ -10,7 +10,7 @@ mod flatten_yaml;
 mod fmt;
 use git2::Repository;
 
-const HEADER_WITH_BUILD_TIME: &'static str = concat!(
+const HEADER_WITH_BUILD_TIME: &str = concat!(
     "Running pre-commit from ",
     env!("CARGO_CRATE_NAME"),
     " built at ",
@@ -70,15 +70,17 @@ impl PreCommitHook {
     }
 
     pub fn run_as_child(&self, search_term: &str) -> bool {
-        if self.repository.statuses(None).unwrap().is_empty() {
-            let stdout = Command::new(self.pre_commit_path())
-                .output()
-                .unwrap()
-                .stdout;
-            String::from_utf8_lossy(&stdout).contains(search_term)
-        } else {
+        let mut status_options = git2::StatusOptions::new();
+        status_options.include_ignored(false);
+        if !self.repository.statuses(Some(&mut status_options)).unwrap().is_empty() {
             eprintln!("advice on cleaning");
             std::process::exit(1);
         }
+
+        let stdout = Command::new(self.pre_commit_path())
+            .output()
+            .unwrap()
+            .stdout;
+        String::from_utf8_lossy(&stdout).contains(search_term)
     }
 }
