@@ -54,8 +54,8 @@ jobs:
         key: ${{ runner.os }}-generate-${{ hashFiles('**/Cargo.toml') }}
     - id: configure-pages
       uses: actions/configure-pages@v3
-    - run: cargo run --package generate --base-url ${{steps.configure-pages.outputs.base_url}}
-    - run: cargo run --package crawl --base-url ${{steps.configure-pages.outputs.base_url}}
+    - run: cargo run --package generate -- --base-url ${{steps.configure-pages.outputs.base_url}}
+    - run: cargo run --package crawl -- --base-url ${{steps.configure-pages.outputs.base_url}}
     - uses: actions/upload-artifact@v3
       with:
         name: site
@@ -165,7 +165,7 @@ jobs:
     - run: |
         chromedriver --log-level=ALL --log-path=chromedriver.log &
         sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-    - run: cargo run --package screenshot --base-url http://example.com
+    - run: cargo run --package screenshot -- --base-url http://example.com
     - uses: actions/upload-artifact@v3
       if: always()
       with:
