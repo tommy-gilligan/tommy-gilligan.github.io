@@ -99,7 +99,7 @@ jobs:
       with:
         path: *cache_path
         key: ${{ runner.os }}-dependencies-${{ hashFiles('**/Cargo.toml') }}
-    - run: cargo install cargo-udeps -Z install-upgrade
+    - run: cargo install cargo-udeps
     - run: cargo udeps
   screenshot:
     needs:
