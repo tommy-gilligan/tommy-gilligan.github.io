@@ -11,6 +11,10 @@ name = "flatten_yaml"
 [[bin]]
 name = "xtask"
 
+[[bin]]
+name = "pre-commit"
+path = "src/bin/xtask.rs"
+
 [dependencies]
 git2.workspace = true
 url.workspace = true

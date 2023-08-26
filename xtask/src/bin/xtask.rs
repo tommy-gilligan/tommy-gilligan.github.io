@@ -52,7 +52,11 @@ where
 }
 
 fn setup_environment() {
-    pre_commit_hook::install();
+    pre_commit_hook::PreCommitHook::new().install();
+}
+
+fn check_environment() {
+    pre_commit_hook::PreCommitHook::new().check_installation();
 }
 
 fn main() {
@@ -69,12 +73,19 @@ fn main() {
     {
         Some("pre-commit") => pre_commit_hook::run(false),
         _ => {
-            setup_environment();
-
             if let Some(subcommand) = args.next() {
                 match subcommand.to_str() {
                     Some("ci") => {
                         pre_commit_hook::run(true);
+                    }
+                    Some("pre-commit") => {
+                        pre_commit_hook::run(false);
+                    }
+                    Some("setup-environment") => {
+                        setup_environment();
+                    }
+                    Some("check-environment") => {
+                        check_environment();
                     }
                     Some("crawl") => {
                         cargo("crawl", args);
