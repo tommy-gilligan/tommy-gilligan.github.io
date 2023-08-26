@@ -50,6 +50,17 @@ pub fn clippy() {
     }
 }
 
+pub fn build() {
+    let mut command = Command::new(var("CARGO").unwrap_or("cargo".to_owned()));
+    command
+        .arg("build")
+        .arg("--all-targets")
+        .current_dir(git_directory());
+    if !command.status().unwrap().success() {
+        std::process::exit(1);
+    }
+}
+
 fn main() {
     let mut args = args_os();
 
@@ -67,6 +78,7 @@ fn main() {
             if let Some(subcommand) = args.next() {
                 match subcommand.to_str() {
                     Some("ci") => {
+                        build();
                         clippy();
                         pre_commit_hook::run(true);
                     }
