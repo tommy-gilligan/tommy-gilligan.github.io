@@ -1,8 +1,4 @@
-#![feature(async_closure)]
-#![feature(impl_trait_projections)]
 #![feature(iter_array_chunks)]
-#![feature(allocator_api)]
-#![feature(unboxed_closures)]
 #![deny(clippy::pedantic)]
 #![deny(clippy::nursery)]
 #![allow(clippy::missing_panics_doc)]
