@@ -1,6 +1,5 @@
 use std::{
     env::{consts::EXE_EXTENSION, current_exe},
-    fs::hard_link,
     path::{Path, PathBuf},
     process::Command,
 };
