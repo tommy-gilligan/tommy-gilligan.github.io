@@ -16,6 +16,15 @@ pub fn run(force: bool) {
         .contains(Status::INDEX_MODIFIED)
         || force
     {
+        if repository
+            .status_file(target)
+            .unwrap()
+            .contains(Status::WT_MODIFIED)
+        {
+            eprintln!("unstaged changes to target {:?}", target);
+            std::process::exit(1);
+        }
+
         crate::flatten_yaml::check(ci_yaml, target);
     }
 }
