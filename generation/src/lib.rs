@@ -23,3 +23,4 @@ pub mod style;
 mod syntax_highlighting;
 pub mod tokiort;
 pub mod view;
+pub mod xml;

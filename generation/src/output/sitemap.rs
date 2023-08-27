@@ -13,6 +13,10 @@ pub struct Sitemap {
     path: PathBuf,
 }
 
+// https://creativecommons.org/licenses/by-sa/2.5/
+// Sitemaps.org: Google, Inc., Yahoo, Inc., and Microsoft Corporation
+const SITEMAP_XSD: &[u8; 3728] = include_bytes!("../sitemap.xsd");
+
 impl Sitemap {
     pub fn new(path: &Path) -> Self {
         Self {
@@ -21,13 +25,16 @@ impl Sitemap {
     }
 
     pub fn create(self) -> Builder {
-        let file = File::create(self.path).unwrap();
+        let file = File::create(&self.path).unwrap();
         let sitemap_writer = SiteMapWriter::new(file);
         let url_writer = sitemap_writer
             .start_urlset()
             .expect("Unable to write urlset");
 
-        Builder { url_writer }
+        Builder {
+            url_writer,
+            path: self.path,
+        }
     }
 
     pub fn open(self) -> Reader {
@@ -40,6 +47,20 @@ impl Sitemap {
 
 pub struct Builder {
     url_writer: UrlSetWriter<File>,
+    path: PathBuf,
+}
+
+impl Drop for Builder {
+    fn drop(&mut self) {
+        // self.url_writer.end();
+        if crate::xml::validate(
+            std::fs::read_to_string(&self.path).unwrap().as_bytes(),
+            Some(SITEMAP_XSD),
+        ) != crate::xml::MyResult::Ok
+        {
+            panic!("bad")
+        }
+    }
 }
 
 impl Builder {

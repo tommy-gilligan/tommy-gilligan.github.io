@@ -1024,6 +1024,7 @@ dependencies = [
  "hyper 1.0.0-rc.4",
  "hyper-staticfile",
  "image",
+ "libxml",
  "lightningcss",
  "markdown",
  "markup",
@@ -1534,6 +1535,17 @@ dependencies = [
  "libc",
  "libz-sys",
  "openssl-sys",
+ "pkg-config",
+ "vcpkg",
+]
+
+[[package]]
+name = "libxml"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fe73cdec2bcb36d25a9fe3f607ffcd44bb8907ca0100c4098d1aa342d1e7bec"
+dependencies = [
+ "libc",
  "pkg-config",
  "vcpkg",
 ]

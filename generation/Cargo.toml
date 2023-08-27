@@ -32,3 +32,4 @@ toml-datetime-compat.workspace = true
 toml.workspace = true
 traversal.workspace = true
 url.workspace = true
+libxml = "0.3.3"
