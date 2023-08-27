@@ -1,4 +1,4 @@
-use generation::tokiort::TokioIo;
+use toolkit::tokiort::TokioIo;
 
 use clap::Parser;
 use std::{fs::create_dir_all, path::Path};
@@ -34,7 +34,7 @@ async fn main() {
             let (stream, _) = listener.accept().await.unwrap();
             let io = TokioIo::new(stream);
 
-            let service = generation::serve::Service::new(output.clone().into());
+            let service = toolkit::serve::Service::new(output.clone().into());
             tokio::task::spawn(async move {
                 hyper::server::conn::http1::Builder::new()
                     .serve_connection(io, service)
@@ -47,9 +47,9 @@ async fn main() {
     let screenshots_dir = Path::new(&config.screenshots);
     create_dir_all(screenshots_dir).unwrap();
 
-    let mut driver = generation::chrome_driver::ChromeDriver::new(&local_addr).await;
+    let mut driver = toolkit::chrome_driver::ChromeDriver::new(&local_addr).await;
 
-    for url in generation::output::Output::new(&config.output)
+    for url in toolkit::output::Output::new(&config.output)
         .sitemap()
         .open()
     {

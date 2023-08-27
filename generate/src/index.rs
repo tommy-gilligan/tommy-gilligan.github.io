@@ -1,4 +1,4 @@
-use generation::{
+use toolkit::{
     article::Article,
     layout::{Factory, Layout},
     output::Output,

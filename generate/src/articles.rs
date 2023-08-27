@@ -1,4 +1,5 @@
-use generation::{
+use git2::Repository;
+use toolkit::{
     article::Article,
     cache::Cache,
     github::Remote,
@@ -8,7 +9,6 @@ use generation::{
     style::Style,
     view::{Author, Footer, History},
 };
-use git2::Repository;
 
 use std::{io::Write, path::Path};
 
@@ -74,7 +74,7 @@ pub fn render(config: &crate::Config) {
     let cache = Cache::new(&config.cache, client);
     for article in Article::from_dir(&config.articles).unwrap() {
         let mut m = Markdown::new(article.contents());
-        m.replace(|node| generation::favicon::decorate_link(&cache, &config.output, node));
+        m.replace(|node| toolkit::favicon::decorate_link(&cache, &config.output, node));
         output
             .page(article.file_stem())
             .write_all(layout_for_page(&layout_factory, &m.render(), &article).as_bytes())

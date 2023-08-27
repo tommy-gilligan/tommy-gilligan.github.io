@@ -1,7 +1,7 @@
 use clap::Parser;
-use generation::tokiort::TokioIo;
-use generation::{crawl::Crawler, output::Output};
 use tokio::net::TcpListener;
+use toolkit::tokiort::TokioIo;
+use toolkit::{crawl::Crawler, output::Output};
 use url::Url;
 
 #[derive(Parser)]
@@ -30,7 +30,7 @@ async fn main() {
             let (stream, _) = listener.accept().await.unwrap();
             let io = TokioIo::new(stream);
 
-            let service = generation::serve::Service::new(output.clone().into());
+            let service = toolkit::serve::Service::new(output.clone().into());
             tokio::task::spawn(async move {
                 hyper::server::conn::http1::Builder::new()
                     .serve_connection(io, service)

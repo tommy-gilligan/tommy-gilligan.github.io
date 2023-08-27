@@ -1,5 +1,5 @@
 use build_time::build_time_local;
-use generation::{article::Article, output::Output};
+use toolkit::{article::Article, output::Output};
 
 use git_version::git_version;
 use rss::ChannelBuilder;

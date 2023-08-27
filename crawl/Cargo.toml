@@ -16,4 +16,4 @@ tl.workspace = true
 tokio.workspace = true
 traversal.workspace = true
 url.workspace = true
-generation = { path = "../generation" }
+toolkit = { path = "../toolkit" }

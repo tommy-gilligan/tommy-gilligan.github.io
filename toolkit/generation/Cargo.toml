@@ -1,0 +1,35 @@
+[package]
+name = "toolkit"
+authors = [ "Tommy Gilligan" ]
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+base64.workspace = true
+chrono.workspace = true
+futures-util.workspace = true
+futures.workspace = true
+git2.workspace = true
+hyper-staticfile.workspace = true
+hyper.workspace = true
+image.workspace = true
+lightningcss.workspace = true
+markdown.workspace = true
+markup.workspace = true
+md5.workspace = true
+ordinal.workspace = true
+pin-project-lite="0.2.12"
+regex.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_with.workspace = true
+site_map.workspace = true
+thirtyfour.workspace = true
+tl.workspace = true
+tokio.workspace = true
+toml-datetime-compat.workspace = true
+toml.workspace = true
+traversal.workspace = true
+url.workspace = true
+libxml = "0.3.3"
