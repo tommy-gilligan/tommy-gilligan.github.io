@@ -1,11 +1,9 @@
 use libxml::parser::{Parser, ParserOptions};
 use libxml::schemas::{SchemaParserContext, SchemaValidationContext};
 
-const SITEMAP_XSD: &[u8; 3728] = include_bytes!("sitemap.xsd");
-
 // RSS does not have an official 'schema'
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum MyResult {
     Ok,
     Xml,
@@ -13,6 +11,7 @@ pub enum MyResult {
     XmlXsd,
 }
 
+#[must_use]
 pub fn validate(xml: &[u8], xsd: Option<&[u8]>) -> MyResult {
     let options = ParserOptions {
         recover: false,
@@ -22,25 +21,20 @@ pub fn validate(xml: &[u8], xsd: Option<&[u8]>) -> MyResult {
         pedantic: true,
         ..ParserOptions::default()
     };
-    if let Ok(xml) = Parser::default().parse_string_with_options(xml, options) {
-        if let Some(xsd) = xsd {
-            if let Ok(mut xsd) =
+    Parser::default()
+        .parse_string_with_options(xml, options)
+        .map_or(MyResult::Xml, |xml| {
+            xsd.map_or(MyResult::Ok, |xsd| {
                 SchemaValidationContext::from_parser(&mut SchemaParserContext::from_buffer(xsd))
-            {
-                if xsd.validate_document(&xml).is_ok() {
-                    MyResult::Ok
-                } else {
-                    MyResult::XmlXsd
-                }
-            } else {
-                MyResult::Xsd
-            }
-        } else {
-            MyResult::Ok
-        }
-    } else {
-        MyResult::Xml
-    }
+                    .map_or(MyResult::Xsd, |mut xsd| {
+                        if xsd.validate_document(&xml).is_ok() {
+                            MyResult::Ok
+                        } else {
+                            MyResult::XmlXsd
+                        }
+                    })
+            })
+        })
 }
 
 #[cfg(test)]
@@ -80,9 +74,11 @@ mod tests {
             </url>
     "#;
 
+    const SITEMAP_XSD: &[u8; 3728] = include_bytes!("sitemap.xsd");
+
     #[test]
     fn test_validate_good_sitemap() {
-        assert_eq!(super::validate(GOOD_SITEMAP, None), super::MyResult::Ok)
+        assert_eq!(super::validate(GOOD_SITEMAP, None), super::MyResult::Ok);
     }
 
     #[test]
@@ -90,7 +86,7 @@ mod tests {
         assert_eq!(
             super::validate(SITEMAP_MISSING_LOC, None),
             super::MyResult::Ok
-        )
+        );
     }
 
     #[test]
@@ -98,31 +94,31 @@ mod tests {
         assert_eq!(
             super::validate(SITEMAP_UNTERMINATED_URLSET, None),
             super::MyResult::Xml
-        )
+        );
     }
 
     #[test]
     fn test_validate_good_sitemap_with_xsd() {
         assert_eq!(
-            super::validate(GOOD_SITEMAP, Some(super::SITEMAP_XSD)),
+            super::validate(GOOD_SITEMAP, Some(SITEMAP_XSD)),
             super::MyResult::Ok
-        )
+        );
     }
 
     #[test]
     fn test_validate_bad_sitemap_with_xsd() {
         assert_eq!(
-            super::validate(SITEMAP_MISSING_LOC, Some(super::SITEMAP_XSD)),
+            super::validate(SITEMAP_MISSING_LOC, Some(SITEMAP_XSD)),
             super::MyResult::XmlXsd
-        )
+        );
     }
 
     #[test]
     fn test_validate_bad_sitemap_without_closing_urlset() {
         assert_eq!(
-            super::validate(SITEMAP_UNTERMINATED_URLSET, Some(super::SITEMAP_XSD)),
+            super::validate(SITEMAP_UNTERMINATED_URLSET, Some(SITEMAP_XSD)),
             super::MyResult::Xml
-        )
+        );
     }
 
     #[test]
@@ -130,6 +126,6 @@ mod tests {
         assert_eq!(
             super::validate(GOOD_SITEMAP, Some(b"badxsd")),
             super::MyResult::Xsd
-        )
+        );
     }
 }
