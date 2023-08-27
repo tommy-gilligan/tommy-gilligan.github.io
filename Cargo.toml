@@ -3,12 +3,10 @@ resolver = "2"
 members = [
     "toolkit",
     "xtask",
-    "crawl",
     "generate",
     "screenshot",
     "serve",
     "visual_diff",
-    "watch",
 ]
 
 [workspace.dependencies]
