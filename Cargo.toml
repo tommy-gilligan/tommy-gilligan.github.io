@@ -4,9 +4,6 @@ members = [
     "toolkit",
     "xtask",
     "generate",
-    "screenshot",
-    "serve",
-    "visual_diff",
 ]
 
 [workspace.dependencies]

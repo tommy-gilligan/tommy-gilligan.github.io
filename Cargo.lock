@@ -2405,25 +2405,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
-name = "screenshot"
-version = "0.1.0"
-dependencies = [
- "clap",
- "git2",
- "hyper 1.0.0-rc.4",
- "hyper-staticfile",
- "markdown",
- "markup",
- "reqwest",
- "sitemap",
- "tl",
- "tokio",
- "toolkit",
- "traversal",
- "url",
-]
-
-[[package]]
 name = "sct"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2556,25 +2537,6 @@ dependencies = [
  "ryu",
  "serde",
  "unsafe-libyaml",
-]
-
-[[package]]
-name = "serve"
-version = "0.1.0"
-dependencies = [
- "clap",
- "git2",
- "hyper 1.0.0-rc.4",
- "hyper-staticfile",
- "markdown",
- "markup",
- "reqwest",
- "sitemap",
- "tl",
- "tokio",
- "toolkit",
- "traversal",
- "url",
 ]
 
 [[package]]
@@ -3021,6 +2983,7 @@ dependencies = [
  "toml-datetime-compat",
  "traversal",
  "url",
+ "viuer",
 ]
 
 [[package]]
@@ -3149,17 +3112,6 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
-
-[[package]]
-name = "visual_diff"
-version = "0.1.0"
-dependencies = [
- "clap",
- "git2",
- "tokio",
- "url",
- "viuer",
-]
 
 [[package]]
 name = "viuer"
