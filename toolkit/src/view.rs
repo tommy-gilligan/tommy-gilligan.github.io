@@ -1,18 +1,8 @@
-use crate::{github::Remote, srcset::srcset};
+use crate::srcset::srcset;
 use chrono::{Datelike, TimeZone, Utc};
 use git2::Commit;
 use ordinal::Ordinal;
 use url::Url;
-
-fn format_commit(remote: &Remote, commit: &Commit) -> [String; 4] {
-    let datetime = Utc.timestamp_opt(commit.time().seconds(), 0).unwrap();
-    [
-        CommitLink { remote, commit }.to_string(),
-        datetime.format("%H:%M").to_string(),
-        Ordinal(datetime.date_naive().day()).to_string(),
-        datetime.format(" of %B, %Y").to_string(),
-    ]
-}
 
 markup::define! {
     CommitLink<'a>(remote: &'a Remote, commit: &'a Commit<'a>) {

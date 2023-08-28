@@ -3,14 +3,11 @@ use crate::{
     cache::Cache,
     config::Config,
     favicon,
-    github::Remote,
     layout::{Factory, Layout},
     markdown::Markdown,
     output::Output,
     style::Style,
-    view::{Author, Footer},
 };
-use git2::Repository;
 
 use std::{io::Write, path::Path};
 

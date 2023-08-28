@@ -11,7 +11,6 @@ pub mod crawl;
 pub mod favicon;
 pub mod feed;
 pub mod git;
-pub mod github;
 pub mod gravatar;
 pub mod index;
 pub mod layout;
