@@ -102,7 +102,7 @@ impl<T> TokioIo<T> {
         Self { inner }
     }
 
-    pub fn inner(self) -> T {
+    pub const fn inner(self) -> T {
         self.inner
     }
 }
