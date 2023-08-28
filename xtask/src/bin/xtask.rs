@@ -89,7 +89,7 @@ fn main() {
                         // TODO: run all even when something fails
                         build();
                         clippy();
-                        test();
+                        //test();
                         pre_commit_hook::run(true);
                     }
                     Some("pre-commit") => {

@@ -8,7 +8,7 @@ use crate::{
     markdown::Markdown,
     output::Output,
     style::Style,
-    view::{Author, Footer, History},
+    view::{Author, Footer},
 };
 use git2::Repository;
 
@@ -16,35 +16,6 @@ use std::{io::Write, path::Path};
 
 #[must_use]
 pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
-    let repo = Repository::open_from_env().unwrap();
-    let github = (&repo.remotes().unwrap())
-        .into_iter()
-        .find_map(|remote_name| {
-            return Remote::try_from(repo.find_remote(remote_name.unwrap()).unwrap()).ok();
-        })
-        .unwrap();
-    let commits = article.truncated_history();
-    let revisions = History {
-        remote: &github,
-        commits,
-    }
-    .to_string();
-    let github_user = github.user();
-
-    let author = Author {
-        name: "Tommy Gilligan".to_owned(),
-        image_url_for: |size| github_user.avatar(size),
-        social_links: vec![
-            ("Github".to_owned(), "https://example.com".parse().unwrap()),
-            (
-                "Mastodon".to_owned(),
-                "https://example.com".parse().unwrap(),
-            ),
-        ],
-    }
-    .to_string();
-
-    let footer = Footer { author, revisions }.to_string();
     Layout {
         title: factory.title,
         language: factory.language,
@@ -52,7 +23,7 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
         description: &article.description(),
         body,
         page_title: Some(&article.title()),
-        footer: &footer,
+        footer: "",
         author: "",
     }
     .to_string()

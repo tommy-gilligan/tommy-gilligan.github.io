@@ -1,4 +1,3 @@
-#![feature(iter_array_chunks)]
 #![deny(clippy::pedantic)]
 #![deny(clippy::nursery)]
 #![allow(clippy::missing_panics_doc)]
@@ -9,7 +8,6 @@ pub mod cache;
 pub mod chrome_driver;
 pub mod config;
 pub mod crawl;
-pub mod ditto;
 pub mod favicon;
 pub mod feed;
 pub mod git;

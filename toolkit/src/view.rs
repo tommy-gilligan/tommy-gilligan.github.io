@@ -1,4 +1,4 @@
-use crate::{ditto::Ditto, github::Remote, srcset::srcset};
+use crate::{github::Remote, srcset::srcset};
 use chrono::{Datelike, TimeZone, Utc};
 use git2::Commit;
 use ordinal::Ordinal;
@@ -83,23 +83,6 @@ markup::define! {
         pre {
             code.{format!("language-{}", language)} {
                 @markup::raw(formatted_code)
-            }
-        }
-    }
-}
-
-markup::define! {
-    History<'a>(remote: &'a Remote, commits: Vec<Commit<'a>>) {
-        table.commits {
-            caption {
-                "Revisions"
-            }
-            tbody {
-                @for [a, b, c, d] in Ditto::new(commits.iter().map(|c| format_commit(remote, c))) {
-                    tr {
-                        td { @a } td { @b } td { @c } td { @d }
-                    }
-                }
             }
         }
     }
