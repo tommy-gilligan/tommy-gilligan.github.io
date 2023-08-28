@@ -17,8 +17,6 @@ pub fn layout_for(factory: &Factory, body: &str) -> String {
         description: "",
         body,
         page_title: None,
-        footer: "",
-        author: "",
     }
     .to_string()
 }

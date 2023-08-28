@@ -20,8 +20,6 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
         description: &article.description(),
         body,
         page_title: Some(&article.title()),
-        footer: "",
-        author: "",
     }
     .to_string()
 }

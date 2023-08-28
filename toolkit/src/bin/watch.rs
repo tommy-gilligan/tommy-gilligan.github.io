@@ -8,15 +8,13 @@ use std::path::Path;
 use std::process::Command;
 use std::{thread, time};
 
-// TODO: config should be a superset of serve config
-// TODO: what to watch configurable recompile and regenerate vs just regenerate
+const GENERATE_CMD: &str = "cargo run --bin generate -- --base-url http://localhost:9231";
+
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct Config {
     #[arg(short, long, default_value = "articles")]
     pub articles: String,
-    #[arg()]
-    pub generate: String,
 }
 
 fn shell_spawn(command: &str) -> std::process::Child {
@@ -35,10 +33,11 @@ fn shell_spawn(command: &str) -> std::process::Child {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let config = Config::parse();
 
-    let mut child = shell_spawn(&config.generate);
+    let mut child = shell_spawn(GENERATE_CMD);
     let mut watcher = recommended_watcher(move |res| {
         if let Ok(Event {
             kind: _e @ (Modify(_) | Remove(_)),
@@ -48,7 +47,7 @@ fn main() {
             match child.try_wait() {
                 Ok(Some(status)) if status.success() => {
                     println!("regenerating");
-                    child = shell_spawn(&config.generate);
+                    child = shell_spawn(GENERATE_CMD);
                 }
                 _ => (),
             }

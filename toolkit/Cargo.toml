@@ -39,3 +39,5 @@ toml.workspace = true
 traversal.workspace = true
 url.workspace = true
 viuer.workspace = true
+tree-sitter-highlight = "0.20.1"
+tree-sitter-rust = "0.20.4"

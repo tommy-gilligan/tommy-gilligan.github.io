@@ -11,10 +11,8 @@ const CSP: &str = "default-src 'none'; script-src 'none'; script-src-elem 'self'
 markup::define! {
     Layout<'a>(
         title: &'a str,
-        author: &'a str,
         description: &'a str,
         body: &'a str,
-        footer: &'a str,
         language: &'a str,
         page_title: Option<&'a str>,
         style: &'a str,
@@ -25,7 +23,6 @@ markup::define! {
                 title { @combined_title(title, *page_title) }
                 meta[charset = "utf-8"];
                 meta["http-equiv" = "Content-Security-Policy", content = markup::raw(CSP)];
-                meta[name = "author", content = author];
                 meta[name = "description", content = description];
                 link[rel = "alternate", r#type = "application/rss+xml", href = "pages.xml", title = title];
                 link[rel = "icon", href = "data:;base64,iVBORw0KGgo="];
@@ -39,7 +36,6 @@ markup::define! {
                     h2 { @page_title }
                 }
                 main { @markup::raw(body) }
-                footer { @markup::raw(footer) }
             }
         }
     }
