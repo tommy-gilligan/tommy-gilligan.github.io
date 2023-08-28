@@ -68,13 +68,13 @@ summary:hover {
   background: var(--background-darkened);
 }
 code {
-  .comment {
+  .highlight-1 {
     font-style: italic;
   }
-  .variable {
+  .highlight-5 {
     color: #0086b3;
   }
-  .keyword {
+  .highlight-6 {
     color: #a71d5d;
   }
 }

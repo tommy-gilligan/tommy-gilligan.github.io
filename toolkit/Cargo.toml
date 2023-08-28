@@ -41,3 +41,5 @@ url.workspace = true
 viuer.workspace = true
 tree-sitter-highlight = "0.20.1"
 tree-sitter-rust = "0.20.4"
+indoc = "2.0.3"
+tree-sitter-bash = "0.20.3"

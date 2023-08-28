@@ -266,9 +266,9 @@ checksum = "89b2fd2a0dcf38d7971e2194b6b6eebab45ae01067456a7fd93d5547a61b70be"
 
 [[package]]
 name = "cc"
-version = "1.0.82"
+version = "1.0.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "305fe645edc1442a0fa8b6726ba61d422798d37a52e12eaecf4b022ebbb88f01"
+checksum = "f1174fb0b6ec23863f8b971027804a42614e347eafb0a95bf0b12cdae21fc4d0"
 dependencies = [
  "jobserver",
  "libc",
@@ -1318,6 +1318,12 @@ dependencies = [
  "equivalent",
  "hashbrown 0.14.0",
 ]
+
+[[package]]
+name = "indoc"
+version = "2.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c785eefb63ebd0e33416dfcb8d6da0bf27ce752843a45632a67bf10d4d4b5c4"
 
 [[package]]
 name = "inotify"
@@ -2942,6 +2948,7 @@ dependencies = [
  "hyper 1.0.0-rc.4",
  "hyper-staticfile",
  "image",
+ "indoc",
  "libxml",
  "lightningcss",
  "markdown",
@@ -2963,6 +2970,7 @@ dependencies = [
  "toml",
  "toml-datetime-compat",
  "traversal",
+ "tree-sitter-bash",
  "tree-sitter-highlight",
  "tree-sitter-rust",
  "url",
@@ -3009,6 +3017,16 @@ checksum = "e747b1f9b7b931ed39a548c1fae149101497de3c1fc8d9e18c62c1a66c683d3d"
 dependencies = [
  "cc",
  "regex",
+]
+
+[[package]]
+name = "tree-sitter-bash"
+version = "0.20.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "096f57b3b44c04bfc7b21a4da44bfa16adf1f88aba18993b8478a091076d0968"
+dependencies = [
+ "cc",
+ "tree-sitter",
 ]
 
 [[package]]

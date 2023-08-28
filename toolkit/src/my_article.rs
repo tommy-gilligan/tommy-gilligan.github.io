@@ -2,7 +2,6 @@ use crate::{
     article::Article,
     cache::Cache,
     config::Config,
-    favicon,
     layout::{Factory, Layout},
     markdown::Markdown,
     output::Output,
@@ -40,10 +39,10 @@ pub fn render(config: &Config) {
         .http1_title_case_headers()
         .build()
         .unwrap();
-    let cache = Cache::new(&config.cache, client);
+    let _cache = Cache::new(&config.cache, client);
     for article in Article::from_dir(&config.articles).unwrap() {
         let mut m = Markdown::new(article.contents());
-        m.replace(|node| favicon::decorate_link(&cache, &config.output, node));
+        m.highlight();
         output
             .page(article.file_stem())
             .write_all(layout_for_page(&layout_factory, &m.render(), &article).as_bytes())

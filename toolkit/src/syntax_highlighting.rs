@@ -1,19 +1,53 @@
-// use syntect::html::{ClassStyle, ClassedHTMLGenerator};
-// use syntect::parsing::SyntaxSet;
-// use syntect::util::LinesWithEndings;
-//
-// pub fn format_code(code: &str, language: &str) -> String {
-//     let binding = SyntaxSet::load_defaults_newlines();
-//     let syntax = binding
-//         .find_syntax_by_extension(language)
-//         .unwrap_or_else(|| binding.find_syntax_plain_text());
-//     let ss = SyntaxSet::load_defaults_newlines();
-//     let mut html_generator =
-//         ClassedHTMLGenerator::new_with_class_style(syntax, &ss, ClassStyle::Spaced);
-//     for line in LinesWithEndings::from(code) {
-//         html_generator
-//             .parse_html_for_line_which_includes_newline(line)
-//             .unwrap();
-//     }
-//     html_generator.finalize()
-// }
+use tree_sitter_highlight::HighlightEvent;
+use tree_sitter_highlight::{HighlightConfiguration, Highlighter};
+
+const HIGHLIGHT_NAMES: [&str; 8] = [
+    "variable", "constant", "operator", "function", "number", "keyword", "type", "string",
+];
+
+#[derive(Clone, Copy)]
+pub enum Language {
+    Sh,
+    Rust,
+}
+
+pub fn highlight(source: &[u8], lang: Language) -> Vec<u8> {
+    let mut config = match lang {
+        Language::Sh => HighlightConfiguration::new(
+            tree_sitter_bash::language(),
+            tree_sitter_bash::HIGHLIGHT_QUERY,
+            "",
+            "",
+        )
+        .unwrap(),
+        Language::Rust => HighlightConfiguration::new(
+            tree_sitter_rust::language(),
+            tree_sitter_rust::HIGHLIGHT_QUERY,
+            "",
+            "",
+        )
+        .unwrap(),
+    };
+    config.configure(&HIGHLIGHT_NAMES);
+
+    Highlighter::new()
+        .highlight(&config, source, None, |_| None)
+        .unwrap()
+        .flat_map(|event| match event {
+            Ok(HighlightEvent::HighlightStart(s)) => {
+                Vec::from(format!("<span class=\"highlight-{}\">", s.0).as_bytes())
+            }
+            Ok(HighlightEvent::HighlightEnd) => Vec::from(&b"</span>"[..]),
+            Ok(HighlightEvent::Source { start, end }) => Vec::from(&source[start..end]),
+            _ => Vec::new(),
+        })
+        .collect()
+}
+
+#[test]
+fn test_highlight() {
+    assert_eq!(
+        &highlight(b"const X: u8 = 123;", Language::Rust),
+        br#"<span class="highlight-5">const</span> X: <span class="highlight-6">u8</span> = <span class="highlight-1">123</span>;"#
+    );
+}

@@ -1,3 +1,5 @@
+use markdown::mdast::{Code, Node};
+
 mod options;
 
 pub struct Markdown {
@@ -39,8 +41,74 @@ impl Markdown {
         }
     }
 
+    pub fn highlight(&mut self) {
+        self.replace(|node| {
+            if let Node::Code(Code { value, lang, .. }) = node {
+                lang.as_ref().map_or_else(
+                    || Some(value.clone()),
+                    |s| {
+                        let code = match s.as_str() {
+                            "rust" => String::from_utf8(crate::syntax_highlighting::highlight(
+                                value.as_bytes(),
+                                crate::syntax_highlighting::Language::Rust,
+                            ))
+                            .unwrap(),
+                            "bash" | "zsh" | "sh" => {
+                                String::from_utf8(crate::syntax_highlighting::highlight(
+                                    value.as_bytes(),
+                                    crate::syntax_highlighting::Language::Sh,
+                                ))
+                                .unwrap()
+                            }
+                            _ => String::new(),
+                        };
+                        format!("<pre><code class=\"language-{}\">{}</code></pre>", s, code).into()
+                    },
+                )
+            } else {
+                None
+            }
+        });
+    }
+
     #[must_use]
     pub fn render(&self) -> String {
         markdown::to_html_with_options(&self.source, &options::OPTIONS).unwrap()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::markdown::Markdown;
+    use indoc::indoc;
+
+    #[test]
+    fn test_highlight_rust() {
+        let mut m = Markdown::new(
+            indoc! {r#"
+                # Some Code
+                ```rust
+                const X: u8 = 123;
+                ```
+
+                1. first it takes the number
+                2. then it doubles it
+                3. and then it returns it
+            "#}
+            .to_owned(),
+        );
+        m.highlight();
+
+        assert_eq!(
+            m.render(),
+            indoc! { r#"<h1>Some Code</h1>
+            <pre><code class="language-rust"><span class="highlight-5">const</span> X: <span class="highlight-6">u8</span> = <span class="highlight-1">123</span>;</code></pre>
+            <ol>
+            <li>first it takes the number</li>
+            <li>then it doubles it</li>
+            <li>and then it returns it</li>
+            </ol>
+            "# }
+        );
     }
 }
