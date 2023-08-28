@@ -98,7 +98,8 @@ pin_project! {
 }
 
 impl<T> TokioIo<T> {
-    pub const fn new(inner: T) -> Self {
+    #[allow(clippy::missing_const_for_fn)]
+    pub fn new(inner: T) -> Self {
         Self { inner }
     }
 
