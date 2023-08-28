@@ -1,4 +1,4 @@
-use toolkit::{
+use crate::{
     article::Article,
     layout::{Factory, Layout},
     output::Output,
@@ -22,7 +22,7 @@ pub fn layout_for(factory: &Factory, body: &str) -> String {
     .to_string()
 }
 
-pub fn render(config: &crate::Config) {
+pub fn render(config: &crate::config::Config) {
     let output = Output::new(&config.output);
     let style = Style::new(Path::new("style.css"));
 

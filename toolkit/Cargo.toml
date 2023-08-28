@@ -6,10 +6,12 @@ edition = "2021"
 
 [dependencies]
 base64.workspace = true
+build-time.workspace = true
 chrono.workspace = true
 clap.workspace = true
 futures-util.workspace = true
 futures.workspace = true
+git-version.workspace = true
 git2.workspace = true
 hyper-staticfile.workspace = true
 hyper.workspace = true
@@ -24,6 +26,7 @@ ordinal.workspace = true
 pin-project-lite="0.2.12"
 regex.workspace = true
 reqwest.workspace = true
+rss.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 serde_with.workspace = true

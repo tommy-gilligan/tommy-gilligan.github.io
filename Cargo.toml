@@ -3,7 +3,6 @@ resolver = "2"
 members = [
     "toolkit",
     "xtask",
-    "generate",
 ]
 
 [workspace.dependencies]

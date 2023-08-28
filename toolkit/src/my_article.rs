@@ -1,7 +1,8 @@
-use git2::Repository;
-use toolkit::{
+use crate::{
     article::Article,
     cache::Cache,
+    config::Config,
+    favicon,
     github::Remote,
     layout::{Factory, Layout},
     markdown::Markdown,
@@ -9,6 +10,7 @@ use toolkit::{
     style::Style,
     view::{Author, Footer, History},
 };
+use git2::Repository;
 
 use std::{io::Write, path::Path};
 
@@ -57,7 +59,7 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
 
 static USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
 
-pub fn render(config: &crate::Config) {
+pub fn render(config: &Config) {
     let output = Output::new(&config.output);
     let style = Style::new(Path::new("style.css"));
     let layout_factory = Factory {
@@ -74,7 +76,7 @@ pub fn render(config: &crate::Config) {
     let cache = Cache::new(&config.cache, client);
     for article in Article::from_dir(&config.articles).unwrap() {
         let mut m = Markdown::new(article.contents());
-        m.replace(|node| toolkit::favicon::decorate_link(&cache, &config.output, node));
+        m.replace(|node| favicon::decorate_link(&cache, &config.output, node));
         output
             .page(article.file_stem())
             .write_all(layout_for_page(&layout_factory, &m.render(), &article).as_bytes())

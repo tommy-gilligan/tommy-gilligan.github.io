@@ -972,28 +972,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "generate"
-version = "0.1.0"
-dependencies = [
- "build-time",
- "clap",
- "git-version",
- "git2",
- "hyper 1.0.0-rc.4",
- "hyper-staticfile",
- "markdown",
- "markup",
- "reqwest",
- "rss",
- "sitemap",
- "tl",
- "tokio",
- "toolkit",
- "traversal",
- "url",
-]
-
-[[package]]
 name = "getrandom"
 version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2954,10 +2932,12 @@ name = "toolkit"
 version = "0.1.0"
 dependencies = [
  "base64 0.21.2",
+ "build-time",
  "chrono",
  "clap",
  "futures",
  "futures-util",
+ "git-version",
  "git2",
  "hyper 1.0.0-rc.4",
  "hyper-staticfile",
@@ -2972,6 +2952,7 @@ dependencies = [
  "pin-project-lite",
  "regex",
  "reqwest",
+ "rss",
  "serde",
  "serde_json",
  "serde_with",

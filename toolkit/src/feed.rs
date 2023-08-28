@@ -1,5 +1,5 @@
+use crate::{article::Article, output::Output};
 use build_time::build_time_local;
-use toolkit::{article::Article, output::Output};
 
 use git_version::git_version;
 use rss::ChannelBuilder;
@@ -21,7 +21,7 @@ pub fn generator() -> String {
     }
 }
 
-pub fn channel_builder(config: &crate::Config) -> ChannelBuilder {
+pub fn channel_builder(config: &crate::config::Config) -> ChannelBuilder {
     let mut channel = ChannelBuilder::default();
     channel
         .title(config.title.clone())
@@ -37,7 +37,7 @@ pub fn channel_builder(config: &crate::Config) -> ChannelBuilder {
     channel
 }
 
-pub fn feed(config: &crate::Config) {
+pub fn feed(config: &crate::config::Config) {
     let mut channel = &mut channel_builder(config);
     let output = Output::new(&config.output);
     for article in Article::from_dir(&config.articles).unwrap() {

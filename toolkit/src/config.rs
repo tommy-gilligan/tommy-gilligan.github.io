@@ -1,10 +1,5 @@
 use clap::Parser;
-
 use url::Url;
-
-mod articles;
-mod feed;
-mod index;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -21,11 +16,4 @@ pub struct Config {
     pub title: String,
     #[arg(short, long, default_value = "en-AU")]
     pub language: String,
-}
-
-fn main() {
-    let config = Config::parse();
-    feed::feed(&config);
-    index::render(&config);
-    articles::render(&config);
 }
