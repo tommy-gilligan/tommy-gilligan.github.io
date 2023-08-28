@@ -1,16 +1,6 @@
 use crate::srcset::srcset;
-use chrono::{Datelike, TimeZone, Utc};
-use git2::Commit;
-use ordinal::Ordinal;
-use url::Url;
 
-markup::define! {
-    CommitLink<'a>(remote: &'a Remote, commit: &'a Commit<'a>) {
-        a [href = remote.page_for(commit).to_string()] {
-            @commit.message()
-        }
-    }
-}
+use url::Url;
 
 markup::define! {
     Link<'a>(href: &'a str, text: &'a str, favicon: Option<&'a str>) {
@@ -20,13 +10,6 @@ markup::define! {
             }
             @text
         }
-    }
-}
-
-markup::define! {
-    Footer(author: String, revisions: String) {
-        @markup::raw(author)
-        @markup::raw(revisions)
     }
 }
 
