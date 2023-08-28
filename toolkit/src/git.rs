@@ -138,6 +138,15 @@ fn test_commits_for() {
     assert_eq!(
         commits,
         [
+            "ddd2b1237fe9f3af3ab1f931d3ed18ee51b69700",
+            "529bd23e24bab8d6e4f6dfeb717d48b8147da02e",
+            "3f8de576d9876e559a012d5713b4fbdaff5bbe6d",
+            "565ea5bae6ff22ac9c981aab4daf30f1a7e199b8",
+            "addac891faa8ca39a4e7db619f986e0ca0907c2c",
+            "05b5514b6e84c166cd0625dc3398a4bd624e47e2",
+            "2eeef7d1f865651dcd296cfbbaa19567c653c3e7",
+            "1733fa752801869fa19368c7f455d120f11428a8",
+            "cb5cee9936edb7def3150d33fd254b9306655ca1",
             "c5ff586b7d49fee4cbcd59ee86c93ef59169b596",
             "7f63641e7d0068cb640ca21b4acc88b8eafe3091",
             "1037305faff4424e07bf51f6da636e6642069c7b",
@@ -175,6 +184,11 @@ fn test_commits_for_rename() {
     assert_eq!(
         commits,
         [
+            "22ee7e21109daea9b8707ab4877ce6209959bf11",
+            "6df55018c4c0a69631520eb42133a1d268bd0541",
+            "3e1cb1176af3b59580ede4c8377cdd6c0d6a6443",
+            "627f6b21d6b8584f98ca4ea5c8515817504387f0",
+            "9f40faa890eee10b6a7349690b920f0ab80d3075",
             "574839031a1fa9503006abebccb0006b08a09327",
             "ebfed3239064af1db9fade22f145ad285a84aefb",
             "2e1077c20bc0179e08bc5d0b44954e9b11f76622",

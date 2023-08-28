@@ -14,6 +14,7 @@ use git2::Repository;
 
 use std::{io::Write, path::Path};
 
+#[must_use]
 pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
     let repo = Repository::open_from_env().unwrap();
     let github = (&repo.remotes().unwrap())

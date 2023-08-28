@@ -8,6 +8,7 @@ use crate::{
 
 use std::{io::Write, path::Path};
 
+#[must_use]
 pub fn layout_for(factory: &Factory, body: &str) -> String {
     Layout {
         title: factory.title,

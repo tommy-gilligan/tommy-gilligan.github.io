@@ -5,6 +5,7 @@ use git_version::git_version;
 use rss::ChannelBuilder;
 use rss::ItemBuilder;
 
+#[must_use]
 pub fn generator() -> String {
     if env!("CARGO_PKG_REPOSITORY").is_empty() {
         format!(
@@ -21,6 +22,7 @@ pub fn generator() -> String {
     }
 }
 
+#[must_use]
 pub fn channel_builder(config: &crate::config::Config) -> ChannelBuilder {
     let mut channel = ChannelBuilder::default();
     channel
