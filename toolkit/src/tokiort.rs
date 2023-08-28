@@ -102,6 +102,7 @@ impl<T> TokioIo<T> {
         Self { inner }
     }
 
+    #[allow(clippy::missing_const_for_fn)]
     pub fn inner(self) -> T {
         self.inner
     }
