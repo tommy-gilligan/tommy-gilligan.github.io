@@ -40,7 +40,7 @@ async fn main() {
         }
     });
 
-    let mut crawler = Crawler::new(local_addr);
+    let mut crawler = Crawler::new(toolkit::chrome_driver::ChromeDriver::new(&local_addr).await);
     crawler.push(config.base_url.clone());
     let mut sitemap = Output::new(&config.output).sitemap().create();
     for url in crawler {

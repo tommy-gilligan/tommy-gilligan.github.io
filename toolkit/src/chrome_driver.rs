@@ -65,6 +65,18 @@ impl ChromeDriver {
             .unwrap();
     }
 
+    pub async fn links(&mut self) -> Vec<Url> {
+        futures::future::join_all(
+            self.web_driver
+                .find_all(thirtyfour::By::Css(":any-link"))
+                .await
+                .unwrap()
+                .iter()
+                .map(|link| async { link.prop("href").await.unwrap().unwrap().parse().unwrap() }),
+        )
+        .await
+    }
+
     pub async fn quit(self) {
         self.web_driver.quit().await.unwrap();
         let ignore_re =
