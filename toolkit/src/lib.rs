@@ -17,6 +17,7 @@ pub mod layout;
 pub mod locale;
 pub mod markdown;
 pub mod output;
+pub mod prettier;
 pub mod serve;
 pub mod style;
 mod syntax_highlighting;

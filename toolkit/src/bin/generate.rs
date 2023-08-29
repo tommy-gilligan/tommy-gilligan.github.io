@@ -1,4 +1,5 @@
 use clap::Parser;
+use std::path::Path;
 
 use toolkit::{article, feed, index};
 
@@ -8,4 +9,5 @@ async fn main() {
     feed::feed(&config);
     index::render(&config);
     article::render(&config);
+    toolkit::prettier::run(Path::new("."));
 }
