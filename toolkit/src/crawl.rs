@@ -1,5 +1,6 @@
 use std::collections::BTreeSet;
 use std::collections::HashSet;
+use std::net::SocketAddr;
 
 use url::Url;
 
@@ -10,40 +11,21 @@ pub struct Crawler {
     origin: Option<url::Origin>,
 }
 
-#[must_use]
-pub fn urls(page: &str, base_url: &Url) -> HashSet<url::Url> {
-    let dom = tl::parse(page, tl::ParserOptions::default()).unwrap();
-    let parser = dom.parser();
-    dom.query_selector(r#"a[href]"#)
+fn root_for(local_addr: &std::net::SocketAddr) -> url::Url {
+    format!("http://{}:{}", local_addr.ip(), local_addr.port())
+        .parse()
         .unwrap()
-        .filter_map(|node_handle| match node_handle.get(parser) {
-            Some(tl::Node::Tag(tag)) => {
-                let mut url = url::Url::options()
-                    .base_url(Some(base_url))
-                    .parse(
-                        tag.attributes()
-                            .get("href")
-                            .unwrap()
-                            .unwrap()
-                            .try_as_utf8_str()
-                            .unwrap(),
-                    )
-                    .unwrap();
-                url.set_fragment(None);
-                url.set_query(None);
-                Some(url)
-            }
-            _ => None,
-        })
-        .collect()
 }
 
 impl Crawler {
     #[must_use]
-    pub fn new(driver: crate::chrome_driver::ChromeDriver) -> Self {
+    pub async fn new(local_addr: &SocketAddr) -> Self {
+        let mut to_visit = BTreeSet::new();
+        to_visit.insert(root_for(local_addr));
+
         Self {
-            driver,
-            to_visit: BTreeSet::new(),
+            driver: crate::chrome_driver::ChromeDriver::new(local_addr).await,
+            to_visit,
             visited: HashSet::new(),
             origin: None,
         }
@@ -79,7 +61,6 @@ impl Iterator for Crawler {
                     self.driver.goto(&to_visit).await;
                     self.driver.links().await
                 }) {
-                    println!("{url}");
                     if !self.visited.contains(&url) {
                         self.to_visit.insert(url);
                     }
