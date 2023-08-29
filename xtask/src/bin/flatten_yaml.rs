@@ -15,7 +15,7 @@ where
     serde_yaml::to_writer(output, &flattened)
 }
 
-pub fn check(source: &Path, target: &Path) {
+pub fn check(source: &Path, target: &Path) -> bool {
     let mut new_buffer: Vec<u8> = Vec::new();
 
     flatten_yaml(&mut File::open(source).unwrap(), &mut new_buffer).unwrap();
@@ -25,8 +25,9 @@ pub fn check(source: &Path, target: &Path) {
             source.display(),
             target.display()
         );
-        std::process::exit(1);
+        return false;
     }
+    true
 }
 
 #[allow(dead_code)]

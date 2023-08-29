@@ -4,7 +4,7 @@ use std::env::var;
 use std::ffi::OsStr;
 use std::process::Command;
 
-pub fn run(force: bool) {
+pub fn run(force: bool) -> bool {
     let repository = Repository::open_from_env().unwrap();
     let head = repository.head().unwrap().peel_to_tree().unwrap();
 
@@ -36,7 +36,8 @@ pub fn run(force: bool) {
             command.arg("--").args(staged_rust_files);
         }
         if !command.status().unwrap().success() {
-            std::process::exit(1);
+            return false;
         }
     }
+    true
 }

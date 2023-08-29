@@ -14,10 +14,11 @@ const HEADER_WITH_BUILD_TIME: &str = concat!(
     env!("BUILD_TIME")
 );
 
-pub fn run(force: bool) {
+pub fn run(force: bool) -> bool {
     println!("{}", HEADER_WITH_BUILD_TIME);
-    fmt::run(force);
-    flatten_yaml::run(force);
+    [fmt::run(force), flatten_yaml::run(force)]
+        .iter()
+        .all(|o| *o)
 }
 
 pub struct PreCommitHook {

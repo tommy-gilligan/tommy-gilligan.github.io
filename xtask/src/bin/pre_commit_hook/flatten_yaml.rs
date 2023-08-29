@@ -1,7 +1,7 @@
 use git2::{Repository, Status};
 use std::path::Path;
 
-pub fn run(force: bool) {
+pub fn run(force: bool) -> bool {
     let ci_yaml = Path::new("ci.yml");
     let target = Path::new(".github/workflows/ci.yml");
     assert!(ci_yaml.exists());
@@ -22,9 +22,10 @@ pub fn run(force: bool) {
             .contains(Status::WT_MODIFIED)
         {
             eprintln!("unstaged changes to target {:?}", target);
-            std::process::exit(1);
+            return false;
         }
 
-        crate::flatten_yaml::check(ci_yaml, target);
+        return crate::flatten_yaml::check(ci_yaml, target);
     }
+    true
 }

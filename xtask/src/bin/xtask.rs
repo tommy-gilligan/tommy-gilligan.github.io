@@ -39,34 +39,28 @@ fn check_environment() {
     pre_commit_hook::PreCommitHook::new().check_installation();
 }
 
-pub fn clippy() {
+pub fn clippy() -> bool {
     let mut command = Command::new(var("CARGO").unwrap_or("cargo".to_owned()));
     command
         .arg("clippy")
         .arg("--all-targets")
         .current_dir(git_directory());
-    if !command.status().unwrap().success() {
-        std::process::exit(1);
-    }
+    command.status().unwrap().success()
 }
 
-pub fn test() {
+pub fn test() -> bool {
     let mut command = Command::new(var("CARGO").unwrap_or("cargo".to_owned()));
     command.arg("test").current_dir(git_directory());
-    if !command.status().unwrap().success() {
-        std::process::exit(1);
-    }
+    command.status().unwrap().success()
 }
 
-pub fn build() {
+pub fn build() -> bool {
     let mut command = Command::new(var("CARGO").unwrap_or("cargo".to_owned()));
     command
         .arg("build")
         .arg("--all-targets")
         .current_dir(git_directory());
-    if !command.status().unwrap().success() {
-        std::process::exit(1);
-    }
+    command.status().unwrap().success()
 }
 
 fn main() {
@@ -81,16 +75,21 @@ fn main() {
         .unwrap()
         .to_str()
     {
-        Some("pre-commit") => pre_commit_hook::run(false),
+        Some("pre-commit") => {
+            if !pre_commit_hook::run(false) {
+                std::process::exit(1);
+            }
+        }
         _ => {
             if let Some(subcommand) = args.next() {
                 match subcommand.to_str() {
                     Some("ci") => {
-                        // TODO: run all even when something fails
-                        build();
-                        clippy();
-                        //test();
-                        pre_commit_hook::run(true);
+                        if [build(), clippy(), test(), pre_commit_hook::run(true)]
+                            .iter()
+                            .any(|t| !t)
+                        {
+                            std::process::exit(1);
+                        }
                     }
                     Some("pre-commit") => {
                         pre_commit_hook::run(false);
