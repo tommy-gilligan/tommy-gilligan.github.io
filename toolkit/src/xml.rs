@@ -24,14 +24,28 @@ pub fn validate(xml: &[u8], xsd: Option<&[u8]>) -> MyResult {
     Parser::default()
         .parse_string_with_options(xml, options)
         .map_or(MyResult::Xml, |xml| {
+            let options = ParserOptions {
+                recover: false,
+                no_def_dtd: false,
+                no_error: true,
+                no_warning: true,
+                pedantic: true,
+                ..ParserOptions::default()
+            };
             xsd.map_or(MyResult::Ok, |xsd| {
-                SchemaValidationContext::from_parser(&mut SchemaParserContext::from_buffer(xsd))
-                    .map_or(MyResult::Xsd, |mut xsd| {
-                        if xsd.validate_document(&xml).is_ok() {
-                            MyResult::Ok
-                        } else {
-                            MyResult::XmlXsd
-                        }
+                Parser::default()
+                    .parse_string_with_options(xsd, options)
+                    .map_or(MyResult::Xsd, |xsd| {
+                        SchemaValidationContext::from_parser(
+                            &mut SchemaParserContext::from_document(&xsd),
+                        )
+                        .map_or(MyResult::Xsd, |mut xsd| {
+                            if xsd.validate_document(&xml).is_ok() {
+                                MyResult::Ok
+                            } else {
+                                MyResult::XmlXsd
+                            }
+                        })
                     })
             })
         })
