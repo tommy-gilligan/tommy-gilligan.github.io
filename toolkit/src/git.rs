@@ -138,6 +138,7 @@ fn test_commits_for() {
     assert_eq!(
         commits,
         [
+            "5e509ef78a5726bd68ccd4dd05d6b51f996dc954",
             "ddd2b1237fe9f3af3ab1f931d3ed18ee51b69700",
             "529bd23e24bab8d6e4f6dfeb717d48b8147da02e",
             "3f8de576d9876e559a012d5713b4fbdaff5bbe6d",
