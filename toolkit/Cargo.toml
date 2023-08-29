@@ -20,9 +20,7 @@ libxml = "0.3.3"
 lightningcss.workspace = true
 markdown.workspace = true
 markup.workspace = true
-md5.workspace = true
 notify.workspace = true
-ordinal.workspace = true
 pin-project-lite="0.2.12"
 regex.workspace = true
 reqwest.workspace = true
@@ -41,5 +39,7 @@ url.workspace = true
 viuer.workspace = true
 tree-sitter-highlight = "0.20.1"
 tree-sitter-rust = "0.20.4"
-indoc = "2.0.3"
 tree-sitter-bash = "0.20.3"
+
+[dev-dependencies]
+indoc = "2.0.3"
