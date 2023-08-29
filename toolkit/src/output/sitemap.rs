@@ -95,3 +95,51 @@ impl Iterator for Reader {
         None
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use tempfile::tempdir;
+
+    #[test]
+    fn test_writer() {
+        let url: Url = "http://example.com/mypage".parse().unwrap();
+        let dir = tempdir().unwrap();
+        let mut sitemap = Sitemap::new(dir.path()).create();
+        sitemap.push(&url);
+        drop(sitemap);
+
+        let parser = libxml::parser::Parser::default();
+        let doc = parser
+            .parse_file(dir.path().join("sitemap.xml").to_str().unwrap())
+            .unwrap();
+
+        let root = doc.get_root_element().unwrap();
+        assert_eq!(root.get_name(), "urlset".to_owned());
+
+        let children = root.get_child_elements();
+        assert_eq!(
+            children
+                .clone()
+                .into_iter()
+                .map(|n| n.get_name())
+                .collect::<Vec<String>>(),
+            vec!["url".to_owned()]
+        );
+
+        let children = children.first().unwrap().get_child_elements();
+        assert_eq!(
+            children
+                .clone()
+                .into_iter()
+                .map(|n| n.get_name())
+                .collect::<Vec<String>>(),
+            vec!["loc".to_owned()]
+        );
+
+        assert_eq!(
+            &children.first().unwrap().get_content(),
+            "http://example.com/mypage"
+        );
+    }
+}
