@@ -2,6 +2,8 @@
 #![deny(clippy::nursery)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::missing_errors_doc)]
+// disable unreliable nursery lint
+#![allow(clippy::missing_const_for_fn)]
 
 pub mod article;
 pub mod cache;

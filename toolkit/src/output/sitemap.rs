@@ -1,13 +1,17 @@
 use site_map::{
     reader::{SiteMapEntity, SiteMapReader},
     structs::{Location, UrlEntry},
-    writer::{SiteMapWriter, UrlSetWriter},
+    writer::SiteMapWriter,
 };
 use std::{
     fs::File,
     path::{Path, PathBuf},
 };
 use url::Url;
+
+// https://creativecommons.org/licenses/by-sa/2.5/
+// Sitemaps.org: Google, Inc., Yahoo, Inc., and Microsoft Corporation
+const SITEMAP_XSD: &[u8; 3728] = include_bytes!("../sitemap.xsd");
 
 pub struct Sitemap {
     path: PathBuf,
@@ -21,13 +25,10 @@ impl Sitemap {
     }
 
     pub fn create(self) -> Builder {
-        let file = File::create(self.path).unwrap();
-        let sitemap_writer = SiteMapWriter::new(file);
-        let url_writer = sitemap_writer
-            .start_urlset()
-            .expect("Unable to write urlset");
-
-        Builder { url_writer }
+        Builder {
+            urls: Vec::new(),
+            path: self.path,
+        }
     }
 
     pub fn open(self) -> Reader {
@@ -39,14 +40,38 @@ impl Sitemap {
 }
 
 pub struct Builder {
-    url_writer: UrlSetWriter<File>,
+    urls: Vec<Url>,
+    path: PathBuf,
+}
+
+impl Drop for Builder {
+    fn drop(&mut self) {
+        let file = File::create(&self.path).unwrap();
+        let sitemap_writer = SiteMapWriter::new(file);
+        let mut url_writer = sitemap_writer
+            .start_urlset()
+            .expect("Unable to write urlset");
+
+        for url in &self.urls {
+            url_writer
+                .url(UrlEntry::builder().loc(url.to_string()))
+                .expect("Unable to write url");
+        }
+        url_writer.end().unwrap();
+
+        if crate::xml::validate(
+            std::fs::read_to_string(&self.path).unwrap().as_bytes(),
+            Some(SITEMAP_XSD),
+        ) != crate::xml::MyResult::Ok
+        {
+            panic!("bad")
+        }
+    }
 }
 
 impl Builder {
     pub fn push(&mut self, url: &Url) {
-        self.url_writer
-            .url(UrlEntry::builder().loc(url.to_string()))
-            .expect("Unable to write url");
+        self.urls.push(url.clone());
     }
 }
 
