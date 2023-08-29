@@ -1,7 +1,8 @@
 name: Check for Unused Dependencies
 on:
+  workflow_dispatch:
   schedule:
-    - cron: 0 0 * * 0
+    cron: 0 0 * * 0
 concurrency:
   group: ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
   cancel-in-progress: true
