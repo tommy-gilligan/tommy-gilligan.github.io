@@ -1,3 +1,4 @@
+use crate::view::CodeContainer;
 use markdown::mdast::{Code, Node};
 
 mod options;
@@ -62,7 +63,13 @@ impl Markdown {
                             }
                             _ => String::new(),
                         };
-                        format!("<pre><code class=\"language-{}\">{}</code></pre>", s, code).into()
+                        Some(
+                            CodeContainer {
+                                formatted_code: &code,
+                                language: s,
+                            }
+                            .to_string(),
+                        )
                     },
                 )
             } else {
