@@ -1,4 +1,3 @@
-use gag::Gag;
 use libxml::parser::{Parser, ParserOptions};
 use libxml::schemas::{SchemaParserContext, SchemaValidationContext};
 
@@ -14,12 +13,11 @@ pub enum MyResult {
 
 #[must_use]
 pub fn validate(xml: &[u8], xsd: Option<&[u8]>) -> MyResult {
-    let _print_gag = Gag::stderr().unwrap();
     let options = ParserOptions {
         recover: false,
         no_def_dtd: false,
-        no_error: false,
-        no_warning: false,
+        no_error: true,
+        no_warning: true,
         pedantic: true,
         ..ParserOptions::default()
     };

@@ -40,7 +40,6 @@ viuer.workspace = true
 tree-sitter-highlight = "0.20.1"
 tree-sitter-rust = "0.20.4"
 tree-sitter-bash = "0.20.3"
-gag = "1.0.0"
 
 [dev-dependencies]
 indoc = "2.0.3"
