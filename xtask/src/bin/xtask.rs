@@ -7,14 +7,6 @@ use std::process::{Command, ExitStatus};
 mod flatten_yaml;
 mod pre_commit_hook;
 
-fn git_directory() -> std::path::PathBuf {
-    Repository::open_from_env()
-        .unwrap()
-        .workdir()
-        .unwrap()
-        .to_path_buf()
-}
-
 struct Task<F: Fn(ArgsOs) + 'static + ?Sized> {
     name: &'static str,
     function: &'static F,
@@ -46,24 +38,6 @@ const TASKS: [Task<dyn Fn(ArgsOs) + 'static>; 6] = [
         function: &print_help,
     },
 ];
-
-fn cargo_self<I, S>(package: &str, args: I) -> ExitStatus
-where
-    I: IntoIterator<Item = S>,
-    S: AsRef<OsStr>,
-{
-    let status = Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
-        .arg("run")
-        .arg("--bin")
-        .arg(package)
-        .arg("--")
-        .args(args)
-        .current_dir(git_directory())
-        .status()
-        .unwrap();
-
-    std::process::exit(status.code().unwrap());
-}
 
 fn ci(_: ArgsOs) {
     if [build(), clippy(), test(), pre_commit_hook::run(true)]
@@ -127,6 +101,32 @@ pub fn build() -> bool {
         .arg("--all-targets")
         .current_dir(git_directory());
     command.status().unwrap().success()
+}
+
+fn git_directory() -> std::path::PathBuf {
+    Repository::open_from_env()
+        .unwrap()
+        .workdir()
+        .unwrap()
+        .to_path_buf()
+}
+
+fn cargo_self<I, S>(package: &str, args: I) -> ExitStatus
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    let status = Command::new(var("CARGO").unwrap_or("cargo".to_owned()))
+        .arg("run")
+        .arg("--bin")
+        .arg(package)
+        .arg("--")
+        .args(args)
+        .current_dir(git_directory())
+        .status()
+        .unwrap();
+
+    std::process::exit(status.code().unwrap());
 }
 
 fn main() {

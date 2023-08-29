@@ -16,13 +16,19 @@ pub fn run(force: bool) -> bool {
     staged.find_similar(None).unwrap();
     let mut staged_rust_files = staged
         .deltas()
-        .filter_map(|diff_delta| {
-            let path = diff_delta.new_file().path().unwrap();
-            if path.extension() == Some(rust_extension) {
-                Some(path)
-            } else {
-                None
+        .filter_map(|diff_delta| match diff_delta.status() {
+            git2::Delta::Added
+            | git2::Delta::Modified
+            | git2::Delta::Renamed
+            | git2::Delta::Copied => {
+                let path = diff_delta.new_file().path().unwrap();
+                if path.extension() == Some(rust_extension) {
+                    Some(path)
+                } else {
+                    None
+                }
             }
+            _ => None,
         })
         .peekable();
 
