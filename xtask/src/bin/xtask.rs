@@ -97,6 +97,7 @@ fn flatten_yaml(args: ArgsOs) {
 }
 
 pub fn clippy() -> bool {
+    eprintln!("clippy()");
     let mut command = Command::new(var("CARGO").unwrap_or("cargo".to_owned()));
     command
         .arg("clippy")
@@ -109,6 +110,7 @@ pub fn clippy() -> bool {
 }
 
 pub fn test() -> bool {
+    eprintln!("test()");
     let mut command = Command::new(var("CARGO").unwrap_or("cargo".to_owned()));
     command
         .arg("test")
@@ -118,6 +120,7 @@ pub fn test() -> bool {
 }
 
 pub fn build() -> bool {
+    eprintln!("build()");
     let mut command = Command::new(var("CARGO").unwrap_or("cargo".to_owned()));
     command
         .arg("build")
