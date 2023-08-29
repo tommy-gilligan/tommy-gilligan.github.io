@@ -50,7 +50,10 @@ pub fn clippy() -> bool {
 
 pub fn test() -> bool {
     let mut command = Command::new(var("CARGO").unwrap_or("cargo".to_owned()));
-    command.arg("test").current_dir(git_directory());
+    command
+        .arg("test")
+        .arg("--no-fail-fast")
+        .current_dir(git_directory());
     command.status().unwrap().success()
 }
 
