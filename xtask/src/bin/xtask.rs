@@ -1,5 +1,5 @@
 use git2::Repository;
-use std::env::{args_os, var};
+use std::env::{args_os, var, ArgsOs};
 use std::ffi::OsStr;
 use std::path::Path;
 use std::process::{Command, ExitStatus};
@@ -14,6 +14,38 @@ fn git_directory() -> std::path::PathBuf {
         .unwrap()
         .to_path_buf()
 }
+
+struct Task<F: Fn(ArgsOs) + 'static + ?Sized> {
+    name: &'static str,
+    function: &'static F,
+}
+
+const TASKS: [Task<dyn Fn(ArgsOs) + 'static>; 6] = [
+    Task {
+        name: "check-environment",
+        function: &check_environment,
+    },
+    Task {
+        name: "ci",
+        function: &ci,
+    },
+    Task {
+        name: "flatten-yaml",
+        function: &flatten_yaml,
+    },
+    Task {
+        name: "pre-commit",
+        function: &pre_commit,
+    },
+    Task {
+        name: "setup-environment",
+        function: &setup_environment,
+    },
+    Task {
+        name: "--help",
+        function: &print_help,
+    },
+];
 
 fn cargo_self<I, S>(package: &str, args: I) -> ExitStatus
 where
@@ -33,10 +65,35 @@ where
     std::process::exit(status.code().unwrap());
 }
 
-fn setup_environment() {}
+fn ci(_: ArgsOs) {
+    if [build(), clippy(), test(), pre_commit_hook::run(true)]
+        .iter()
+        .any(|t| !t)
+    {
+        std::process::exit(1);
+    }
+}
 
-fn check_environment() {
+fn setup_environment(_: ArgsOs) {}
+
+fn check_environment(_: ArgsOs) {
     pre_commit_hook::PreCommitHook::new().check_installation();
+}
+
+fn print_help(_: ArgsOs) {
+    eprintln!("cargo xtask <task name> [options]");
+    eprintln!("Available tasks:");
+    for task in TASKS {
+        eprintln!("{}", task.name);
+    }
+}
+
+fn pre_commit(_: ArgsOs) {
+    pre_commit_hook::run(false);
+}
+
+fn flatten_yaml(args: ArgsOs) {
+    assert!(cargo_self("flatten_yaml", args).success());
 }
 
 pub fn clippy() -> bool {
@@ -44,6 +101,9 @@ pub fn clippy() -> bool {
     command
         .arg("clippy")
         .arg("--all-targets")
+        .arg("--")
+        .arg("--deny")
+        .arg("warnings")
         .current_dir(git_directory());
     command.status().unwrap().success()
 }
@@ -85,29 +145,17 @@ fn main() {
         }
         _ => {
             if let Some(subcommand) = args.next() {
-                match subcommand.to_str() {
-                    Some("ci") => {
-                        if [build(), clippy(), test(), pre_commit_hook::run(true)]
-                            .iter()
-                            .any(|t| !t)
-                        {
-                            std::process::exit(1);
-                        }
-                    }
-                    Some("pre-commit") => {
-                        pre_commit_hook::run(false);
-                    }
-                    Some("setup-environment") => {
-                        setup_environment();
-                    }
-                    Some("check-environment") => {
-                        check_environment();
-                    }
-                    Some("flatten_yaml") => {
-                        assert!(cargo_self("flatten_yaml", args).success());
-                    }
-                    _ => unimplemented!(),
+                if let Some(task) = TASKS
+                    .iter()
+                    .find(|task| Some(task.name) == subcommand.to_str())
+                {
+                    (task.function)(args);
+                } else {
+                    print_help(args);
+                    std::process::exit(1);
                 }
+            } else {
+                print_help(args)
             }
         }
     }
