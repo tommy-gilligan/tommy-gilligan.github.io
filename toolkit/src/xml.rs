@@ -14,7 +14,7 @@ pub enum MyResult {
 
 #[must_use]
 pub fn validate(xml: &[u8], xsd: Option<&[u8]>) -> MyResult {
-    let _print_gag = Gag::stdout().unwrap();
+    let _print_gag = Gag::stderr().unwrap();
     let options = ParserOptions {
         recover: false,
         no_def_dtd: false,
