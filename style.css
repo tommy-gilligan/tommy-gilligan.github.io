@@ -42,17 +42,6 @@ body {
 body {
   font-family: sans-serif;
 }
-/*
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 20px;
-  justify-content: space-around;
-}
-header {
-  flex: 1 1 min-content;
-}
-main {
-flex: 1 1 max-content; */
 main {
   max-width: 60ch;
   text-align: justify;
@@ -67,6 +56,7 @@ summary {
 summary:hover {
   background: var(--background-darkened);
 }
+
 code {
   .highlight-1 {
     font-style: italic;
@@ -77,31 +67,4 @@ code {
   .highlight-6 {
     color: #a71d5d;
   }
-}
-figure {
-  margin: 0;
-}
-table.commits {
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-table.commits caption {
-  text-align: left;
-}
-.commits td { padding: 0; text-align: right }
-.commits td:nth-child(1) { text-align: left }
-.commits td:nth-child(2) { width: 50px }
-.commits td:nth-child(3) { width: 24px }
-.commits td:nth-child(4) { width: 120px }
-footer {
-  display: flex;
-  align-content: start;
-  justify-content: space-between;
-
-}
-.author {
-  flex: 1
-}
-a img {
-  vertical-align: middle;
 }
