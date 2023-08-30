@@ -4,10 +4,12 @@
   --background-color: #fff;
   --foreground-color: #222;
 
-  --highlight-6: #0086b3;
-  --highlight-3: #795da3;
-  --highlight-5: #a71d5d;
-  --highlight-7: #183691;
+  --background-1: #f3f3f3;
+
+  --warm-1: #A16E4A;
+  --warm-2: #FF9F50;
+  --warm-3: #bba424;
+  --warm-4: #6CC33C;
 }
 @media screen and (prefers-contrast: more) {
   :root {
@@ -15,6 +17,11 @@
     --visited-color: #750075;
     --background-color: #fff;
     --foreground-color: #000;
+
+    --warm-1: #946441;
+    --warm-2: #b7440f;
+    --warm-3: #7a761a;
+    --warm-4: #308500;
   }
 }
 @media screen and (prefers-color-scheme: dark) {
@@ -23,10 +30,10 @@
     --visited-color: #ff68fb;
     --background-color: #222;
     --foreground-color: #fff;
-    --highlight-6: #81d8d1;
-    --highlight-3: #d2b4ff;
-    --highlight-5: #ff5ea9;
-    --highlight-7: #00b8ff;
+
+
+    --warm-1: #b58561;
+    --background-1: #3a3a3a;
   }
 }
 @media screen and (prefers-contrast: more) and (prefers-color-scheme: dark) {
@@ -35,6 +42,10 @@
     --visited-color: #ff68fb;
     --background-color: #000;
     --foreground-color: #fff;
+
+    --background-1: #2b2b2b;
+    --warm-3: #b9b326;
+    --warm-4: #41b102;
   }
 }
 a {
@@ -78,20 +89,23 @@ summary + * {
   margin-top: 0;
 }
 
-code {
-  .highlight-6 {
-    color: var(--highlight-6);
+code.language-bash, code.language-zsh, code.language-sh {
+  .highlight-1 {
+    text-style: italic;
   }
-  .highlight-3 {
-    color: var(--highlight-3)
+  .highlight-10 {
+    color: var(--warm-1);
+  }
+  .highlight-14 {
+    color: var(--warm-2);
+  }
+  .highlight-15 {
+    color: var(--warm-3);
   }
   .highlight-5 {
-    color: var(--highlight-5);
+    background: var(--background-1);
   }
   .highlight-7 {
-    color: var(--highlight-7);
-  }
-  .highlight-8 {
-    font-style: italic;
+    color: var(--warm-4);
   }
 }
