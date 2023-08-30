@@ -69,6 +69,10 @@ main {
   white-space: normal;
   overflow: clip;
 }
+code {
+  max-width: 100%;
+  overflow: scroll;
+}
 details {
   margin-top: -30px;
 }
@@ -107,5 +111,14 @@ code.language-bash, code.language-zsh, code.language-sh {
   }
   .highlight-7 {
     color: var(--warm-4);
+  }
+}
+@media (orientation: landscape) {
+  main {
+    overflow: visible;
+  }
+  code {
+    max-width: initial;
+    overflow: visible;
   }
 }
