@@ -1,8 +1,13 @@
-root {
+:root {
   --link-color: rgb(0, 0, 238);
   --visited-color: rgb(85, 26, 139);
   --background-color: #fff;
   --foreground-color: #222;
+
+  --highlight-6: #0086b3;
+  --highlight-3: #795da3;
+  --highlight-5: #a71d5d;
+  --highlight-7: #183691;
 }
 @media screen and (prefers-contrast: more) {
   :root {
@@ -18,6 +23,10 @@ root {
     --visited-color: #ff68fb;
     --background-color: #222;
     --foreground-color: #fff;
+    --highlight-6: #81d8d1;
+    --highlight-3: #d2b4ff;
+    --highlight-5: #ff5ea9;
+    --highlight-7: #00b8ff;
   }
 }
 @media screen and (prefers-contrast: more) and (prefers-color-scheme: dark) {
@@ -71,16 +80,16 @@ summary + * {
 
 code {
   .highlight-6 {
-    color: #0086b3;
+    color: var(--highlight-6);
   }
   .highlight-3 {
-    color: #795da3;
+    color: var(--highlight-3)
   }
   .highlight-5 {
-    color: #a71d5d;
+    color: var(--highlight-5);
   }
   .highlight-7 {
-    color: #183691;
+    color: var(--highlight-7);
   }
   .highlight-8 {
     font-style: italic;
