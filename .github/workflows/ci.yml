@@ -69,10 +69,8 @@ jobs:
       with:
         name: site
         path: _site
-    - uses: Cyb3r-Jak3/html5validator-action@v7.2.0
-      with:
-        css: true
-        root: _site/
+    - run: pip install git+https://github.com/tommy-gilligan/html5validator.git
+    - run: html5validator --root _site/ --also-check-css
     - uses: actions/cache@v3
       with:
         path: |
