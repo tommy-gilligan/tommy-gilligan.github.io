@@ -91,7 +91,7 @@ summary + * {
 
 code.language-bash, code.language-zsh, code.language-sh {
   .highlight-1 {
-    text-style: italic;
+    font-style: italic;
   }
   .highlight-10 {
     color: var(--warm-1);
