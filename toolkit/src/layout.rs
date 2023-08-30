@@ -24,6 +24,7 @@ markup::define! {
                 meta[charset = "utf-8"];
                 meta["http-equiv" = "Content-Security-Policy", content = markup::raw(CSP)];
                 meta[name = "description", content = description];
+                meta[name = "viewport", content = "width=device-width, initial-scale=1, interactive-widget=overlays-content"];
                 link[rel = "alternate", r#type = "application/rss+xml", href = "pages.xml", title = title];
                 link[rel = "icon", href = "data:;base64,iVBORw0KGgo="];
                 style {

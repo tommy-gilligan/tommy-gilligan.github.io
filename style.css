@@ -47,24 +47,47 @@ main {
   text-align: justify;
   hyphens: auto;
   white-space: normal;
+  overflow: clip;
+}
+details {
+  margin-top: -30px;
 }
 summary {
   cursor: pointer;
-  border: var(--foreground-color) 1px solid;
-  padding-left: 5px;
+  color: var(--link-color);
+  text-decoration: underline dashed 1px;
+  width: fit-content;
+  margin-right: 0;
+  margin-left: auto;
 }
-summary:hover {
-  background: var(--background-darkened);
+details[open] summary {
+  color: var(--visited-color);
+}
+summary::marker {
+  content: "";
+}
+summary:before {
+  content: "Expand ";
+}
+details[open] summary:before {
+  content: "Collapse ";
 }
 
 code {
-  .highlight-1 {
-    font-style: italic;
-  }
-  .highlight-5 {
+  .highlight-6 {
     color: #0086b3;
   }
-  .highlight-6 {
+  .highlight-3 {
+    color: #795da3;
+  }
+  .highlight-5 {
     color: #a71d5d;
+  }
+  .highlight-7 {
+    color: #183691;
+  }
+  .highlight-8 {
+    color: #969896;
+    font-style: italic;
   }
 }

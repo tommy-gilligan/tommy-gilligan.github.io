@@ -1,8 +1,9 @@
 use tree_sitter_highlight::HighlightEvent;
 use tree_sitter_highlight::{HighlightConfiguration, Highlighter};
 
-const HIGHLIGHT_NAMES: [&str; 8] = [
+const HIGHLIGHT_NAMES: [&str; 9] = [
     "variable", "constant", "operator", "function", "number", "keyword", "type", "string",
+    "comment",
 ];
 
 #[derive(Clone, Copy)]
