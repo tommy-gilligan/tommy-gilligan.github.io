@@ -68,6 +68,6 @@ pub fn highlight(source: &[u8], lang: Language) -> Vec<u8> {
 fn test_highlight() {
     assert_eq!(
         &highlight(b"const X: u8 = 123;", Language::Rust),
-        br#"<span class="highlight-5">const</span> X: <span class="highlight-6">u8</span> = <span class="highlight-1">123</span>;"#
+        br#"<span class="highlight-10">const</span> <span class="highlight-4">X</span>: <span class="highlight-17">u8</span> = <span class="highlight-3">123</span>;"#
     );
 }

@@ -109,7 +109,7 @@ mod test {
         assert_eq!(
             m.render(),
             indoc! { r#"<h1>Some Code</h1>
-            <pre><code class="language-rust"><span class="highlight-5">const</span> X: <span class="highlight-6">u8</span> = <span class="highlight-1">123</span>;</code></pre>
+            <pre><code class="language-rust"><span class="highlight-10">const</span> <span class="highlight-4">X</span>: <span class="highlight-17">u8</span> = <span class="highlight-3">123</span>;</code></pre>
             <ol>
             <li>first it takes the number</li>
             <li>then it doubles it</li>
