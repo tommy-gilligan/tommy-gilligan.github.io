@@ -72,6 +72,9 @@ summary:before {
 details[open] summary:before {
   content: "Collapse ";
 }
+summary + * {
+  margin-top: 0;
+}
 
 code {
   .highlight-6 {

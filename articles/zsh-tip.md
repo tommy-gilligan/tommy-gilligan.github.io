@@ -18,12 +18,10 @@ emacs style keybindings are the defaault
 ```zsh
 % bindkey -M emacs
 ```
-
 <details>
 <summary>Output</summary>
-<pre>
-<code>
-"^@" set-mark-command
+<!-- prettier-ignore -->
+<pre><code>"^@" set-mark-command
 "^A" beginning-of-line
 "^B" backward-char
 "^D" delete-char-or-list
