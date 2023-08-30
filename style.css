@@ -55,22 +55,15 @@ details {
 summary {
   cursor: pointer;
   color: var(--link-color);
-  text-decoration: underline dashed 1px;
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 1px;
   width: fit-content;
   margin-right: 0;
   margin-left: auto;
 }
 details[open] summary {
   color: var(--visited-color);
-}
-summary::marker {
-  content: "";
-}
-summary:before {
-  content: "Expand ";
-}
-details[open] summary:before {
-  content: "Collapse ";
 }
 summary + * {
   margin-top: 0;

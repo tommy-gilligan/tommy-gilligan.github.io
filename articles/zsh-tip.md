@@ -19,7 +19,7 @@ emacs style keybindings are the defaault
 % bindkey -M emacs
 ```
 <details>
-<summary>Output</summary>
+<summary>Toggle Output</summary>
 <!-- prettier-ignore -->
 <pre><code>"^@" set-mark-command
 "^A" beginning-of-line
