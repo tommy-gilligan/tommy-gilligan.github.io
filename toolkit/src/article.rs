@@ -11,7 +11,6 @@ use std::{
     io::{BufReader, Read},
     path::{Path, PathBuf},
 };
-use url::Url;
 
 const EXTENSION: &str = "md";
 
