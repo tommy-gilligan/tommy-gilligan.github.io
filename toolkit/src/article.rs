@@ -62,36 +62,6 @@ impl Article {
     }
 
     #[must_use]
-    pub fn link_urls(&self) -> Vec<Url> {
-        let mdast = markdown::to_mdast(&self.contents(), &crate::markdown::OPTIONS.parse).unwrap();
-
-        (mdast.children())
-            .unwrap()
-            .iter()
-            .filter_map(|child| {
-                if let markdown::mdast::Node::Paragraph(markdown::mdast::Paragraph {
-                    children,
-                    ..
-                }) = child
-                {
-                    Some(children.iter().filter_map(|child| {
-                        if let markdown::mdast::Node::Link(markdown::mdast::Link { url, .. }) =
-                            child
-                        {
-                            Some(url.parse().unwrap())
-                        } else {
-                            None
-                        }
-                    }))
-                } else {
-                    None
-                }
-            })
-            .flatten()
-            .collect()
-    }
-
-    #[must_use]
     pub fn updated_at(&self) -> Option<DateTime<Utc>> {
         let updated_at = self
             .history()
