@@ -23,26 +23,25 @@ pub fn generator() -> String {
 }
 
 #[must_use]
-pub fn channel_builder(config: &crate::config::Config) -> ChannelBuilder {
+pub fn channel_builder(base_url: &url::Url) -> ChannelBuilder {
     let mut channel = ChannelBuilder::default();
     channel
-        .title(config.title.clone())
-        .link(config.base_url.clone())
+        .title(crate::TITLE)
+        .link(base_url.clone())
         //.description(crate::config::description())
         // should only change when content has changed
         .last_build_date(Some(
             build_time_local!("%a, %d %b %Y %H:%M:%S %z").to_owned(),
         ))
-        .language(config.language.clone())
+        .language(crate::locale::language())
         .ttl("600".to_owned())
         .generator(generator());
     channel
 }
 
-pub fn feed(config: &crate::config::Config) {
-    let mut channel = &mut channel_builder(config);
-    let output = Output::new(&config.output);
-    for article in Article::from_dir(&config.articles).unwrap() {
+pub fn feed(base_url: &url::Url) {
+    let mut channel = &mut channel_builder(base_url);
+    for article in Article::from_dir(crate::ARTICLES).unwrap() {
         let mut item_builder = ItemBuilder::default();
         let item = item_builder
             .title(article.title())
@@ -55,5 +54,5 @@ pub fn feed(config: &crate::config::Config) {
             );
         channel = channel.item(item.build());
     }
-    channel.build().write_to(output.feed()).unwrap();
+    channel.build().write_to(Output::feed()).unwrap();
 }

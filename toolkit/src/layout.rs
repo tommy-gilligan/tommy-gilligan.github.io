@@ -15,7 +15,6 @@ markup::define! {
         body: &'a str,
         language: &'a str,
         page_title: Option<&'a str>,
-        style: &'a str,
     ) {
         @markup::doctype()
         html[lang = language] {
@@ -28,7 +27,7 @@ markup::define! {
                 link[rel = "alternate", r#type = "application/rss+xml", href = "pages.xml", title = title];
                 link[rel = "icon", href = "data:;base64,iVBORw0KGgo="];
                 style {
-                    @markup::raw(style)
+                    @markup::raw(crate::css::style())
                 }
             }
             body {
@@ -40,13 +39,4 @@ markup::define! {
             }
         }
     }
-}
-
-use crate::style::Style;
-
-#[derive(Clone)]
-pub struct Factory<'a> {
-    pub title: &'a str,
-    pub language: &'a str,
-    pub style: Style,
 }

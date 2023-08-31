@@ -3,10 +3,7 @@ use lightningcss::{
     targets::{Browsers, Targets},
 };
 use std::io::Read;
-use std::{
-    fs::File,
-    path::{Path, PathBuf},
-};
+use std::{fs::File, path::Path};
 
 fn targets() -> Targets {
     Targets {
@@ -33,26 +30,12 @@ fn parser_options<'a>() -> ParserOptions<'a, 'a> {
     }
 }
 
-#[derive(Clone)]
-pub struct Style {
-    path: PathBuf,
-}
+#[must_use]
+pub fn style() -> String {
+    let mut file = File::open(Path::new(crate::STYLE)).unwrap();
+    let mut data = String::new();
+    file.read_to_string(&mut data).unwrap();
 
-impl Style {
-    #[must_use]
-    pub fn new(path: &Path) -> Self {
-        Self {
-            path: path.to_path_buf(),
-        }
-    }
-
-    #[must_use]
-    pub fn style(&self) -> String {
-        let mut file = File::open(&self.path).unwrap();
-        let mut data = String::new();
-        file.read_to_string(&mut data).unwrap();
-
-        let stylesheet = StyleSheet::parse(&data, parser_options()).unwrap();
-        stylesheet.to_css(printer_options()).unwrap().code
-    }
+    let stylesheet = StyleSheet::parse(&data, parser_options()).unwrap();
+    stylesheet.to_css(printer_options()).unwrap().code
 }

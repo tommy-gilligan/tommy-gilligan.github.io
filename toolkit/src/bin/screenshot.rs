@@ -1,66 +1,15 @@
-use toolkit::tokiort::TokioIo;
-
-use clap::Parser;
 use std::{fs::create_dir_all, path::Path};
-use tokio::net::TcpListener;
-use url::Url;
-
-#[derive(Parser)]
-#[command(author, version, about, long_about = None)]
-pub struct Config {
-    #[arg(short, long, default_value = "_site")]
-    output: String,
-    #[arg(short, long, default_value = "screenshots")]
-    screenshots: String,
-    #[arg(short, long)]
-    base_url: Url,
-}
+use toolkit::{browser::Browser, output::Output, serve};
 
 #[tokio::main]
 async fn main() {
-    let config = Config::parse();
-    let listener = TcpListener::bind(std::net::SocketAddrV4::new(
-        std::net::Ipv4Addr::LOCALHOST,
-        0,
-    ))
-    .await
-    .unwrap();
-    let local_addr = listener.local_addr().unwrap();
+    create_dir_all(Path::new(toolkit::SCREENSHOTS)).unwrap();
 
-    let output = config.output.clone();
-    tokio::task::spawn(async move {
-        let output = output.clone();
-        loop {
-            let (stream, _) = listener.accept().await.unwrap();
-            let io = TokioIo::new(stream);
+    let mut browser = Browser::new(&serve::run().await).await;
 
-            let service = toolkit::serve::Service::new(output.clone().into());
-            tokio::task::spawn(async move {
-                hyper::server::conn::http1::Builder::new()
-                    .serve_connection(io, service)
-                    .await
-                    .unwrap();
-            });
-        }
-    });
-
-    let screenshots_dir = Path::new(&config.screenshots);
-    create_dir_all(screenshots_dir).unwrap();
-
-    let mut driver = toolkit::browser::Browser::new(&local_addr).await;
-
-    for url in toolkit::output::Output::new(&config.output)
-        .sitemap()
-        .open()
-    {
-        driver.goto(&url).await;
-
-        let path = url.path_segments().unwrap().last().unwrap();
-        let mut joined_path = screenshots_dir.join(path);
-        joined_path = joined_path.with_extension("png");
-
-        driver.screenshot(&joined_path).await;
+    for url in Output::sitemap().open() {
+        browser.goto(&url).await;
+        browser.screenshot().await;
     }
-
-    driver.quit().await;
+    browser.quit().await;
 }

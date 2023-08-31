@@ -21,7 +21,7 @@ impl Sitemap {
     #[must_use]
     pub fn new(path: &Path) -> Self {
         Self {
-            path: path.to_path_buf().join("sitemap.xml"),
+            path: path.to_path_buf().join(crate::SITEMAP),
         }
     }
 
@@ -114,7 +114,7 @@ mod test {
 
         let parser = libxml::parser::Parser::default();
         let doc = parser
-            .parse_file(dir.path().join("sitemap.xml").to_str().unwrap())
+            .parse_file(dir.path().join(crate::SITEMAP).to_str().unwrap())
             .unwrap();
 
         let root = doc.get_root_element().unwrap();

@@ -14,6 +14,7 @@ pub struct Browser {
     web_driver: WebDriver,
     dev_tools: ChromeDevTools,
     server_addr: SocketAddr,
+    url: Option<Url>,
 }
 
 impl Browser {
@@ -26,10 +27,13 @@ impl Browser {
             server_addr: *server_addr,
             web_driver: web_driver.clone(),
             dev_tools: ChromeDevTools::new(web_driver.handle),
+            url: None,
         }
     }
 
-    pub async fn screenshot(&mut self, path: &Path) {
+    pub async fn screenshot(&mut self) {
+        let url = self.url.clone();
+
         let screenshot_as_base64 = self
             .dev_tools
             .execute_cdp_with_params(
@@ -39,17 +43,22 @@ impl Browser {
             .await
             .unwrap();
 
-        File::create(path)
-            .unwrap()
-            .write_all(
-                &general_purpose::STANDARD
-                    .decode(screenshot_as_base64["data"].as_str().unwrap().as_bytes())
-                    .unwrap(),
-            )
-            .unwrap();
+        File::create(
+            Path::new(crate::SCREENSHOTS)
+                .join(url.unwrap().path_segments().unwrap().last().unwrap())
+                .with_extension("png"),
+        )
+        .unwrap()
+        .write_all(
+            &general_purpose::STANDARD
+                .decode(screenshot_as_base64["data"].as_str().unwrap().as_bytes())
+                .unwrap(),
+        )
+        .unwrap();
     }
 
     pub async fn goto(&mut self, url: &Url) {
+        self.url = Some(url.clone());
         let mut rewritten_url = url.clone();
         rewritten_url
             .set_host(Some(&self.server_addr.ip().to_string()))

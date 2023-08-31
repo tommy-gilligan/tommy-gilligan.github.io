@@ -1,43 +1,16 @@
-use clap::Parser;
 use notify::{
     recommended_watcher, Event,
     EventKind::{Modify, Remove},
     RecursiveMode, Watcher,
 };
 use std::path::Path;
-use std::process::Command;
-use std::{thread, time};
+use toolkit::shell::spawn;
 
-const GENERATE_CMD: &str = "cargo run --bin generate -- --base-url http://localhost:9231";
-
-#[derive(Parser)]
-#[command(author, version, about, long_about = None)]
-pub struct Config {
-    #[arg(short, long, default_value = "articles")]
-    pub articles: String,
-}
-
-fn shell_spawn(command: &str) -> std::process::Child {
-    if cfg!(target_os = "windows") {
-        Command::new("cmd")
-            .arg("/C")
-            .arg(command)
-            .spawn()
-            .expect("failed to execute process")
-    } else {
-        Command::new("sh")
-            .arg("-c")
-            .arg(command)
-            .spawn()
-            .expect("failed to execute process")
-    }
-}
+const GENERATE_CMD: &str = "cargo run --bin generate -- http://localhost:9231";
 
 #[tokio::main]
 async fn main() {
-    let config = Config::parse();
-
-    let mut child = shell_spawn(GENERATE_CMD);
+    let mut child = spawn(GENERATE_CMD);
     let mut watcher = recommended_watcher(move |res| {
         if let Ok(Event {
             kind: _e @ (Modify(_) | Remove(_)),
@@ -47,7 +20,7 @@ async fn main() {
             match child.try_wait() {
                 Ok(Some(status)) if status.success() => {
                     println!("regenerating");
-                    child = shell_spawn(GENERATE_CMD);
+                    child = spawn(GENERATE_CMD);
                 }
                 _ => (),
             }
@@ -55,10 +28,7 @@ async fn main() {
     })
     .unwrap();
     watcher
-        .watch(Path::new(&config.articles), RecursiveMode::NonRecursive)
+        .watch(Path::new(toolkit::ARTICLES), RecursiveMode::NonRecursive)
         .unwrap();
-
-    loop {
-        thread::sleep(time::Duration::from_secs(1));
-    }
+    println!("Listening on http://{}", toolkit::serve::run().await);
 }

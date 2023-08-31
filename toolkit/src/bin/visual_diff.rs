@@ -1,17 +1,8 @@
-use clap::Parser;
 use git2::Repository;
 use viuer::print_from_file;
 
-#[derive(Parser)]
-#[command(author, version, about, long_about = None)]
-pub struct Config {
-    #[arg(short, long, default_value = "screenshots")]
-    screenshots: String,
-}
-
 #[tokio::main]
 async fn main() {
-    let config = Config::parse();
     let repo = Repository::open_from_env().unwrap();
     let tree = repo.find_reference("HEAD").unwrap().peel_to_tree();
     for d in repo
@@ -19,11 +10,7 @@ async fn main() {
         .unwrap()
         .deltas()
     {
-        if d.old_file()
-            .path()
-            .unwrap()
-            .starts_with(&config.screenshots)
-        {
+        if d.old_file().path().unwrap().starts_with("screenshots") {
             let old_conf = viuer::Config {
                 x: 0,
                 y: 0,

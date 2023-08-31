@@ -8,7 +8,6 @@ edition = "2021"
 base64.workspace = true
 build-time.workspace = true
 chrono.workspace = true
-clap.workspace = true
 futures-util.workspace = true
 futures.workspace = true
 git-version.workspace = true

@@ -1,18 +1,11 @@
-use crate::{
-    article::Article,
-    layout::{Factory, Layout},
-    output::Output,
-    style::Style,
-    view::ArticleList,
-};
+use crate::{article::Article, layout::Layout, output::Output, view::ArticleList};
 
-use std::{io::Write, path::Path};
+use std::io::Write;
 
-fn layout_for(factory: &Factory, body: &str) -> String {
+fn layout_for(body: &str) -> String {
     Layout {
-        title: factory.title,
-        language: factory.language,
-        style: &factory.style.style(),
+        title: crate::TITLE,
+        language: &crate::locale::language(),
         description: "",
         body,
         page_title: None,
@@ -20,21 +13,12 @@ fn layout_for(factory: &Factory, body: &str) -> String {
     .to_string()
 }
 
-pub fn render(config: &crate::config::Config) {
-    let output = Output::new(&config.output);
-    let style = Style::new(Path::new("style.css"));
-
-    let layout_factory = Factory {
-        style,
-        title: &config.title,
-        language: &config.language,
-    };
-    let articles: Vec<Article> = Article::from_dir(&config.articles)
+pub fn render() {
+    let articles: Vec<Article> = Article::from_dir(crate::ARTICLES)
         .unwrap()
         .into_iter()
         .collect();
-    output
-        .index()
-        .write_all(layout_for(&layout_factory, &ArticleList { articles }.to_string()).as_bytes())
+    Output::index()
+        .write_all(layout_for(&ArticleList { articles }.to_string()).as_bytes())
         .unwrap();
 }

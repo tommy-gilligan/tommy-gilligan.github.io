@@ -1,12 +1,5 @@
 use crate::{
-    cache::Cache,
-    config::Config,
-    frontmatter::Frontmatter,
-    git::Git,
-    layout::{Factory, Layout},
-    markdown::Markdown,
-    output::Output,
-    style::Style,
+    frontmatter::Frontmatter, git::Git, layout::Layout, markdown::Markdown, output::Output,
     view::CodeContainer,
 };
 use chrono::{DateTime, TimeZone, Utc};
@@ -21,7 +14,6 @@ use std::{
 use url::Url;
 
 const EXTENSION: &str = "md";
-static USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
 
 #[derive(Debug)]
 pub struct Article {
@@ -218,11 +210,10 @@ impl Article {
 }
 
 #[must_use]
-pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> String {
+pub fn layout_for_page(body: &str, article: &Article) -> String {
     Layout {
-        title: factory.title,
-        language: factory.language,
-        style: &factory.style.style(),
+        title: crate::TITLE,
+        language: &crate::locale::language(),
         description: &article.description(),
         body,
         page_title: Some(&article.title()),
@@ -230,27 +221,12 @@ pub fn layout_for_page(factory: &Factory, body: &str, article: &Article) -> Stri
     .to_string()
 }
 
-pub fn render(config: &Config) {
-    let output = Output::new(&config.output);
-    let style = Style::new(Path::new("style.css"));
-    let layout_factory = Factory {
-        style,
-        title: &config.title,
-        language: &config.language,
-    };
-    let client = reqwest::Client::builder()
-        .timeout(core::time::Duration::new(10, 0))
-        .user_agent(USER_AGENT)
-        .http1_title_case_headers()
-        .build()
-        .unwrap();
-    let _cache = Cache::new(&config.cache, client);
-    for article in Article::from_dir(&config.articles).unwrap() {
+pub fn render() {
+    for article in Article::from_dir(crate::ARTICLES).unwrap() {
         let mut m = Markdown::new(article.contents());
         m.highlight();
-        output
-            .page(article.file_stem())
-            .write_all(layout_for_page(&layout_factory, &m.render(), &article).as_bytes())
+        Output::page(article.file_stem())
+            .write_all(layout_for_page(&m.render(), &article).as_bytes())
             .unwrap();
     }
 }
