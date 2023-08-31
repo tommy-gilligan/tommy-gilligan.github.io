@@ -47,7 +47,7 @@ async fn main() {
     let screenshots_dir = Path::new(&config.screenshots);
     create_dir_all(screenshots_dir).unwrap();
 
-    let mut driver = toolkit::chrome_driver::ChromeDriver::new(&local_addr).await;
+    let mut driver = toolkit::browser::Browser::new(&local_addr).await;
 
     for url in toolkit::output::Output::new(&config.output)
         .sitemap()

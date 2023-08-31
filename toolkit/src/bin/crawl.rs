@@ -18,7 +18,7 @@ async fn main() {
             let (stream, _) = listener.accept().await.unwrap();
             let io = TokioIo::new(stream);
 
-            let service = toolkit::serve::Service::new(OUTPUT.clone().into());
+            let service = toolkit::serve::Service::new(OUTPUT.into());
             tokio::task::spawn(async move {
                 hyper::server::conn::http1::Builder::new()
                     .serve_connection(io, service)

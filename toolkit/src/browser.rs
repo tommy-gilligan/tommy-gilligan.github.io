@@ -10,13 +10,13 @@ use thirtyfour::{
 };
 use url::Url;
 
-pub struct ChromeDriver {
+pub struct Browser {
     web_driver: WebDriver,
     dev_tools: ChromeDevTools,
     server_addr: SocketAddr,
 }
 
-impl ChromeDriver {
+impl Browser {
     pub async fn new(server_addr: &SocketAddr) -> Self {
         let mut caps = DesiredCapabilities::chrome();
         // GPU doesn't get used on GH runner

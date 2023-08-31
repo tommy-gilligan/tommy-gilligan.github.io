@@ -1,10 +1,8 @@
-use chrono::DateTime;
-use chrono::Locale;
-use chrono::Utc;
-use std::convert::TryInto;
+use chrono::{DateTime, Locale, Utc};
+use std::{convert::TryInto, env::var};
 
 fn time_locale_from_env() -> Locale {
-    std::env::var("LANGUAGE")
+    var("LANGUAGE")
         .map(|language| language.as_str().try_into())
         .unwrap_or(Ok(Locale::POSIX))
         .unwrap()

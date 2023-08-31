@@ -1,6 +1,7 @@
 use crate::{
     cache::Cache,
     config::Config,
+    frontmatter::Frontmatter,
     git::Git,
     layout::{Factory, Layout},
     markdown::Markdown,
@@ -19,10 +20,6 @@ use std::{
 };
 use url::Url;
 
-mod frontmatter;
-mod markdown_options;
-pub use crate::article::frontmatter::Frontmatter;
-
 const EXTENSION: &str = "md";
 static USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
 
@@ -34,7 +31,7 @@ pub struct Article {
 
 pub fn replace_code(contents: &mut String) {
     // BROKEN: multibyte characters
-    let mdast = markdown::to_mdast(contents, &markdown_options::MARKDOWN_OPTIONS.parse).unwrap();
+    let mdast = markdown::to_mdast(contents, &crate::markdown::OPTIONS.parse).unwrap();
 
     let mut file_offset_accum: isize = 0;
     for child in (mdast.children()).unwrap() {
@@ -74,8 +71,7 @@ impl Article {
 
     #[must_use]
     pub fn link_urls(&self) -> Vec<Url> {
-        let mdast = markdown::to_mdast(&self.contents(), &markdown_options::MARKDOWN_OPTIONS.parse)
-            .unwrap();
+        let mdast = markdown::to_mdast(&self.contents(), &crate::markdown::OPTIONS.parse).unwrap();
 
         (mdast.children())
             .unwrap()
@@ -190,11 +186,11 @@ impl Article {
     pub fn body(&mut self) -> String {
         let mut contents = self.contents();
         replace_code(&mut contents);
-        markdown::to_html_with_options(&contents, &markdown_options::MARKDOWN_OPTIONS).unwrap()
+        markdown::to_html_with_options(&contents, &crate::markdown::OPTIONS).unwrap()
     }
 
     fn frontmatter(&self) -> Frontmatter {
-        frontmatter::frontmatter(&self.contents(), &markdown_options::MARKDOWN_OPTIONS.parse)
+        crate::frontmatter::frontmatter(&self.contents(), &crate::markdown::OPTIONS.parse)
     }
 
     pub fn from_dir(path_str: &str) -> std::io::Result<Vec<Self>> {

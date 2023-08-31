@@ -1,5 +1,4 @@
-mod sitemap;
-use sitemap::Sitemap;
+use crate::sitemap::Sitemap;
 use std::{
     ffi::OsStr,
     fs::{create_dir_all, File},

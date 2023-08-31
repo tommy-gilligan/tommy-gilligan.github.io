@@ -6,11 +6,12 @@
 #![allow(clippy::missing_const_for_fn)]
 
 pub mod article;
+pub mod browser;
 pub mod cache;
-pub mod chrome_driver;
 pub mod config;
 pub mod crawl;
 pub mod feed;
+pub mod frontmatter;
 pub mod git;
 pub mod index;
 pub mod layout;
@@ -19,6 +20,7 @@ pub mod markdown;
 pub mod output;
 pub mod prettier;
 pub mod serve;
+pub mod sitemap;
 pub mod style;
 mod syntax_highlighting;
 pub mod tokiort;

@@ -15,6 +15,7 @@ pub struct Frontmatter {
     pub published: Option<bool>,
 }
 
+#[must_use]
 pub fn frontmatter(contents: &str, parse_options: &ParseOptions) -> Frontmatter {
     if let Ok(mdast) = markdown::to_mdast(contents, parse_options) {
         if let [Node::Toml(Toml { value, .. }), ..] = &mdast.children().unwrap()[..] {

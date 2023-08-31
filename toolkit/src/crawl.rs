@@ -7,7 +7,7 @@ use url::Url;
 pub struct Crawler {
     to_visit: BTreeSet<Url>,
     visited: HashSet<Url>,
-    driver: crate::chrome_driver::ChromeDriver,
+    driver: crate::browser::Browser,
     origin: Option<url::Origin>,
 }
 
@@ -18,13 +18,12 @@ fn root_for(local_addr: &std::net::SocketAddr) -> url::Url {
 }
 
 impl Crawler {
-    #[must_use]
     pub async fn new(local_addr: &SocketAddr) -> Self {
         let mut to_visit = BTreeSet::new();
         to_visit.insert(root_for(local_addr));
 
         Self {
-            driver: crate::chrome_driver::ChromeDriver::new(local_addr).await,
+            driver: crate::browser::Browser::new(local_addr).await,
             to_visit,
             visited: HashSet::new(),
             origin: None,

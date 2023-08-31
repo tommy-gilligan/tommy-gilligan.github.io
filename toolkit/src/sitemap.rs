@@ -11,19 +11,21 @@ use url::Url;
 
 // https://creativecommons.org/licenses/by-sa/2.5/
 // Sitemaps.org: Google, Inc., Yahoo, Inc., and Microsoft Corporation
-const SITEMAP_XSD: &[u8; 3728] = include_bytes!("../sitemap.xsd");
+const SITEMAP_XSD: &[u8; 3728] = include_bytes!("sitemap.xsd");
 
 pub struct Sitemap {
     path: PathBuf,
 }
 
 impl Sitemap {
+    #[must_use]
     pub fn new(path: &Path) -> Self {
         Self {
             path: path.to_path_buf().join("sitemap.xml"),
         }
     }
 
+    #[must_use]
     pub fn create(self) -> Builder {
         Builder {
             urls: Vec::new(),
@@ -31,6 +33,7 @@ impl Sitemap {
         }
     }
 
+    #[must_use]
     pub fn open(self) -> Reader {
         let file = File::open(self.path).expect("Unable to open file.");
         Reader {
