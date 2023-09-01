@@ -2,21 +2,17 @@ use crate::{article::Article, layout::Layout, output::Output, view::ArticleList}
 
 use std::io::Write;
 
-fn layout_for(body: &str) -> String {
-    Layout {
-        description: "",
-        body,
-        page_title: None,
-    }
-    .to_string()
-}
-
 pub fn render() {
     let articles: Vec<Article> = Article::from_dir(crate::ARTICLES)
         .unwrap()
         .into_iter()
         .collect();
-    Output::index()
-        .write_all(layout_for(&ArticleList { articles }.to_string()).as_bytes())
-        .unwrap();
+    let layed_out = Layout {
+        description: "",
+        body: &ArticleList { articles }.to_string(),
+        page_title: None,
+    }
+    .to_string();
+
+    Output::index().write_all(layed_out.as_bytes()).unwrap();
 }

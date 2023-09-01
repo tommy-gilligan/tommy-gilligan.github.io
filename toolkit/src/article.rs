@@ -131,23 +131,17 @@ impl Article {
     }
 
     #[must_use]
-    pub fn is_published(&self) -> bool {
+    fn is_published(&self) -> bool {
         matches!(self.frontmatter().published, Some(true))
     }
 
     #[must_use]
-    pub fn contents(&self) -> String {
+    fn contents(&self) -> String {
         let input_file = File::open(&self.path).unwrap();
         let mut buf_reader = BufReader::new(input_file);
         let mut contents = String::new();
         buf_reader.read_to_string(&mut contents).unwrap();
         contents
-    }
-
-    pub fn body(&mut self) -> String {
-        let mut contents = self.contents();
-        replace_code(&mut contents);
-        markdown::to_html_with_options(&contents, &crate::markdown::OPTIONS).unwrap()
     }
 
     fn frontmatter(&self) -> Frontmatter {
@@ -178,22 +172,18 @@ impl Article {
     }
 }
 
-#[must_use]
-pub fn layout_for_page(body: &str, article: &Article) -> String {
-    Layout {
-        description: &article.description(),
-        body,
-        page_title: Some(&article.title()),
-    }
-    .to_string()
-}
-
 pub fn render() {
     for article in Article::from_dir(crate::ARTICLES).unwrap() {
         let mut m = Markdown::new(article.contents());
         m.highlight();
+        let layed_out = Layout {
+            description: &article.description(),
+            body: &m.render(),
+            page_title: Some(&article.title()),
+        }
+        .to_string();
         Output::page(article.file_stem())
-            .write_all(layout_for_page(&m.render(), &article).as_bytes())
+            .write_all(layed_out.as_bytes())
             .unwrap();
     }
 }
