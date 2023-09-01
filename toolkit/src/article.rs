@@ -3,7 +3,7 @@ use crate::{
     view::CodeContainer,
 };
 use chrono::{DateTime, TimeZone, Utc};
-use git2::Commit;
+
 use std::{
     ffi::OsStr,
     fs::{read_dir, File},
@@ -62,11 +62,8 @@ impl Article {
 
     #[must_use]
     pub fn updated_at(&self) -> Option<DateTime<Utc>> {
-        let updated_at = self
-            .history()
-            .into_iter()
-            .map(|commit| Utc.timestamp_opt(commit.time().seconds(), 0).unwrap())
-            .max()
+        let updated_at = Utc
+            .timestamp_opt(self.repo.latest(&self.path).time().seconds(), 0)
             .unwrap();
         if updated_at > self.published_at() {
             Some(updated_at)
@@ -78,29 +75,9 @@ impl Article {
     #[must_use]
     pub fn published_at(&self) -> DateTime<Utc> {
         self.frontmatter().published_at.unwrap_or_else(|| {
-            self.history()
-                .into_iter()
-                .map(|commit| Utc.timestamp_opt(commit.time().seconds(), 0).unwrap())
-                .min()
+            Utc.timestamp_opt(self.repo.earliest(&self.path).time().seconds(), 0)
                 .unwrap()
         })
-    }
-
-    #[must_use]
-    pub fn truncated_history(&self) -> Vec<Commit> {
-        let truncated: Vec<_> = self
-            .history()
-            .into_iter()
-            .filter(|commit| {
-                Utc.timestamp_opt(commit.time().seconds(), 0).unwrap() >= self.published_at()
-            })
-            .collect();
-
-        if truncated.is_empty() {
-            vec![self.history().into_iter().last().unwrap()]
-        } else {
-            truncated
-        }
     }
 
     #[must_use]
@@ -116,11 +93,6 @@ impl Article {
     #[must_use]
     pub fn description(&self) -> String {
         self.frontmatter().description
-    }
-
-    #[must_use]
-    pub fn history(&self) -> Vec<Commit> {
-        self.repo.commits_for(&self.path)
     }
 
     #[must_use]

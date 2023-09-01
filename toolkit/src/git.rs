@@ -124,6 +124,22 @@ impl Git {
             })
             .collect()
     }
+
+    #[must_use]
+    pub fn earliest(&self, a_path: &Path) -> Commit {
+        self.commits_for(a_path)
+            .into_iter()
+            .min_by_key(git2::Commit::time)
+            .unwrap()
+    }
+
+    #[must_use]
+    pub fn latest(&self, a_path: &Path) -> Commit {
+        self.commits_for(a_path)
+            .into_iter()
+            .max_by_key(git2::Commit::time)
+            .unwrap()
+    }
 }
 
 #[test]
