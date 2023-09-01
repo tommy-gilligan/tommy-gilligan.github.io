@@ -1,41 +1,12 @@
+mod css;
 use crate::output::Output;
 
-use lightningcss::{
-    stylesheet::{ParserFlags, ParserOptions, PrinterOptions, StyleSheet},
-    targets::{Browsers, Targets},
-};
 use std::{
     ffi::OsStr,
-    fs::{read_dir, File},
-    io::Read,
+    fs::read_dir,
     io::Write,
     path::{Path, PathBuf},
 };
-
-fn targets() -> Targets {
-    Targets {
-        browsers: Some(Browsers {
-            safari: Some((13 << 16) | (2 << 8)),
-            ..Browsers::default()
-        }),
-        ..Targets::default()
-    }
-}
-
-fn printer_options<'a>() -> PrinterOptions<'a> {
-    PrinterOptions {
-        minify: false,
-        targets: targets(),
-        ..PrinterOptions::default()
-    }
-}
-
-fn parser_options<'a>() -> ParserOptions<'a, 'a> {
-    ParserOptions {
-        flags: ParserFlags::NESTING,
-        ..ParserOptions::default()
-    }
-}
 
 #[derive(Debug)]
 pub struct Asset {
@@ -50,16 +21,6 @@ impl Asset {
     #[must_use]
     pub fn file_name(&self) -> &OsStr {
         self.path.file_name().unwrap()
-    }
-
-    #[must_use]
-    fn transform(&self) -> String {
-        let mut file = File::open(&self.path).unwrap();
-        let mut data = String::new();
-        file.read_to_string(&mut data).unwrap();
-
-        let stylesheet = StyleSheet::parse(&data, parser_options()).unwrap();
-        stylesheet.to_css(printer_options()).unwrap().code
     }
 
     pub fn from_dir(path_str: &str) -> std::io::Result<Vec<Self>> {
@@ -78,8 +39,12 @@ impl Asset {
 
 pub fn copy() {
     for asset in Asset::from_dir(crate::ASSETS).unwrap() {
-        Output::asset(asset.file_name())
-            .write_all(asset.transform().as_bytes())
-            .unwrap();
+        if asset.path.extension().unwrap() == OsStr::new(css::EXTENSION) {
+            Output::asset(asset.file_name())
+                .write_all(&css::transform(&asset.path))
+                .unwrap();
+        } else {
+            std::fs::copy(&asset.path, Output::asset_path(asset.file_name())).unwrap();
+        }
     }
 }

@@ -64,6 +64,7 @@ async fn main() {
         let mut child = child_cell.lock().unwrap();
         if let Ok(Some(_)) = child.try_wait() {
             println!("regenerating due to keypress");
+            // TODO: spawn cargo build of generate and rely on filewatcher to run it when its done
             *child = spawn(GENERATE_CMD.get().unwrap());
         }
     }

@@ -16,7 +16,12 @@ impl Output {
 
     #[must_use]
     pub fn asset(file_name: &OsStr) -> File {
-        File::create(Path::new(crate::SITE).join(file_name)).unwrap()
+        File::create(Self::asset_path(file_name)).unwrap()
+    }
+
+    #[must_use]
+    pub fn asset_path(file_name: &OsStr) -> PathBuf {
+        Path::new(crate::SITE).join(file_name)
     }
 
     #[must_use]
