@@ -1,4 +1,5 @@
 use crate::sitemap::Sitemap;
+use std::fs::create_dir_all;
 use std::{
     ffi::OsStr,
     fs::File,
@@ -32,6 +33,7 @@ impl Output {
 
     #[must_use]
     pub fn feed() -> File {
+        create_dir_all(Path::new(crate::SITE)).unwrap();
         File::create(Path::new(crate::SITE).join("feed.xml")).unwrap()
     }
 }
