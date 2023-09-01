@@ -6,23 +6,26 @@ use notify::{
 use std::path::Path;
 use toolkit::shell::spawn;
 
-const GENERATE_CMD: &str = "cargo run --bin generate -- http://localhost:9231";
-
 #[tokio::main]
 async fn main() {
-    let mut child = spawn(GENERATE_CMD);
+    let address = toolkit::serve::run().await;
+    println!("Listening on http://{}", address.1);
+
+    let generate_cmd = format!(
+        "cargo run --bin generate -- http://{}:{}",
+        address.1.ip(),
+        address.1.port()
+    );
+
+    let mut child = spawn(&generate_cmd);
     let mut watcher = recommended_watcher(move |res| {
         if let Ok(Event {
             kind: _e @ (Modify(_) | Remove(_)),
             ..
         }) = res
         {
-            match child.try_wait() {
-                Ok(Some(_)) => {
-                    println!("regenerating");
-                    child = spawn(GENERATE_CMD);
-                }
-                _ => (),
+            if let Ok(Some(_)) = child.try_wait() {
+                child = spawn(&generate_cmd);
             }
         }
     })
@@ -34,7 +37,5 @@ async fn main() {
         .watch(Path::new(toolkit::STYLE), RecursiveMode::NonRecursive)
         .unwrap();
 
-    let address = toolkit::serve::run().await;
-    println!("Listening on http://{}", address.1);
     address.0.await.unwrap();
 }
