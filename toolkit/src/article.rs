@@ -181,8 +181,6 @@ impl Article {
 #[must_use]
 pub fn layout_for_page(body: &str, article: &Article) -> String {
     Layout {
-        title: crate::TITLE,
-        language: &crate::locale::language(),
         description: &article.description(),
         body,
         page_title: Some(&article.title()),

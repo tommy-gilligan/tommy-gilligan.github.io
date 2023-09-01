@@ -4,8 +4,6 @@ use std::io::Write;
 
 fn layout_for(body: &str) -> String {
     Layout {
-        title: crate::TITLE,
-        language: &crate::locale::language(),
         description: "",
         body,
         page_title: None,

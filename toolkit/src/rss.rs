@@ -33,7 +33,7 @@ pub fn channel_builder(base_url: &url::Url) -> ChannelBuilder {
         .last_build_date(Some(
             build_time_local!("%a, %d %b %Y %H:%M:%S %z").to_owned(),
         ))
-        .language(crate::locale::language())
+        .language(crate::locale::language_tag())
         .ttl("600".to_owned())
         .generator(generator());
     channel

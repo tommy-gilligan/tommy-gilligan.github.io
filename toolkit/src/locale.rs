@@ -6,6 +6,11 @@ pub fn language() -> String {
     var("LANGUAGE").unwrap()
 }
 
+#[must_use]
+pub fn language_tag() -> String {
+    language().replace('_', "-")
+}
+
 fn time_locale_from_env() -> Locale {
     language().as_str().try_into().unwrap_or(Locale::POSIX)
 }

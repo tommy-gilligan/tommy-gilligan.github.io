@@ -1,8 +1,8 @@
-fn combined_title(title: &str, page_title: Option<&str>) -> String {
+fn combined_title(page_title: Option<&str>) -> String {
     if page_title.is_some() {
-        format!("{} - {}", page_title.unwrap(), title)
+        format!("{} - {}", page_title.unwrap(), crate::TITLE)
     } else {
-        title.to_string()
+        crate::TITLE.to_string()
     }
 }
 
@@ -10,21 +10,19 @@ const CSP: &str = "default-src 'none'; script-src 'none'; script-src-elem 'self'
 
 markup::define! {
     Layout<'a>(
-        title: &'a str,
         description: &'a str,
         body: &'a str,
-        language: &'a str,
         page_title: Option<&'a str>,
     ) {
         @markup::doctype()
-        html[lang = language] {
+        html[lang = crate::locale::language_tag()] {
             head {
-                title { @combined_title(title, *page_title) }
+                title { @combined_title(*page_title) }
                 meta[charset = "utf-8"];
                 meta["http-equiv" = "Content-Security-Policy", content = markup::raw(CSP)];
                 meta[name = "description", content = description];
                 meta[name = "viewport", content = "width=device-width, initial-scale=1, interactive-widget=overlays-content"];
-                link[rel = "alternate", r#type = "application/rss+xml", href = "pages.xml", title = title];
+                link[rel = "alternate", r#type = "application/rss+xml", href = crate::SITEMAP, title = crate::TITLE];
                 link[rel = "icon", href = "data:;base64,iVBORw0KGgo="];
                 style {
                     @markup::raw(crate::css::style())
@@ -32,7 +30,7 @@ markup::define! {
             }
             body {
                 header {
-                    h1 { a[href = "/"] { @title } }
+                    h1 { a[href = "/"] { @crate::TITLE } }
                     h2 { @page_title }
                 }
                 main { @markup::raw(body) }
