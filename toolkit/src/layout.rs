@@ -6,7 +6,7 @@ fn combined_title(page_title: Option<&str>) -> String {
     }
 }
 
-const CSP: &str = "default-src 'none'; script-src 'none'; script-src-elem 'self'; script-src-attr 'none'; style-src 'none'; style-src-elem 'unsafe-inline'; style-src-attr 'none'; img-src 'self' data: http: https:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; child-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; upgrade-insecure-requests; block-all-mixed-content; base-uri 'self'; manifest-src 'self'";
+const CSP: &str = "default-src 'none'; script-src 'none'; script-src-elem https://gist.github.com; script-src-attr 'none'; style-src 'self'; style-src-elem https://github.githubassets.com 'self' 'unsafe-inline'; style-src-attr 'unsafe-inline'; img-src 'self' data: http: https:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; child-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; upgrade-insecure-requests; block-all-mixed-content; base-uri 'self'; manifest-src 'self';";
 
 markup::define! {
     Layout<'a>(
@@ -21,12 +21,10 @@ markup::define! {
                 meta[charset = "utf-8"];
                 meta["http-equiv" = "Content-Security-Policy", content = markup::raw(CSP)];
                 meta[name = "description", content = description];
-                meta[name = "viewport", content = "width=device-width, initial-scale=1, interactive-widget=overlays-content"];
+                meta[name = "viewport", content = "width=device-width, initial-scale=1"];
                 link[rel = "alternate", r#type = "application/rss+xml", href = crate::SITEMAP, title = crate::TITLE];
                 link[rel = "icon", href = "data:;base64,iVBORw0KGgo="];
-                style {
-                    @markup::raw(crate::css::style())
-                }
+                link[rel = "stylesheet", href = "style.css"];
             }
             body {
                 header {

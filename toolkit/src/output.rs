@@ -15,6 +15,11 @@ impl Output {
     }
 
     #[must_use]
+    pub fn asset(file_name: &OsStr) -> File {
+        File::create(Path::new(crate::SITE).join(file_name)).unwrap()
+    }
+
+    #[must_use]
     pub fn page(file_stem: &OsStr) -> File {
         File::create(Self::page_path(file_stem)).unwrap()
     }

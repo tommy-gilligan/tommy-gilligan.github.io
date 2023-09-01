@@ -34,7 +34,7 @@ async fn main() {
         .watch(Path::new(toolkit::ARTICLES), RecursiveMode::Recursive)
         .unwrap();
     watcher
-        .watch(Path::new(toolkit::STYLE), RecursiveMode::NonRecursive)
+        .watch(Path::new(toolkit::ASSETS), RecursiveMode::Recursive)
         .unwrap();
 
     address.0.await.unwrap();

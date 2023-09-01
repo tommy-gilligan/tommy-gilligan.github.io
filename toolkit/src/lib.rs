@@ -8,15 +8,15 @@
 pub const TITLE: &str = "Tommy's Blog";
 pub const SCREENSHOTS: &str = "screenshots";
 pub const ARTICLES: &str = "articles";
+pub const ASSETS: &str = "assets";
 pub const SITEMAP: &str = "sitemap.xml";
 pub const SITE: &str = "_site";
-pub const STYLE: &str = "style.css";
 
 pub mod article;
+pub mod asset;
 pub mod browser;
 pub mod cache;
 pub mod crawl;
-pub mod css;
 pub mod frontmatter;
 pub mod git;
 pub mod index;
