@@ -6,26 +6,39 @@ use notify::{
 use std::path::Path;
 use toolkit::shell::spawn;
 
+use std::io::BufRead;
+use std::sync::{Arc, Mutex, OnceLock};
+
+static GENERATE_CMD: OnceLock<String> = OnceLock::new();
+
 #[tokio::main]
 async fn main() {
+    let stdin = std::io::stdin();
+    let mut handle = stdin.lock();
+
     let address = toolkit::serve::run().await;
     println!("Listening on http://{}", address.1);
+    GENERATE_CMD
+        .set(format!(
+            "cargo run --bin generate -- http://{}:{}",
+            address.1.ip(),
+            address.1.port()
+        ))
+        .unwrap();
 
-    let generate_cmd = format!(
-        "cargo run --bin generate -- http://{}:{}",
-        address.1.ip(),
-        address.1.port()
-    );
+    let child_cell = Arc::new(Mutex::new(spawn(GENERATE_CMD.get().unwrap())));
+    let for_watcher = child_cell.clone();
 
-    let mut child = spawn(&generate_cmd);
     let mut watcher = recommended_watcher(move |res| {
         if let Ok(Event {
             kind: _e @ (Modify(_) | Remove(_)),
             ..
         }) = res
         {
+            let mut child = for_watcher.lock().unwrap();
             if let Ok(Some(_)) = child.try_wait() {
-                child = spawn(&generate_cmd);
+                println!("regenerating due to file change");
+                *child = spawn(GENERATE_CMD.get().unwrap());
             }
         }
     })
@@ -37,5 +50,12 @@ async fn main() {
         .watch(Path::new(toolkit::ASSETS), RecursiveMode::Recursive)
         .unwrap();
 
-    address.0.await.unwrap();
+    let mut null = String::new();
+    while handle.read_line(&mut null).is_ok() {
+        let mut child = child_cell.lock().unwrap();
+        if let Ok(Some(_)) = child.try_wait() {
+            println!("regenerating due to keypress");
+            *child = spawn(GENERATE_CMD.get().unwrap());
+        }
+    }
 }
