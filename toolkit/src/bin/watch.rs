@@ -18,7 +18,7 @@ async fn main() {
         }) = res
         {
             match child.try_wait() {
-                Ok(Some(status)) if status.success() => {
+                Ok(Some(_)) => {
                     println!("regenerating");
                     child = spawn(GENERATE_CMD);
                 }
