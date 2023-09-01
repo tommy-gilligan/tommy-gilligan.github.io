@@ -3,10 +3,10 @@ use notify::{
     EventKind::{Modify, Remove},
     RecursiveMode, Watcher,
 };
+use std::io::Read;
 use std::path::Path;
 use toolkit::shell::spawn;
 
-use std::io::BufRead;
 use std::sync::{Arc, Mutex, OnceLock};
 
 static GENERATE_CMD: OnceLock<String> = OnceLock::new();
@@ -14,7 +14,7 @@ static GENERATE_CMD: OnceLock<String> = OnceLock::new();
 #[tokio::main]
 async fn main() {
     let stdin = std::io::stdin();
-    let mut handle = stdin.lock();
+    let handle = stdin.lock();
     let mut path_to_self = std::env::current_exe().unwrap();
     path_to_self.set_file_name("generate");
 
@@ -59,13 +59,18 @@ async fn main() {
         .watch(&path_to_self, RecursiveMode::NonRecursive)
         .unwrap();
 
-    let mut null = String::new();
-    while handle.read_line(&mut null).is_ok() {
-        let mut child = child_cell.lock().unwrap();
-        if let Ok(Some(_)) = child.try_wait() {
-            println!("regenerating due to keypress");
-            // TODO: spawn cargo build of generate and rely on filewatcher to run it when its done
-            *child = spawn(GENERATE_CMD.get().unwrap());
+    for byte in handle.bytes() {
+        if byte.unwrap() == b'\n' {
+            let mut child = child_cell.lock().unwrap();
+            if let Ok(Some(_)) = child.try_wait() {
+                println!("regenerating due to keypress");
+                // TODO: websocket
+                // TODO: spawn cargo build of generate and rely on filewatcher to run it when its done
+                // TODO: give feedback when finished
+                // TODO: build new generate at startup (different target name, so that it is 'well
+                // known')?
+                *child = spawn(GENERATE_CMD.get().unwrap());
+            }
         }
     }
 }
