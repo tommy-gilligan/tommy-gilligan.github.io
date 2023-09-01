@@ -45,10 +45,13 @@ pub async fn run() -> (tokio::task::JoinHandle<()>, std::net::SocketAddr) {
 
                 let service = Service::new(crate::SITE.into());
                 tokio::task::spawn(async move {
-                    hyper::server::conn::http1::Builder::new()
+                    match hyper::server::conn::http1::Builder::new()
                         .serve_connection(io, service)
                         .await
-                        .unwrap();
+                    {
+                        Ok(_) => (),
+                        Err(e) => println!("{e}"),
+                    }
                 });
             }
         }),
