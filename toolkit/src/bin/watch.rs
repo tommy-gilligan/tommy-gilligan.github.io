@@ -15,15 +15,21 @@ static GENERATE_CMD: OnceLock<String> = OnceLock::new();
 async fn main() {
     let stdin = std::io::stdin();
     let mut handle = stdin.lock();
+    let mut path_to_self = std::env::current_exe().unwrap();
+    path_to_self.set_file_name("generate");
 
     let address = toolkit::serve::run().await;
     println!("Listening on http://{}", address.1);
     GENERATE_CMD
-        .set(format!(
-            "cargo run --bin generate -- http://{}:{}",
-            address.1.ip(),
-            address.1.port()
-        ))
+        .set(
+            // todo: use osstr instead
+            format!(
+                "{} http://{}:{}",
+                path_to_self.display(),
+                address.1.ip(),
+                address.1.port()
+            ),
+        )
         .unwrap();
 
     let child_cell = Arc::new(Mutex::new(spawn(GENERATE_CMD.get().unwrap())));
@@ -48,6 +54,9 @@ async fn main() {
         .unwrap();
     watcher
         .watch(Path::new(toolkit::ASSETS), RecursiveMode::Recursive)
+        .unwrap();
+    watcher
+        .watch(&path_to_self, RecursiveMode::NonRecursive)
         .unwrap();
 
     let mut null = String::new();
