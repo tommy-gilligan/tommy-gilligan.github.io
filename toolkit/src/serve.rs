@@ -28,7 +28,7 @@ impl hyper::service::Service<Request<IncomingBody>> for Service {
     }
 }
 
-pub async fn run() -> std::net::SocketAddr {
+pub async fn run() -> (tokio::task::JoinHandle<()>, std::net::SocketAddr) {
     let listener = TcpListener::bind(std::net::SocketAddrV4::new(
         std::net::Ipv4Addr::LOCALHOST,
         0,
@@ -37,19 +37,21 @@ pub async fn run() -> std::net::SocketAddr {
     .unwrap();
     let local_addr = listener.local_addr().unwrap();
 
-    tokio::task::spawn(async move {
-        loop {
-            let (stream, _) = listener.accept().await.unwrap();
-            let io = TokioIo::new(stream);
+    (
+        tokio::task::spawn(async move {
+            loop {
+                let (stream, _) = listener.accept().await.unwrap();
+                let io = TokioIo::new(stream);
 
-            let service = Service::new(crate::SITE.into());
-            tokio::task::spawn(async move {
-                hyper::server::conn::http1::Builder::new()
-                    .serve_connection(io, service)
-                    .await
-                    .unwrap();
-            });
-        }
-    });
-    local_addr
+                let service = Service::new(crate::SITE.into());
+                tokio::task::spawn(async move {
+                    hyper::server::conn::http1::Builder::new()
+                        .serve_connection(io, service)
+                        .await
+                        .unwrap();
+                });
+            }
+        }),
+        local_addr,
+    )
 }

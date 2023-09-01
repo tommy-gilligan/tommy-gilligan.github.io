@@ -28,7 +28,13 @@ async fn main() {
     })
     .unwrap();
     watcher
-        .watch(Path::new(toolkit::ARTICLES), RecursiveMode::NonRecursive)
+        .watch(Path::new(toolkit::ARTICLES), RecursiveMode::Recursive)
         .unwrap();
-    println!("Listening on http://{}", toolkit::serve::run().await);
+    watcher
+        .watch(Path::new(toolkit::STYLE), RecursiveMode::NonRecursive)
+        .unwrap();
+
+    let address = toolkit::serve::run().await;
+    println!("Listening on http://{}", address.1);
+    address.0.await.unwrap();
 }
