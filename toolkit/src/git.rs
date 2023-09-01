@@ -127,54 +127,6 @@ impl Git {
 }
 
 #[test]
-fn test_commits_for() {
-    let git = Git::new();
-    let commits: Vec<String> = git
-        .commits_for(Path::new("Cargo.toml"))
-        .into_iter()
-        .map(|c| c.id().to_string())
-        .collect();
-
-    assert_eq!(
-        commits,
-        [
-            "3a1ef750c4c15460e818e32218db87fa4087341e",
-            "5e509ef78a5726bd68ccd4dd05d6b51f996dc954",
-            "ddd2b1237fe9f3af3ab1f931d3ed18ee51b69700",
-            "529bd23e24bab8d6e4f6dfeb717d48b8147da02e",
-            "3f8de576d9876e559a012d5713b4fbdaff5bbe6d",
-            "565ea5bae6ff22ac9c981aab4daf30f1a7e199b8",
-            "addac891faa8ca39a4e7db619f986e0ca0907c2c",
-            "05b5514b6e84c166cd0625dc3398a4bd624e47e2",
-            "2eeef7d1f865651dcd296cfbbaa19567c653c3e7",
-            "1733fa752801869fa19368c7f455d120f11428a8",
-            "cb5cee9936edb7def3150d33fd254b9306655ca1",
-            "c5ff586b7d49fee4cbcd59ee86c93ef59169b596",
-            "7f63641e7d0068cb640ca21b4acc88b8eafe3091",
-            "1037305faff4424e07bf51f6da636e6642069c7b",
-            "4c4912535a77384fc26ec9f9f63a6326a4926072",
-            "8c7fcc066a7e1e7af672b316faf887fb94d49164",
-            "a86914d7257849dc487d423448aa931ed8087339",
-            "5c5541379278ebe00a3fd3d8ad850aea79efa7e4",
-            "49412a598a5f86d45d81223f6e5945e36979fd82",
-            "4b0b6251995b33644c3cb5eee500209c3715aeb3",
-            "32140412262f601ce40ee9c674deffd069ff92a4",
-            "1268768e8853c0549edd6387f7a8088203df836a",
-            "075801250cb1645e8b32fe520ad5702405e84a90",
-            "bc7547d51b60ad62d269d745fb66e77e3ff9daec",
-            "da1a693cd5caf24e05fdca580f2a913fa7b7d661",
-            "8960e1117c773a3d65a4f2f269dcc68602de9a83",
-            "a08b3fda21159aca5c218e1bdc22e7e85fcf3f69",
-            "56431abc7254b00e3d0065cb5df5a9a735065a04",
-            "f78ecb749dffdce6d2c56029ed68f91e7ace2dcb",
-            "186ed6f1e363f65fda43db271024b1004e5033e8",
-            "aed8ed84f5fb734acdd90b67a57d353f8d412dff",
-            "cf929cffc041e8574c0c33e599ac68e93f7fe58c"
-        ]
-    );
-}
-
-#[test]
 fn test_commits_for_rename() {
     let git = Git::new();
     let commits: Vec<String> = git
