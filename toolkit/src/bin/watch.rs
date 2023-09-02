@@ -1,14 +1,16 @@
-use notify::{
-    recommended_watcher, Event,
-    EventKind::{Modify, Remove},
-    RecursiveMode, Watcher,
-};
+use notify::{recommended_watcher, RecursiveMode, Watcher};
 use std::io::Read;
 use std::path::Path;
-use toolkit::shell::spawn;
+use std::process::Child;
+use toolkit::shell::{block_spawn, spawn};
 
 use std::sync::{Arc, Mutex, OnceLock};
 
+use futures::FutureExt;
+use std::process::ExitStatus;
+
+use notify::Event;
+use notify::EventKind::{Modify, Remove};
 static GENERATE_CMD: OnceLock<String> = OnceLock::new();
 
 #[tokio::main]
@@ -18,6 +20,9 @@ async fn main() {
     let mut path_to_self = std::env::current_exe().unwrap();
     path_to_self.set_file_name("generate");
 
+    // TODO: websocket
+    // report file names
+    // in generate bin: print status info
     let address = toolkit::serve::run().await;
     println!("Listening on http://{}", address.1);
     GENERATE_CMD
@@ -31,8 +36,13 @@ async fn main() {
             ),
         )
         .unwrap();
-
-    let child_cell = Arc::new(Mutex::new(spawn(GENERATE_CMD.get().unwrap())));
+    let printer = |e: Result<ExitStatus, std::io::Error>| async move {
+        match e {
+            Ok(e) if e.success() => println!("succeeded"),
+            _ => println!("failed"),
+        }
+    };
+    let child_cell: Arc<Mutex<Option<Result<Child, std::io::Error>>>> = Arc::new(Mutex::new(None));
     let for_watcher = child_cell.clone();
 
     let mut watcher = recommended_watcher(move |res| {
@@ -42,9 +52,13 @@ async fn main() {
         }) = res
         {
             let mut child = for_watcher.lock().unwrap();
-            if let Ok(Some(_)) = child.try_wait() {
+            if child.is_none() {
                 println!("regenerating due to file change");
-                *child = spawn(GENERATE_CMD.get().unwrap());
+                *child = Some(block_spawn(GENERATE_CMD.get().unwrap()));
+            // TODO: kill instead of waiting
+            } else if let Ok(Some(_)) = child.as_mut().unwrap().as_mut().unwrap().try_wait() {
+                println!("regenerating due to file change");
+                *child = Some(block_spawn(GENERATE_CMD.get().unwrap()));
             }
         }
     })
@@ -59,18 +73,13 @@ async fn main() {
         .watch(&path_to_self, RecursiveMode::NonRecursive)
         .unwrap();
 
+    let mut build_child = spawn("cargo build --bin generate").then(printer).shared();
+    build_child.clone().await;
+
     for byte in handle.bytes() {
-        if byte.unwrap() == b'\n' {
-            let mut child = child_cell.lock().unwrap();
-            if let Ok(Some(_)) = child.try_wait() {
-                println!("regenerating due to keypress");
-                // TODO: websocket
-                // TODO: spawn cargo build of generate and rely on filewatcher to run it when its done
-                // TODO: give feedback when finished
-                // TODO: build new generate at startup (different target name, so that it is 'well
-                // known')?
-                *child = spawn(GENERATE_CMD.get().unwrap());
-            }
+        if byte.unwrap() == b'\n' && build_child.clone().now_or_never().is_some() {
+            build_child = spawn("cargo build --bin generate").then(printer).shared();
+            build_child.clone().await
         }
     }
 }
