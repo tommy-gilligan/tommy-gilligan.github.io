@@ -37,14 +37,26 @@ impl Asset {
     }
 }
 
+pub fn watch<W>(watcher: &mut W)
+where
+    W: notify::Watcher,
+{
+    watcher
+        .watch(Path::new(crate::ASSETS), notify::RecursiveMode::Recursive)
+        .unwrap();
+}
+
 pub fn copy() {
     for asset in Asset::from_dir(crate::ASSETS).unwrap() {
-        if asset.path.extension().unwrap() == OsStr::new(css::EXTENSION) {
-            Output::asset(asset.file_name())
-                .write_all(&css::transform(&asset.path))
-                .unwrap();
-        } else {
-            std::fs::copy(&asset.path, Output::asset_path(asset.file_name())).unwrap();
+        match asset.path.extension() {
+            Some(extension) if extension == OsStr::new(css::EXTENSION) => {
+                Output::asset(asset.file_name())
+                    .write_all(&css::transform(&asset.path))
+                    .unwrap();
+            }
+            _ => {
+                std::fs::copy(&asset.path, Output::asset_path(asset.file_name())).unwrap();
+            }
         }
     }
 }

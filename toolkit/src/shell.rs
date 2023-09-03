@@ -1,9 +1,8 @@
 use std::env::var;
 use std::ffi::OsStr;
-use std::process::{Child, ExitStatus, Stdio};
-use tokio::process::Command;
+use std::process::{Child, Command, Stdio};
 
-pub async fn spawn<S: AsRef<OsStr>>(arg: S) -> std::io::Result<ExitStatus> {
+pub fn spawn<S: AsRef<OsStr>>(arg: S) -> std::io::Result<Child> {
     let mut command = Command::new(var("CARGO").unwrap_or("cargo".to_owned()));
 
     if cfg!(target_os = "windows") {
@@ -13,8 +12,7 @@ pub async fn spawn<S: AsRef<OsStr>>(arg: S) -> std::io::Result<ExitStatus> {
             .arg(arg)
             .stdin(Stdio::null())
             .stdout(Stdio::null())
-            .status()
-            .await
+            .spawn()
     } else {
         command
             .arg("build")
@@ -22,21 +20,20 @@ pub async fn spawn<S: AsRef<OsStr>>(arg: S) -> std::io::Result<ExitStatus> {
             .arg(arg)
             .stdin(Stdio::null())
             .stdout(Stdio::null())
-            .status()
-            .await
+            .spawn()
     }
 }
 
 pub fn block_spawn<S: AsRef<OsStr>>(command: S) -> std::io::Result<Child> {
     if cfg!(target_os = "windows") {
-        std::process::Command::new("cmd")
+        Command::new("cmd")
             .arg("/C")
             .arg(command)
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .spawn()
     } else {
-        std::process::Command::new("sh")
+        Command::new("sh")
             .arg("-c")
             .arg(command)
             .stdin(Stdio::null())

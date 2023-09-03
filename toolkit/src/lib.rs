@@ -30,6 +30,7 @@ pub mod serve;
 pub mod shell;
 pub mod sitemap;
 mod syntax_highlighting;
+pub mod terminal;
 pub mod tokiort;
 pub mod view;
 pub mod xml;

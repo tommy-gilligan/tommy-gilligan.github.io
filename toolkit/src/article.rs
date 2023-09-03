@@ -144,6 +144,15 @@ impl Article {
     }
 }
 
+pub fn watch<W>(watcher: &mut W)
+where
+    W: notify::Watcher,
+{
+    watcher
+        .watch(Path::new(crate::ARTICLES), notify::RecursiveMode::Recursive)
+        .unwrap();
+}
+
 pub fn render() {
     for article in Article::from_dir(crate::ARTICLES).unwrap() {
         let mut m = Markdown::new(article.contents());
