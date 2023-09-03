@@ -1,43 +1,29 @@
-use std::env::var;
 use std::ffi::OsStr;
 use std::process::{Child, Command, Stdio};
 
-pub fn spawn<S: AsRef<OsStr>>(arg: S) -> std::io::Result<Child> {
-    let mut command = Command::new(var("CARGO").unwrap_or("cargo".to_owned()));
-
-    if cfg!(target_os = "windows") {
-        command
-            .arg("build")
-            .arg("--bin")
-            .arg(arg)
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .spawn()
-    } else {
-        command
-            .arg("build")
-            .arg("--bin")
-            .arg(arg)
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .spawn()
+pub fn replacing_spawn<I, B, S: AsRef<OsStr> + std::fmt::Debug>(
+    arg: S,
+    args: I,
+    existing_child: &mut Option<Child>,
+) where
+    I: IntoIterator<Item = B>,
+    B: std::convert::AsRef<std::ffi::OsStr>,
+{
+    if let Some(ref mut child) = existing_child {
+        if child.try_wait().unwrap().is_none() {
+            eprintln!("Killing unfinished {arg:?}");
+            child.kill().unwrap();
+            child.wait().unwrap();
+        }
     }
-}
 
-pub fn block_spawn<S: AsRef<OsStr>>(command: S) -> std::io::Result<Child> {
-    if cfg!(target_os = "windows") {
-        Command::new("cmd")
-            .arg("/C")
-            .arg(command)
+    eprintln!("Starting {arg:?}");
+    *existing_child = Some(
+        Command::new(arg)
+            .args(args)
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .spawn()
-    } else {
-        Command::new("sh")
-            .arg("-c")
-            .arg(command)
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .spawn()
-    }
+            .unwrap(),
+    );
 }

@@ -1,79 +1,40 @@
-use notify::{
-    recommended_watcher, Event,
-    EventKind::{Modify, Remove},
-    RecursiveMode, Watcher,
-};
-use std::{
-    ffi::{OsStr, OsString},
-    io::Read,
-    process::Child,
-    sync::{Arc, Mutex, OnceLock},
-};
-use toolkit::shell::{block_spawn, spawn};
+use notify::RecursiveMode;
+use notify::Watcher;
+use std::{env::var, io::Read};
+use toolkit::{serve, shell::replacing_spawn, terminal, watch};
 
-static GENERATE_CMD: OnceLock<OsString> = OnceLock::new();
 const GENERATE_TARGET_NAME: &str = "generate";
+const CARGO_ARGS: [&str; 3] = ["build", "--bin", GENERATE_TARGET_NAME];
+
+fn path_to_cargo() -> String {
+    var("CARGO").unwrap_or_else(|_| "cargo".to_owned())
+}
 
 #[tokio::main]
 async fn main() {
-    toolkit::terminal::setup();
-    let address = toolkit::serve::run().await;
-    println!("Listening on http://{}", address.1);
+    terminal::setup();
+    // TODO: websocket to signal clients to refresh
+    let server = serve::run().await;
+    println!("Listening on http://{}", server.1);
 
-    let path_to_generate = std::env::current_exe()
+    let generate_path = std::env::current_exe()
         .unwrap()
         .with_file_name(GENERATE_TARGET_NAME);
-    let mut command_string: OsString = path_to_generate.clone().into();
-    command_string.push(OsStr::new(" http://"));
-    command_string.push(address.1.ip().to_string());
-    command_string.push(OsStr::new(":"));
-    command_string.push(address.1.port().to_string());
-    GENERATE_CMD.set(command_string).unwrap();
+    let generate_args = vec![format!(
+        "http://{}:{}",
+        &server.1.ip().to_string(),
+        &server.1.port().to_string()
+    )];
 
-    // TODO: websocket
-    let child_cell: Arc<Mutex<Option<Result<Child, std::io::Error>>>> = Arc::new(Mutex::new(None));
-    let for_watcher = child_cell.clone();
-
-    let mut watcher = recommended_watcher(move |res| {
-        if let Ok(Event {
-            kind: _e @ (Modify(_) | Remove(_)),
-            paths,
-            ..
-        }) = res
-        {
-            let mut child = for_watcher.lock().unwrap();
-            if child.is_none() {
-                println!("Regenerating due to changes to:");
-                for path in paths {
-                    // FIX: does not give filename on macos
-                    println!("- {}", path.display());
-                }
-                *child = Some(block_spawn(GENERATE_CMD.get().unwrap()));
-            // TODO: kill instead of waiting
-            } else if let inner_child = child.as_mut().unwrap().as_mut().unwrap() {
-                println!("Regenerating due to changes to:");
-                for path in paths {
-                    // FIX: does not give filename on macos
-                    println!("- {}", path.display());
-                }
-                inner_child.kill().unwrap();
-                inner_child.wait().unwrap();
-                *child = Some(block_spawn(GENERATE_CMD.get().unwrap()));
-            }
-        }
-    })
-    .unwrap();
-    toolkit::article::watch(&mut watcher);
-    toolkit::asset::watch(&mut watcher);
+    let mut watcher = watch::setup(&generate_path, generate_args);
     watcher
-        .watch(&path_to_generate, RecursiveMode::NonRecursive)
+        .watch(&generate_path, RecursiveMode::NonRecursive)
         .unwrap();
 
-    let mut build_child = spawn(GENERATE_TARGET_NAME).unwrap();
+    let mut cargo_child = None;
+    replacing_spawn(&path_to_cargo(), CARGO_ARGS, &mut cargo_child);
     for _byte in std::io::stdin().lock().bytes() {
-        build_child.kill().unwrap();
-        build_child.wait().unwrap();
-        build_child = spawn(GENERATE_TARGET_NAME).unwrap();
+        replacing_spawn(&path_to_cargo(), CARGO_ARGS, &mut cargo_child);
     }
-    toolkit::terminal::cleanup();
+    terminal::cleanup();
 }
