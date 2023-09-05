@@ -1,13 +1,31 @@
+use futures::{sink::SinkExt, stream::StreamExt};
+use hyper_tungstenite::{tungstenite, HyperWebsocket};
+use tungstenite::Message;
+
 use futures_util::future;
 use hyper::{
     service::{make_service_fn, service_fn},
     Body, Request, Response,
 };
 use hyper_staticfile::Static;
-use std::{io::Error as IoError, path::Path};
+use std::{convert::Infallible, io::Error as IoError, path::Path};
 
-async fn handle_request<B>(req: Request<B>, static_: Static) -> Result<Response<Body>, IoError> {
-    static_.clone().serve(req).await
+async fn handle_request<B>(
+    mut req: Request<B>,
+    static_: Static,
+) -> Result<Response<Body>, IoError> {
+    if hyper_tungstenite::is_upgrade_request(&req) {
+        let (response, websocket) = hyper_tungstenite::upgrade(&mut req, None).unwrap();
+
+        tokio::spawn(async move {
+            let mut websocket = websocket.await.unwrap();
+            websocket.send("hey".into()).await.unwrap();
+        });
+
+        Ok(response)
+    } else {
+        static_.clone().serve(req).await
+    }
 }
 
 pub async fn run(
