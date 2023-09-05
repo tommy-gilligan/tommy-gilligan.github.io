@@ -14,7 +14,7 @@ fn path_to_cargo() -> String {
 async fn main() {
     terminal::setup();
     // TODO: websocket to signal clients to refresh
-    let server = serve::run().await;
+    let server = serve::run(None).await;
     println!("Listening on http://{}", server.1);
 
     let generate_path = std::env::current_exe()

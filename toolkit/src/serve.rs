@@ -2,8 +2,10 @@ use hyper::{body::Incoming as IncomingBody, Request, Response};
 use hyper_staticfile::Static;
 
 use crate::tokiort::TokioIo;
+use futures_util::stream::Stream;
 use std::{future::Future, path::PathBuf, pin::Pin};
 use tokio::net::TcpListener;
+use tokio_stream::{self as stream, StreamExt};
 
 pub struct Service {
     inner: Static,
@@ -28,7 +30,9 @@ impl hyper::service::Service<Request<IncomingBody>> for Service {
     }
 }
 
-pub async fn run() -> (tokio::task::JoinHandle<()>, std::net::SocketAddr) {
+pub async fn run(
+    refresh_channel: Option<tokio::sync::mpsc::Receiver<bool>>,
+) -> (tokio::task::JoinHandle<()>, std::net::SocketAddr) {
     let listener = TcpListener::bind(std::net::SocketAddrV4::new(
         std::net::Ipv4Addr::LOCALHOST,
         0,

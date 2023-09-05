@@ -5,7 +5,7 @@ use toolkit::{browser::Browser, output::Output};
 async fn main() {
     create_dir_all(Path::new(toolkit::SCREENSHOTS)).unwrap();
 
-    let address = toolkit::serve::run().await;
+    let address = toolkit::serve::run(None).await;
     let mut browser = Browser::new(&address.1).await;
 
     for url in Output::sitemap().open() {
