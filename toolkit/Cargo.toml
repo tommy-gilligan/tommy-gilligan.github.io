@@ -41,6 +41,7 @@ tree-sitter-bash = "0.20.3"
 tempfile = "3.8.0"
 crossterm = "0.27.0"
 ctrlc = "3.4.1"
+http = "0.2.9"
 
 [dev-dependencies]
 indoc = "2.0.3"

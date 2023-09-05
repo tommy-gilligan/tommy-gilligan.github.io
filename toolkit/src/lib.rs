@@ -31,7 +31,6 @@ pub mod shell;
 pub mod sitemap;
 mod syntax_highlighting;
 pub mod terminal;
-pub mod tokiort;
 pub mod view;
 pub mod watch;
 pub mod xml;
