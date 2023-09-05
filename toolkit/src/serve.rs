@@ -1,6 +1,6 @@
-use futures::{sink::SinkExt, stream::StreamExt};
-use hyper_tungstenite::{tungstenite, HyperWebsocket};
-use tungstenite::Message;
+use futures::{sink::SinkExt};
+
+
 
 use futures_util::future;
 use hyper::{
@@ -8,18 +8,22 @@ use hyper::{
     Body, Request, Response,
 };
 use hyper_staticfile::Static;
-use std::{convert::Infallible, io::Error as IoError, path::Path};
+use std::{io::Error as IoError, path::Path};
 
 async fn handle_request<B>(
     mut req: Request<B>,
     static_: Static,
+    mut refresh_channel: Option<tokio::sync::watch::Receiver<()>>,
 ) -> Result<Response<Body>, IoError> {
     if hyper_tungstenite::is_upgrade_request(&req) {
         let (response, websocket) = hyper_tungstenite::upgrade(&mut req, None).unwrap();
 
         tokio::spawn(async move {
             let mut websocket = websocket.await.unwrap();
-            websocket.send("hey".into()).await.unwrap();
+            while refresh_channel.as_mut().unwrap().changed().await.is_ok() {
+                eprintln!("hey");
+                websocket.send("hey".into()).await.unwrap();
+            }
         });
 
         Ok(response)
@@ -29,12 +33,16 @@ async fn handle_request<B>(
 }
 
 pub async fn run(
-    _refresh_channel: Option<tokio::sync::mpsc::Receiver<bool>>,
+    refresh_channel: Option<tokio::sync::watch::Receiver<()>>,
 ) -> (tokio::task::JoinHandle<()>, std::net::SocketAddr) {
     let static_ = Static::new(Path::new(crate::SITE));
     let make_service = make_service_fn(move |_| {
         let static_ = static_.clone();
-        future::ok::<_, hyper::Error>(service_fn(move |req| handle_request(req, static_.clone())))
+        let refresh_channel = refresh_channel.clone(); 
+        future::ok::<_, hyper::Error>(service_fn(move |req| {
+            let refresh_channel = refresh_channel.clone();
+            handle_request(req, static_.clone(), refresh_channel)
+        }))
     });
 
     let server =
