@@ -1,6 +1,4 @@
-use futures::{sink::SinkExt};
-
-
+use futures::sink::SinkExt;
 
 use futures_util::future;
 use hyper::{
@@ -20,9 +18,10 @@ async fn handle_request<B>(
 
         tokio::spawn(async move {
             let mut websocket = websocket.await.unwrap();
-            while refresh_channel.as_mut().unwrap().changed().await.is_ok() {
-                eprintln!("hey");
-                websocket.send("hey".into()).await.unwrap();
+            let channel = refresh_channel.as_mut().unwrap();
+            channel.changed().await.unwrap();
+            while channel.changed().await.is_ok() {
+                websocket.send("refresh".into()).await.unwrap();
             }
         });
 
@@ -38,16 +37,17 @@ pub async fn run(
     let static_ = Static::new(Path::new(crate::SITE));
     let make_service = make_service_fn(move |_| {
         let static_ = static_.clone();
-        let refresh_channel = refresh_channel.clone(); 
+        let refresh_channel = refresh_channel.clone();
         future::ok::<_, hyper::Error>(service_fn(move |req| {
             let refresh_channel = refresh_channel.clone();
             handle_request(req, static_.clone(), refresh_channel)
         }))
     });
 
-    let server =
-        hyper::Server::bind(&std::net::SocketAddrV4::new(std::net::Ipv4Addr::LOCALHOST, 0).into())
-            .serve(make_service);
+    let server = hyper::Server::bind(
+        &std::net::SocketAddrV4::new(std::net::Ipv4Addr::LOCALHOST, 3000).into(),
+    )
+    .serve(make_service);
 
     let addr = server.local_addr();
     (tokio::spawn(async { server.await.unwrap() }), addr)

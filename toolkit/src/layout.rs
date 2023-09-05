@@ -6,7 +6,9 @@ fn combined_title(page_title: Option<&str>) -> String {
     }
 }
 
-const CSP: &str = "default-src 'none'; script-src 'none'; script-src-elem https://gist.github.com; script-src-attr 'none'; style-src 'self'; style-src-elem https://github.githubassets.com 'self' 'unsafe-inline'; style-src-attr 'unsafe-inline'; img-src 'self' data: http: https:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; child-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; upgrade-insecure-requests; block-all-mixed-content; base-uri 'self'; manifest-src 'self';";
+const CSP: &str = "default-src 'none'; script-src 'self' 'unsafe-inline'; script-src-elem https://gist.github.com 'self' 'unsafe-inline'; script-src-attr 'none'; style-src 'self'; style-src-elem https://github.githubassets.com 'self' 'unsafe-inline'; style-src-attr 'unsafe-inline'; img-src 'self' data: http: https:; font-src 'none'; connect-src 'self'; media-src 'none'; object-src 'none'; child-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; upgrade-insecure-requests; block-all-mixed-content; base-uri 'self'; manifest-src 'self';";
+
+const JS: &str = "const socket = new WebSocket('ws://127.0.0.1:3000'); socket.addEventListener('message', () => window.location.reload());";
 
 markup::define! {
     Layout<'a>(
@@ -25,6 +27,7 @@ markup::define! {
                 link[rel = "alternate", r#type = "application/rss+xml", href = crate::SITEMAP, title = crate::TITLE];
                 link[rel = "icon", href = "data:;base64,iVBORw0KGgo="];
                 link[rel = "stylesheet", href = "style.css"];
+                script { @markup::raw(JS) }
             }
             body {
                 header {
