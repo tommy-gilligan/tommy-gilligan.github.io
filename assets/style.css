@@ -96,7 +96,10 @@ details[open] > summary:after {
 }
 details {
   position: relative;
-  > pre {
+  > code {
+    margin: 0;
+  }
+  > code > pre {
     margin: 0;
   }
 }
@@ -112,7 +115,10 @@ summary::-webkit-details-marker {
   content: ""
 }
 summary {
-  > pre {
+  > code {
+    margin: 0;
+  }
+  > code > pre {
     margin: 0;
   }
 }

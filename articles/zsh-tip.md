@@ -20,15 +20,15 @@ combination to a line editing command.  Consulting the `man` page for ZLE we
 find that `bindkey` can be used to display a set of key bindings (a *keymap*).
 
 <details>
-<summary><pre><samp>% <kbd>bindkey</kbd>
+<summary><code><pre><samp>% <kbd>bindkey</kbd>
 "^@" set-mark-command
 "^A" beginning-of-line
 "^B" backward-char
 "^D" delete-char-or-list
 "^E" end-of-line
 "^F" forward-char
-"^G" send-break</samp></pre></summary>
-<pre><samp>"^H" backward-delete-char
+"^G" send-break</samp></pre></code></summary>
+<code><pre><samp>"^H" backward-delete-char
 "^I" expand-or-complete
 "^J" accept-line
 "^K" kill-line
@@ -157,7 +157,7 @@ find that `bindkey` can be used to display a set of key bindings (a *keymap*).
 "^_" undo
 " "-"~" self-insert
 "^?" backward-delete-char
-"\M-^@"-"\M-^?" self-insert</samp></pre>
+"\M-^@"-"\M-^?" self-insert</samp></pre></code>
 </details>
 
 There's a little bit of interpretation involved in understanding this keymap:
