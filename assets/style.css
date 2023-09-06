@@ -73,56 +73,6 @@ code {
   max-width: 100%;
   overflow: scroll;
 }
-details > summary:before {
-  color: var(--visited-color);
-  text-decoration-line: underline;
-  text-decoration-style: dashed;
-  text-decoration-thickness: 1px;
-  content: 'Collapse △';
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-details[open] > summary:after {
-  color: var(--visited-color);
-  text-decoration-line: underline;
-  text-decoration-style: dashed;
-  text-decoration-thickness: 1px;
-  content: 'Collapse △';
-  text-align: right;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-}
-details {
-  position: relative;
-  > code {
-    margin: 0;
-  }
-  > code > pre {
-    margin: 0;
-  }
-}
-details:not(details[open]) > summary:before {
-  color: var(--link-color);
-  content: 'Expand ▽';
-  /* background: linear-gradient(0deg, #ffffff9c, #ffffff00 50%); */
-}
-summary::marker {
-  content: ""
-}
-summary::-webkit-details-marker {
-  content: ""
-}
-summary {
-  > code {
-    margin: 0;
-  }
-  > code > pre {
-    margin: 0;
-  }
-}
-
 code.language-bash, code.language-zsh, code.language-sh {
   .highlight-1 {
     font-style: italic;
