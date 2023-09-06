@@ -17,7 +17,7 @@ fn print(paths: Vec<PathBuf>) {
 }
 
 #[must_use]
-pub fn setup(bin_path: &Path, args: Vec<String>) -> notify::FsEventWatcher {
+pub fn setup(bin_path: &Path, args: Vec<String>) -> notify::RecommendedWatcher {
     let mut child: Option<Child> = None;
     let bin_path_buf = bin_path.to_path_buf();
     let mut watcher = recommended_watcher(move |res| {
