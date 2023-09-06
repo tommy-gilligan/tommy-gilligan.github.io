@@ -1,34 +1,34 @@
 +++
-title = "Zsh Keybinding Reminder"
-description = "A small masochism to use Zsh more efficiently"
+title = "Zsh Keybinding Reminders"
+description = "A small flagellator to learn more efficient use of Zsh"
 published = true
 +++
-I love using Neovim but at the shell I still prefer to use Emacs style
-keybindings. I've never been able to remember them all, so lets build a script
-to remind us of them.
+I've never been able to remember all of the handy line editing keyboard
+shortcuts that are available in Zsh.  Sure, I know that
+<kbd>Ctrl</kbd>+<kbd>A</kbd> goes to the beginning of the line and
+<kbd>Ctrl</kbd>+<kbd>E</kbd> goes to the end of the line but there are many
+other keyboard shortcuts (*key bindings*) besides these that can be quite
+useful.  I'd like to learn them so that I can use Zsh more efficiently.  Maybe
+a program that annoys me with random keybinding at shell startup could help me
+learn.  Let's make that.
 
-First lets get a list of all the Emacs mode keybindings currently in use by zsh.
+### Finding Zsh Keybindings
 
-explain key combination
-feedback to markdown crate (html/mdast)
-phone
-mention how zshzle is at the core of this
-emacs style keybindings are the defaault
+First I need a list of all the key bindings active in the shell. ZLE or the zsh
+line editor is the part of Zsh that is responsible for binding a particular key
+combination to a line editing command.  Consulting the `man` page for ZLE we
+find that `bindkey` can be used to display a set of key bindings (a *keymap*).
 
-```zsh
-% bindkey -M emacs
-```
 <details>
-<summary>Toggle Output</summary>
-<!-- prettier-ignore -->
-<pre><code>"^@" set-mark-command
+<summary><pre><samp>% <kbd>bindkey</kbd>
+"^@" set-mark-command
 "^A" beginning-of-line
 "^B" backward-char
 "^D" delete-char-or-list
 "^E" end-of-line
 "^F" forward-char
-"^G" send-break
-"^H" backward-delete-char
+"^G" send-break</samp></pre></summary>
+<pre><samp>"^H" backward-delete-char
 "^I" expand-or-complete
 "^J" accept-line
 "^K" kill-line
@@ -50,16 +50,28 @@ emacs style keybindings are the defaault
 "^X^K" kill-buffer
 "^X^N" infer-next-history
 "^X^O" overwrite-mode
+"^X^R" _read_comp
 "^X^U" undo
 "^X^V" vi-cmd-mode
 "^X^X" exchange-point-and-mark
 "^X*" expand-word
 "^X=" what-cursor-position
+"^X?" _complete_debug
+"^XC" _correct_filename
 "^XG" list-expand
+"^Xa" _expand_alias
+"^Xc" _correct_word
+"^Xd" _list_expansions
+"^Xe" _expand_word
 "^Xg" list-expand
+"^Xh" _complete_help
+"^Xm" _most_recent_file
+"^Xn" _next_tags
 "^Xr" history-incremental-search-backward
 "^Xs" history-incremental-search-forward
+"^Xt" _complete_tag
 "^Xu" undo
+"^X~" _bash_list-choices
 "^Y" yank
 "^[^D" list-choices
 "^[^G" send-break
@@ -74,8 +86,10 @@ emacs style keybindings are the defaault
 "^[\"" quote-region
 "^[\$" spell-word
 "^['" quote-line
+"^[," _history-complete-newer
 "^[-" neg-argument
 "^[." insert-last-word
+"^[/" _history-complete-older
 "^[0" digit-argument
 "^[1" digit-argument
 "^[2" digit-argument
@@ -110,6 +124,8 @@ emacs style keybindings are the defaault
 "^[T" transpose-words
 "^[U" up-case-word
 "^[W" copy-region-as-kill
+"^[[1;3C" forward-word
+"^[[1;3D" backward-word
 "^[[200~" bracketed-paste
 "^[[3~" delete-char
 "^[[A" up-line-or-history
@@ -136,113 +152,149 @@ emacs style keybindings are the defaault
 "^[y" yank-pop
 "^[z" execute-last-named-cmd
 "^[|" vi-goto-column
+"^[~" _bash_complete-word
 "^[^?" backward-kill-word
 "^_" undo
 " "-"~" self-insert
 "^?" backward-delete-char
-"\M-^@"-"\M-^?" self-insert
-</code>
-</pre>
+"\M-^@"-"\M-^?" self-insert</samp></pre>
 </details>
 
+There's a little bit of interpretation involved in understanding this keymap:
+
+- `^[` followed by <var>character</var> means <kbd>Alt</kbd>+<kbd><var>character</var></kbd>.<br>
+  If <kbd>Alt</kbd>+<kbd>U</kbd> is pressed then `up-case-word`:<br>
+  `"^[u" up-case-word`
+- `^` followed by <var>character</var> means <kbd>Ctrl</kbd>+<kbd><var>character</var></kbd>.<br>
+  If <kbd>Ctrl</kbd>+<kbd>A</kbd> is pressed then `beginning-of-line`:<br>
+  `"^A" beginning-of-line`
+- Sometimes a binding consists of multiple keys pressed in sequence.<br>
+  If <kbd>Ctrl</kbd>+<kbd>X</kbd> then <kbd>Ctrl</kbd>+<kbd>F</kbd> is pressed then `vi-find-next-char`:<br>
+  `"^X^F" vi-find-next-char`
+- <var>character</var> not preceded by `^[` or `^` is <kbd><var>character</var></kbd> without a modifier key.<br>
+  If <kbd>Ctrl</kbd>+<kbd>X</kbd> then <kbd>=</kbd> is pressed then `what-cursor-position`:<br>
+  `"^X=" what-cursor-position`
+
+### Selecting a Random Keybinding 
+
+It is easy enough to select a random keybinding, just shuffle all the
+keybindings and select the first one:
+
+<pre><samp>% <kbd>bindkey | shuf -n1</kbd>
+"^[f" forward-word
+</samp></pre>
+
+### Printing Help for ZLE Commands
+
+It's all well and good if a key is mapped to a ZLE command with an obvious name
+like `forward-word` but what if that's not the case.  Selecting another random
+keybinding:
+
+<pre><samp>% <kbd>bindkey | shuf -n1</kbd>
+"^@" set-mark-command
+</samp></pre>
+
+What in the world is `set-mark-command`?  The `man` page has the answer!
+
+<pre><samp>% <kbd>man 1 zshzle</kbd></samp></pre>
+
+After scrolling a bit:
+
+<pre><samp>set-mark-command (^@) (unbound) (unbound)
+      Set the mark at the cursor position.  If called with a negative
+      numeric argument, do not set the mark but deactivate the region
+      so that it is no longer highlighted (it is still usable for
+      other purposes).  Otherwise the region is marked as active.
+</samp></pre>
+
+So it should be possible to just grep for this documentation right?
+<pre><samp>% <kbd>man 1 zshzle | grep -A1 set-mark-command</kbd>
+% </samp></pre>
+
+Curiously, `grep` doesn't return any matches.  What is going on here?  Inspecting the output from `man` with `xxd`
+<pre><samp>% <kbd>man 1 zshzle | xxd | cut -b11-</kbd>
+&hellip;
+0a20 2020 2020 2020 7308 7365 0865 7408  .       s.se.et.
+742d 082d 6d08 6d61 0861 7208 726b 086b  t-.-m.ma.ar.rk.k
+2d08 2d63 0863 6f08 6f6d 086d 6d08 6d61  -.-c.co.om.mm.ma
+0861 6e08 6e64 0864 2028 5e08 5e40 0840  .an.nd.d (^.^@.@
+2920 2875 6e62 6f75 6e64 2920 2875 6e62  ) (unbound) (unb
+6f75 6e64 290a 2020 2020 2020 2020 2020  ound).
+&hellip;</samp></pre>
+
+The label for `set-mark-command` is present but it is somewhat mangled. Every
+letter in the label is followed by `0x08` and then a repitition of the original
+letter.  Presumably this strange sequence of characters is to format things
+nicely for display.  This output is a bit annoying to have to deal with but
+it's not hard to do so by filtering through `sed`:
+
+<pre><samp>% <kbd>man 1 zshzle | sed 's/.\x08//g</kbd></samp></pre>
+
+This `sed` filter is essentailly "when there is a character followed by the
+`0x08` character, substitute both characters with nothing (delete them)." By
+chaining `grep` on the end, it is now possible to search the documentation for
+a ZLE command by name:
+
+<pre><samp>% <kbd>man 1 zshzle | sed -E 's/^ *|\x08.//g' | grep -A1 set-mark-command</kbd>
+set-mark-command in Emacs mode, or by visual-mode in Vi mode) is
+enabled by default; consult this reference for more information.
+--
+set-mark-command (^@) (unbound) (unbound)
+Set the mark at the cursor position.  If called with a negative
+--
+set-mark-command or exchange-point-and-mark.  Note that whether
+or not the region is active has no effect on its use within</samp></pre>
+
+There are a few unintended matches here.  The match in the middle is what I'm
+interested in.  Tightening up the regular expression:
+<pre><samp>% <kbd>man 1 zshzle | sed -E 's/^ *|\x08.//g' | grep -A1 '^set-mark-command ('</kbd>
+set-mark-command (^@) (unbound) (unbound)
+Set the mark at the cursor position.  If called with a negative</samp></pre>
+
+Switching from `grep` to `sed` and generalising to create a Zsh function:
+
 ```zsh
-% bindkey -M emacs | shuf -n1
-"^X^N" infer-next-history
+function print_zle_command_help() {
+  man 1 zshzle | sed -E -n "
+  # unindent and delete special formatting characters
+  s/^ *|\x08.//g
+  # so that $1 can match the start of a command's entry in manpage
+  # up until the next blank line
+  /^$1 \(/,/^$/ {
+      # delete header line and blank lines
+      /^$1 \(|^$/d
+      # print entry
+      p
+  }"
+}
 ```
 
-I have no idea what `infer-next-history` means but a definition can be found at
-`zshzle(1)`
+Calling `print_zle_command_help` with `set-mark-command`
+<pre><samp>% <kbd>print_zle_command_help set-mark-command</kbd>
+Set the mark at the cursor position.  If called with a negative
+numeric argument, do not set the mark but deactivate the region
+so that it is no longer highlighted (it is still usable for
+other purposes).  Otherwise the region is marked as active.
+</samp></pre>
+
+### Printing Random Keybinding on Shell Startup
+
+To print a random keybinding every time the shell starts, add the
+`print_zle_command_help` function and this `print_random_keybinding` function
+to `~/.zshrc`.
 ```zsh
-% man 1 zshzle
+function print_random_keybinding() {
+    # Select a random keybinding
+    local keybinding=$(bindkey | shuf -n1)
+    # Get keyboard shortcut part of the keybinding, deleting the quotes
+    local shortcut=${${${(s. .)keybinding}[1]}[2,-2]}
+    # Get the command part of the keybinding
+    local command_name=${${(s. .)keybinding}[2]}
+    echo $shortcut
+    print_zle_command_help $command_name
+}
 ```
 
-Scrolling down, we get 
-```zsh
-infer-next-history (^X^N) (unbound) (unbound)
-  Search in the history list for a line matching the current one and fetch
-  the event following it.
-```
+Combining selecting a random keybinding and printing it:
 
-It would be nice for our script to display this next to the keybinding.
-Grepping the man page for `infer-next-history` does not work though.
-```zsh
-% man 1 zshzle | grep -C5 'infer-next-history'
-%
-```
-
-Grepping for the definition body does work though
-```zsh
-% man 1 zshzle | grep -C5 'Search in the history list'
-```
-
-What is going on? Why can't `grep` find this?  Let's inspect the output from
-`man` with `xxd`.
-```zsh
-% man 1 zshzle | grep -C5 'Search in the history list' | xxd
-…
-00000100: 2020 2020 2020 2069 0869 6e08 6e66 0866         i.in.nf.f
-00000110: 6508 6572 0872 2d08 2d6e 086e 6508 6578  e.er.r-.-n.ne.ex
-00000120: 0878 7408 742d 082d 6808 6869 0869 7308  .xt.t-.-h.hi.is.
-00000130: 7374 0874 6f08 6f72 0872 7908 7920 285e  st.to.or.ry.y (^
-00000140: 085e 5808 585e 085e 4e08 4e29 2028 756e  .^X.X^.^N.N) (un
-00000150: 626f 756e 6429 2028 756e 626f 756e 6429  bound) (unbound)
-00000160: 0a20 2020 2020 2020 2020 2020 2020 2053  .              S
-…
-```
-
-Here we see that we have a characte n (`0x6e`) then `0x08` and the same
-character n (`0x6e`) again. What is `0x08`?
-
-```zsh
-% man ascii
-…
-The hexadecimal set:
-
-00 nul   01 soh   02 stx   03 etx   04 eot   05 enq   06 ack   07 bel
-08 bs    09 ht    0a nl    0b vt    0c np    0d cr    0e so    0f si
-…
-```
-
-It is the backspace character.  We can strip out this pattern with:
-
-```zsh
-% man -P cat 1 zshzle | sed 's/.\x08//g'
-```
-
-That is: where there is a character followed by the backspace character,
-substitute both characters with nothing (delete them).
-
-```zsh
-% man -P cat 1 zshzle | sed 's/.\x08//g' | grep -A2 "^[[:space:]]*infer-next-history"
-infer-next-history (^X^N) (unbound) (unbound)
-      Search in the history list for a line matching the current one
-      and fetch the event following it.
-```
-
-So putting it all together now:
-
-
-```zsh
-# Select a random keybinding
-keybinding=$(bindkey -M emacs | shuf -n1)
-# Get keyboard shortcut part of the keybinding, deleting the quotes
-shortcut=${${${(s. .)keybinding}[1]}[2,-2]}
-bound=${${(s. .)keybinding}[2]}
-man -P cat 1 zshzle | sed -n "s/.\x08//g; /^ *$bound /,/^       [^[:space:]]/p"
-```
-
-
-What about key bindings that I've already committed to memory?  Bit of a wasted
-opportunity to tell me about a key binding like that.  A deny-list can be kept
-in the `.zshrc` embedded in our script that prints keybinding tips.  All we
-need to do to filter out a keybinding by name is 
-```zsh
-| grep -Ev ' (beginning-of-line|end-of-line)$' |
-```
-
-By default `man` will use the `less` program to make the output from `man`
-scrollable i.e. 'paged'. Incidentally, you can search for `infer-next-history`
-inside of less (use `/` to start entering a search term). This implication here
-is that `less` strips control sequences when searching but that `grep` does
-not. Where does the backspace character come from? Why is it there? Point out
-source (but we're not going to use it to avoid having to fetch anything)
+<script src="https://gist.github.com/tommy-gilligan/6c9b4de4def9702c80364fba43f6f938.js"></script>
