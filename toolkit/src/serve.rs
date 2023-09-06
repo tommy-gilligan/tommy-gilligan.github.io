@@ -8,6 +8,7 @@ use hyper::{
 use hyper_staticfile::Static;
 use std::{io::Error as IoError, path::Path};
 
+#[allow(clippy::future_not_send)]
 async fn handle_request<B>(
     mut req: Request<B>,
     static_: Static,
@@ -31,6 +32,7 @@ async fn handle_request<B>(
     }
 }
 
+#[allow(clippy::unused_async)]
 pub async fn run(
     refresh_channel: Option<tokio::sync::watch::Receiver<()>>,
 ) -> (tokio::task::JoinHandle<()>, std::net::SocketAddr) {
