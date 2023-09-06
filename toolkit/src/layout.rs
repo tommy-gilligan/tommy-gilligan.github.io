@@ -6,7 +6,7 @@ fn combined_title(page_title: Option<&str>) -> String {
     }
 }
 
-const CSP: &str = "default-src 'none'; script-src 'self' 'unsafe-inline'; script-src-elem https://gist.github.com 'self' 'unsafe-inline'; script-src-attr 'none'; style-src 'self'; style-src-elem https://github.githubassets.com 'self' 'unsafe-inline'; style-src-attr 'unsafe-inline'; img-src 'self' data: http: https:; font-src 'none'; connect-src 'self'; media-src 'none'; object-src 'none'; child-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; upgrade-insecure-requests; block-all-mixed-content; base-uri 'self'; manifest-src 'self';";
+const CSP: &str = "default-src 'none'; script-src 'self' 'unsafe-inline'; script-src-elem https://gist.github.com 'self' 'unsafe-inline'; script-src-attr 'none'; style-src https://github.githubassets.com 'self'; style-src-elem https://github.githubassets.com 'self' 'unsafe-inline'; style-src-attr 'unsafe-inline'; img-src 'self' data: http: https:; font-src 'none'; connect-src 'self'; media-src 'none'; object-src 'none'; child-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; upgrade-insecure-requests; block-all-mixed-content; base-uri 'self'; manifest-src 'self';";
 
 markup::define! {
     Layout<'a>(
