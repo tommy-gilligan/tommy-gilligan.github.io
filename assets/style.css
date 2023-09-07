@@ -103,6 +103,7 @@ code.language-bash, code.language-zsh, code.language-sh {
   }
 }
 kbd:not(samp > kbd) {
+  margin-right: 1px;
   box-sizing: border-box;
   background-color: #eee;
   border-radius: 3px;
