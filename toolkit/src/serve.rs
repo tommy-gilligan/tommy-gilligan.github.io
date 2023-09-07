@@ -7,8 +7,6 @@ use hyper::{
 };
 use hyper_staticfile::Static;
 use std::{io::Error as IoError, path::Path};
-use http::response::Builder as ResponseBuilder;
-use http::{header, StatusCode};
 
 #[allow(clippy::future_not_send)]
 async fn handle_request<B>(
@@ -29,13 +27,6 @@ async fn handle_request<B>(
         });
 
         Ok(response)
-    } else if req.uri().path() == "/" {
-        let res = ResponseBuilder::new()
-            .status(StatusCode::MOVED_PERMANENTLY)
-            .header(header::LOCATION, "/index.html")
-            .body(Body::empty())
-            .expect("unable to build response");
-        Ok(res)
     } else {
         static_.clone().serve(req).await
     }
