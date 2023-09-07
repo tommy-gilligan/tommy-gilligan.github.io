@@ -16,11 +16,10 @@ async fn browser_clipping_test() {
         for child in browser.children().await {
             let child_rect = child.rect().await.unwrap();
             let child_right = child_rect.x + child_rect.width;
-            assert!(
-                child_right <= main_right,
-                "{} intersects main",
-                child.outer_html().await.unwrap()
-            )
+            if child_right > main_right {
+                browser.screenshot().await;
+                panic!("{} intersects main", child.outer_html().await.unwrap())
+            }
         }
     }
 }

@@ -70,6 +70,11 @@ jobs:
         chromedriver --log-level=ALL --log-path=chromedriver.log &
         sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
     - run: cargo test -- browser_
+    - uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: validate-screenshots
+        path: screenshots
   deploy:
     needs:
     - ci
