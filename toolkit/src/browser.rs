@@ -47,7 +47,7 @@ impl Browser {
 
     pub async fn children(&mut self) -> Vec<WebElement> {
         self.web_driver
-            .query(By::Css("main *"))
+            .query(By::Css("main > * > *"))
             .all_from_selector()
             .await
             .unwrap()

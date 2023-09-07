@@ -1,4 +1,5 @@
 use git2::Repository;
+use std::path::Path;
 use toolkit::crawl::Crawler;
 
 #[tokio::test(flavor = "multi_thread")]
@@ -17,7 +18,10 @@ async fn browser_clipping_test() {
             let child_rect = child.rect().await.unwrap();
             let child_right = child_rect.x + child_rect.width;
             if child_right > main_right {
-                browser.screenshot().await;
+                std::fs::create_dir_all("screenshots").unwrap();
+                main.screenshot(Path::new("screenshots/clipping.png"))
+                    .await
+                    .unwrap();
                 panic!("{} intersects main", child.outer_html().await.unwrap())
             }
         }
