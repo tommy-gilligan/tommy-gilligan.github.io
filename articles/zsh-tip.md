@@ -115,9 +115,8 @@ or not the region is active has no effect on its use within</samp></pre>
 
 There are a few unintended matches here.  The match in the middle is what I'm
 interested in.  Tightening up the regular expression:
-<pre><samp>% <kbd>man 1 zshzle | sed -E 's/^ *|\x08.//g' | grep -A1 '^set-mark-command ('</kbd>
-set-mark-command (^@) (unbound) (unbound)
-Set the mark at the cursor position.  If called with a negative</samp></pre>
+<pre><samp>% <kbd>man 1 zshzle | sed -E 's/^ *|\x08.//g' | grep '^set-mark-command ('</kbd>
+set-mark-command (^@) (unbound) (unbound)</samp></pre>
 
 Switching from `grep` to `sed` and generalising to create a Zsh function:
 
