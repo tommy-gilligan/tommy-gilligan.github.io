@@ -63,7 +63,7 @@ body {
   font-family: sans-serif;
 }
 main {
-  max-width: 60ch;
+  max-width: 64ch;
   text-align: justify;
   hyphens: auto;
   white-space: normal;
