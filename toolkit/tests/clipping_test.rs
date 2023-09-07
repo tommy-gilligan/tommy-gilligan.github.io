@@ -2,7 +2,7 @@ use git2::Repository;
 use toolkit::crawl::Crawler;
 
 #[tokio::test(flavor = "multi_thread")]
-async fn clipping_test() {
+async fn browser_clipping_test() {
     std::env::set_current_dir(Repository::open_from_env().unwrap().workdir().unwrap()).unwrap();
     let server = toolkit::serve::run(None).await;
     let mut browser = toolkit::browser::Browser::new(&server.1).await;

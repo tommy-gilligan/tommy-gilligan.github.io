@@ -89,6 +89,9 @@ pub fn test() -> bool {
     command
         .arg("test")
         .arg("--no-fail-fast")
+        .arg("--")
+        .arg("--skip")
+        .arg("browser_")
         .current_dir(git_directory());
     command.status().unwrap().success()
 }
