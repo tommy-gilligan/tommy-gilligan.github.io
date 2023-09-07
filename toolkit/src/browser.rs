@@ -2,12 +2,18 @@ use std::{fs::File, io::prelude::*, path::Path};
 
 use base64::{engine::general_purpose, Engine as _};
 use regex::Regex;
+
 use serde_json::json;
+
 use std::io::BufReader;
 use std::net::SocketAddr;
+use thirtyfour::WebElement;
 use thirtyfour::{
     extensions::cdp::ChromeDevTools, ChromiumLikeCapabilities, DesiredCapabilities, WebDriver,
 };
+
+use thirtyfour::prelude::ElementQueryable;
+use thirtyfour::By;
 use url::Url;
 
 pub struct Browser {
@@ -29,6 +35,22 @@ impl Browser {
             dev_tools: ChromeDevTools::new(web_driver.handle),
             url: None,
         }
+    }
+
+    pub async fn main(&mut self) -> WebElement {
+        self.web_driver
+            .query(By::Css("main"))
+            .first()
+            .await
+            .unwrap()
+    }
+
+    pub async fn children(&mut self) -> Vec<WebElement> {
+        self.web_driver
+            .query(By::Css("main *"))
+            .all_from_selector()
+            .await
+            .unwrap()
     }
 
     pub async fn screenshot(&mut self) {
