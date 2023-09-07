@@ -31,15 +31,15 @@ find that `bindkey` can be used to display a set of key bindings (a *keymap*).
 There's a little bit of interpretation involved in understanding this keymap:
 
 - `^[` followed by <var>character</var> means <kbd>Alt</kbd>+<kbd><var>character</var></kbd>.<br>
-  If <kbd>Alt</kbd>+<kbd>U</kbd> is pressed then `up-case-word`:<br>
+  <kbd>Alt</kbd>+<kbd>U</kbd> invokes `up-case-word`:<br>
   `"^[u" up-case-word`
 - `^` followed by <var>character</var> means <kbd>Ctrl</kbd>+<kbd><var>character</var></kbd>.<br>
-  If <kbd>Ctrl</kbd>+<kbd>A</kbd> is pressed then `beginning-of-line`:<br>
+  <kbd>Ctrl</kbd>+<kbd>A</kbd> invokes `beginning-of-line`:<br>
   `"^A" beginning-of-line`
 - Sometimes a binding consists of multiple keys pressed in sequence.<br>
-  If <kbd>Ctrl</kbd>+<kbd>X</kbd> then <kbd>Ctrl</kbd>+<kbd>F</kbd> is pressed then `vi-find-next-char`:<br>
+  <kbd>Ctrl</kbd>+<kbd>X</kbd> then <kbd>Ctrl</kbd>+<kbd>F</kbd> invokes `vi-find-next-char`:<br>
   `"^X^F" vi-find-next-char`
-- <var>character</var> not preceded by `^[` or `^` is <kbd><var>character</var></kbd> without a modifier key.<br>
+- <var>character</var> without `^[` or `^` is <kbd><var>character</var></kbd> by itself.<br>
   If <kbd>Ctrl</kbd>+<kbd>X</kbd> then <kbd>=</kbd> is pressed then `what-cursor-position`:<br>
   `"^X=" what-cursor-position`
 
@@ -126,7 +126,7 @@ function print_zle_command_help() {
   man 1 zshzle | sed -E -n "
   # unindent and delete special formatting characters
   s/^ *|\x08.//g
-  # so that $1 can match the start of a command's entry in manpage
+  # so $1 matches the start of a command's manpage entry
   # up until the next blank line
   /^$1 \(/,/^$/ {
       # delete header line and blank lines
