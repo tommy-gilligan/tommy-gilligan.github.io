@@ -111,6 +111,11 @@ impl Markdown {
                                 crate::syntax_highlighting::Language::Rust,
                             ))
                             .unwrap(),
+                            "python" => String::from_utf8(crate::syntax_highlighting::highlight(
+                                value.as_bytes(),
+                                crate::syntax_highlighting::Language::Python,
+                            ))
+                            .unwrap(),
                             "bash" | "zsh" | "sh" => {
                                 String::from_utf8(crate::syntax_highlighting::highlight(
                                     value.as_bytes(),

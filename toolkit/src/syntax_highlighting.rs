@@ -29,6 +29,7 @@ const HIGHLIGHT_NAMES: [&str; 21] = [
 pub enum Language {
     Sh,
     Rust,
+    Python,
 }
 
 pub fn highlight(source: &[u8], lang: Language) -> Vec<u8> {
@@ -36,6 +37,13 @@ pub fn highlight(source: &[u8], lang: Language) -> Vec<u8> {
         Language::Sh => HighlightConfiguration::new(
             tree_sitter_bash::language(),
             tree_sitter_bash::HIGHLIGHT_QUERY,
+            "",
+            "",
+        )
+        .unwrap(),
+        Language::Python => HighlightConfiguration::new(
+            tree_sitter_python::language(),
+            tree_sitter_python::HIGHLIGHT_QUERY,
             "",
             "",
         )
