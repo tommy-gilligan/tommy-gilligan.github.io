@@ -47,7 +47,7 @@ pub async fn run(
     });
 
     let server = hyper::Server::bind(
-        &std::net::SocketAddrV4::new(std::net::Ipv4Addr::LOCALHOST, 3000).into(),
+        &std::net::SocketAddrV4::new(std::net::Ipv4Addr::UNSPECIFIED, 3000).into(),
     )
     .serve(make_service);
 
