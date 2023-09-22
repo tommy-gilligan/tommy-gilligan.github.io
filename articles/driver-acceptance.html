@@ -1,0 +1,436 @@
+<script id="frontmatter" type="application/toml">
+title = "Zsh Keybinding Reminders"
+description = "A small flagellator to learn more efficient use of Zsh"
+published = true
+published_at = 2023-01-01T01:01:01Z
+</script>
+<p>
+A while ago I was working on some Rust <a href="https://github.com/rust-embedded/embedded-hal"><code>embedded-hal</code></a> drivers for the <a href="https://core-electronics.com.au/piicodev.html">PiicoDev</a> range of open hardware from <a href="https://core-electronics.com.au">Core Electronics</a>.  <a href="https://core-electronics.com.au/piicodev.html">PiicoDev</a> already has <a href="https://github.com/CoreElectronics">excellent support</a> in <a href="https://micropython.org">MicroPython</a> and there are existing
+<code>embedded-hal</code> drivers for individual pieces of PiicoDev hardware (albeit incidentally; by targeting whichever IC is at the heart of the device eg. <a href="https://github.com/TomSievers/vl53l1x-rs">vl53l1x-uld</a>). Nevertheless, I was interested in creating a holistic set of <code>embedded-hal</code> drivers that targeted PiicoDev specifically.
+</p>
+<p>
+Moving from MicroPython to Rust's <code>embedded-hal</code>, it makes little sense to get too attached to a MicroPython API. There's only so well the API can realistically be replicated in Rust. Choosing to disregard the API of the existing MicroPython drivers was liberating: it allowed me to focus on creating my own API that could best utilize the Rust environment. I feel like I made some interesting API choices but these choices are not what I want to talk about here.
+</p>
+<p>
+A problem came up working on these drivers: how do I decide when these
+are ready to be released? One potential criterion for whether my new
+drivers pass mustard:
+</p>
+<blockquote>
+<p>
+Can these new drivers be used for all of the same things as the
+existing drivers?
+</p>
+</blockquote>
+<p>
+This criterion is frustratingly broad. The set of specific uses for the
+drivers is basically endless. Thankfully the offical drivers come with a
+large but finite number of examples. So an improved criterion: </p>
+<blockquote>
+<p>
+Can these new drivers be used to recreate all of the same examples as
+the existing drivers?
+</p>
+</blockquote>
+<p>
+A nice bonus here is that by using this as some kind of 'acceptance
+criterion', it follows that the examples need to be ported (and code
+examples are usually a pretty indispensible artefact for API consumers).
+</p>
+<h3>Laser Distance Sensor VL53L1X (<em>p7</em>)</h3>
+<p>
+I've picked just a single PiicoDev device to focus on here:
+<a href="https://piico.dev/p7">Laser Distance Sensor VL53L1X</a>. This
+device is identified as <em>p7</em> in PiicoDev URLs. <em>p7</em> is a
+convenient shorthand to refer to this device and is what I'll be
+sticking to. The
+<a href="https://github.com/CoreElectronics/CE-PiicoDev-VL53L1X-MicroPython-Module.git">official driver</a>
+includes a single, simple example for <em>p7</em>:
+</p>
+<div class="editor">
+<span class="title"><span>CE-PiicoDev-VL53L1X-MicroPython-Module/main.py</span><a class="maximize" href="https://github.com/CoreElectronics/CE-PiicoDev-VL53L1X-MicroPython-Module/blob/47f0cff02306b80d4e03417d355e3e566409e634/main.py"></a></span>
+<pre><code class="language-python"><span class="highlight-10">from</span> <span class="highlight-4">PiicoDev_VL53L1X</span> <span class="highlight-10">import</span> <span class="highlight-4">PiicoDev_VL53L1X</span>
+<span class="highlight-10">from</span> <span class="highlight-18">time</span> <span class="highlight-10">import</span> <span class="highlight-18">sleep</span>
+
+<span class="highlight-18">distSensor</span> <span class="highlight-13">=</span> <span class="highlight-4">PiicoDev_VL53L1X</span>()
+
+<span class="highlight-10">while</span> <span class="highlight-3">True</span>:
+    <span class="highlight-18">dist</span> <span class="highlight-13">=</span> <span class="highlight-18">distSensor</span>.<span class="highlight-9">read</span>() <span class="highlight-1"># read the distance in millimetres</span>
+    <span class="highlight-7">print</span>(<span class="highlight-7">str</span>(<span class="highlight-18">dist</span>) <span class="highlight-13">+</span> <span class="highlight-15">" mm"</span>) <span class="highlight-1"># convert the number to a string and print</span>
+    <span class="highlight-7">sleep</span>(<span class="highlight-12">0.1</span>)</code></pre>
+</div>
+      <h3>Running the MicroPython Example with Thonny</h3>
+      <p>
+        Thonny eases some of the pain points common to getting started with
+        MicroPython:
+      </p>
+      <ul>
+        <li>Downloading the right MicroPython interpreter to the Pico.</li>
+        <li>Downloading 3rd-party MicroPython libraries to the Pico.</li>
+        <li>
+          Initiating a MicroPython session on the Pico for code execution.
+        </li>
+      </ul>
+      <p>
+        The Raspberry Pi Foundation covers using a Pico with Thonny in
+        <a href="https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico">Getting started with the Raspberry Pi Pico</a>. This is a very accessible starting point. Core Electronics provides
+        some instructions for
+        <a href="https://core-electronics.com.au/guides/how-to-setup-a-raspberry-pi-pico-and-code-with-thonny/">How to Setup a Raspberry Pi Pico and Code with Thonny</a>
+        that are a bit more relevant to the particular hardware I'm using. And
+        some
+        <a href="https://core-electronics.com.au/guides/raspberry-pi-pico/piicodev-distance-sensor-vl53l1x-raspberry-pi-pico-guide/">further instructions from Core Electronic</a>
+        is all that is needed to get the above <em>p7</em> example running in
+        Thonny. Summarising:
+      </p>
+      <ol>
+        <li>
+          Install an appropriate MicroPython interpreter on the Pico.
+          <figure>
+            <figcaption>Thonny options</figcaption>
+            <img src="thonny-options.png" />
+          </figure>
+        </li>
+        <li>
+          Copy the
+          <a href="https://raw.githubusercontent.com/CoreElectronics/CE-PiicoDev-Unified/main/PiicoDev_Unified.py">PiicoDev Unified Library</a>
+          to the Pico filesystem.
+        </li>
+        <li>
+          Copy the
+          <a href="https://raw.githubusercontent.com/CoreElectronics/CE-PiicoDev-VL53L1X-MicroPython-Module/main/PiicoDev_VL53L1X.py">PiicoDev_VL53L1X.py</a>
+          to the Pico filesystem.
+        </li>
+        <li>
+          Run the above example.
+          <figure>
+            <figcaption>Thonny - main.py @ 1:1</figcaption>
+            <img src="thonny.png" />
+          </figure>
+        </li>
+      </ol>
+      <h3>Running the MicroPython Example with <code>mpremote</code></h3>
+      <p>
+        Thonny is great for interactive operation of MicroPython on a Pico but
+        to automate operation of the Pico I needed something different.
+        MicroPython makes available a handy tool called
+        <a href="https://docs.micropython.org/en/latest/reference/mpremote.html"><code>mpremote</code></a>
+        for talking with the interpreter from a host's CLI. Steps 2-4 of
+        <em>Running the MicroPython Example with Thonny</em> can be automated
+        through <code>mpremote</code> In other words: <code>mpremote</code> can
+        be used for basically all of what Thonny can be used for
+        <em>except for installing a MicroPython interpreter when one isn't already installed</em>. Without Thonny to find the right MicroPython interpreter for a
+        particular development board, it is necessary to carefully select the
+        right one at
+        <a href="https://micropython.org/download/">MicroPython Downloads</a>.
+        Popular options:
+      </p>
+      <ul>
+        <li>
+          <a href="https://micropython.org/resources/firmware/RPI_PICO_W-20230426-v1.20.0.uf2">MicroPython for Raspberry Pi Pico W</a>
+          or
+        </li>
+        <li>
+          <a href="https://micropython.org/resources/firmware/RPI_PICO-20230426-v1.20.0.uf2">MicroPython for Raspberry Pi Pico</a>
+        </li>
+      </ul>
+      <ol>
+        <li>
+          Hold BOOTSEL button during connection to put Pico in USB mass storage
+          device mode.
+        </li>
+        <li>
+          Copy a DOWNLOADED_INTERPRETER UF2 file to the mounted storage device
+          DEVBOARD_MOUNTPOINT.
+        </li>
+        <li>Wait a second or two for the interpreter to become available.</li>
+        <li>
+          Copy the PiicoDev shared library code ('Unified Library')
+          <code>mpremote cp CE-PiicoDev-Unified/min/PiicoDev_Unified.py :</code>
+        </li>
+        <li>
+          Copy the PiicoDev <em>p7</em> specific driver code
+          <code>mpremote cp
+            CE-PiicoDev-VL53L1X-MicroPython-Module/min/PiicoDev_VL53L1X.py
+            :</code>
+        </li>
+        <li>
+          Run the <em>p7</em> example
+          <code>mpremote run CE-PiicoDev-VL53L1X-MicroPython-Module/main.py</code>
+        </li>
+      </ol>
+      <p>Condensing this into a script:</p>
+      <div class="editor">
+        <span class="title"><span>script.sh</span><a class="maximize"></a></span>
+        <pre><code class="language-bash"><span class="highlight-1"># connect to Pico with BOOTSEL held</span>
+<span class="highlight-1"># assumes that it has been mounted to DEVBOARD_MOUNTPOINT</span>
+<span class="highlight-7">set</span> <span class="highlight-2">-e</span>
+<span class="highlight-14">DOWNLOADED_INTERPRETER</span>=<span class="highlight-13">$</span><span class="highlight-14">1</span>
+<span class="highlight-14">DEVBOARD_MOUNTPOINT</span>=<span class="highlight-13">$</span><span class="highlight-14">2</span>
+<span class="highlight-7">echo</span> Copying MicroPython interpreter to devboard
+<span class="highlight-10">if</span> <span class="highlight-7">cp</span> <span class="highlight-2">-X</span> <span class="highlight-2">-v</span> <span class="highlight-13">$</span><span class="highlight-14">DOWNLOADED_INTERPRETER</span> <span class="highlight-13">$</span><span class="highlight-14">DEVBOARD_MOUNTPOINT</span>
+<span class="highlight-10">then</span>
+  <span class="highlight-7">:</span>
+<span class="highlight-10">else</span>
+  <span class="highlight-7">echo</span> Make sure the Pico is mounted at <span class="highlight-13">$</span><span class="highlight-14">DEVBOARD_MOUNTPOINT</span>
+  <span class="highlight-7">exit</span> 1
+<span class="highlight-10">fi</span>
+<span class="highlight-7">echo</span> Waiting for intepreter to come up
+<span class="highlight-7">sleep</span> 5
+<span class="highlight-7">echo</span> Copying libraries to devboard
+<span class="highlight-7">mpremote</span> cp CE-PiicoDev-Unified/min/PiicoDev_Unified.py \
+  CE-PiicoDev-VL53L1X-MicroPython-Module/min/PiicoDev_VL53L1X.py :
+<span class="highlight-7">echo</span> Running example
+<span class="highlight-7">mpremote</span> run CE-PiicoDev-VL53L1X-MicroPython-Module/main.py</code></pre>
+      </div>
+      <p>
+        The example runs indefinitely but can be disconnected from with
+        <kbd>Ctrl</kbd>+<kbd>X</kbd>. This automates basically all of the steps
+        involved in running this example except
+      </p>
+      <ul>
+        <li>selecting and downloading the right interpreter</li>
+        <li>
+          putting the Pico in the right state for installing the interpreter
+        </li>
+      </ul>
+      <h3>Installing MicroPython Without BOOTSEL</h3>
+      <p>
+        Being familiar with running code on the Pico with
+        <a href="https://probe.rs"><code>probe-rs</code></a>, needing to connect the Pico in USB mass storage device mode to
+        install the interpreter does not seem all that necessary. The
+        <a href="https://github.com/rp-rs/rp2040-project-template"><code>rp2040-project-template</code></a>
+        is what originally got me onto using <code>probe-rs</code> for
+        programming the Pico in a Rust environment. It is a great starting point
+        if you're somewhat familiar with Rust but have never used it on the Pico
+        before.
+      </p>
+      <p>
+        Using <a href="https://probe.rs"><code>probe-rs</code></a> with the
+        Raspberry Pi Pico requires a 'probe'. Two easy options for getting your
+        hands on a probe:
+      </p>
+      <ul>
+        <li>
+          <a href="https://www.raspberrypi.com/documentation/microcontrollers/debug-probe.html">buy a purpose-built probe</a>
+          or
+        </li>
+        <li>
+          <a href="https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html#debugging-using-another-raspberry-pi-pico">repurpose a spare Raspberry Pi Pico</a>
+        </li>
+      </ul>
+      <p>
+        I don't have one of the purpose-built probes handy so I went with
+        repurposing a spare Pico.
+      </p>
+      <figure>
+        <img src="" />
+        <caption>
+          Obligatory photo of using a spare Raspberry Pi Pico as a probe
+          connected to a target Raspberry Pi Pico
+        </caption>
+      </figure>
+      <p>
+        MicroPython binaries are distributed as UF2. UF2 is a pretty handy
+        format. It is designed expressly for ease-of-use. A device makes itself
+        available as 'mass storage' (for the Pico this is when a BOOTSEL button
+        is held during connection) and any UF2 file copied to this storage is
+        treated as a binary to run. <code>probe-rs</code> does not accept UF2
+        files for programming but will
+        <a href="https://github.com/probe-rs/probe-rs/pull/1765">on the next release</a>. This is a minor problem to overcome though: Microsoft makes available
+        <a href="https://github.com/microsoft/uf2/blob/master/utils/uf2conv.py">an official tool</a>
+        to convert any UF2 file to a plain-old Bin format that is acceptable to
+        <code>probe-rs</code>.
+      </p>
+      <pre class="terminal"><samp>% <kbd>uf2/utils/uf2conv.py DOWNLOADED_INTERPRETER</kbd>
+--- UF2 File Header Info ---
+Family ID is RP2040, hex value is 0xe48bff56
+Target Address is 0x10000000
+All block flag values consistent, 0x2000
+----------------------------
+Converted to bin, output size: 700416, start address: 0x10000000
+Wrote 700416 bytes to flash.bin
+</samp></pre>
+      <p>The output here is important. It gives us:</p>
+      <ul>
+        <li>the path for the new Bin file: <code>flash.bin</code></li>
+        <li>
+          the memory address that this file targets when it is installed to the
+          Pico: <code>0x10000000</code>
+        </li>
+      </ul>
+      <p>
+        This information can be fed fairly directly into <code>probe-rs</code>
+      </p>
+      <pre class="terminal"><samp>% <kbd>probe-rs download --protocol swd --chip RP2040 --disable-progressbars \</kbd>
+> <kbd>--format bin --base-address 0x10000000 flash.bin</kbd>
+    <span class="ansi-green-fg ansi-bold">Finished in 44.151s</span></samp></pre>
+      <p>
+        Now the interpreter is installed and running on the target Pico without
+        having to reconnect it with BOOTSEL held.
+      </p>
+      <p>
+        <code>probe-rs</code> provides a mechanism (<a href="https://github.com/probe-rs/rtt-target">Real-Time Transfer</a>) that can share the USB connection used by the probe for programming
+        the target. As far as I can tell, this is not something MicroPython
+        supports.
+      </p>
+      <p>
+        That is not a problem though because using a USB connection to the probe
+        to install the MicroPython interpreter does not preclude a separate USB
+        connection to the target. In other words, <code>probe-rs</code> can have
+        its connection for installing MicroPython and <code>mpremote</code> can
+        have its connection for communicating with the interpreter.
+      </p>
+      <p>Bringing this all together:</p>
+      <div class="editor">
+        <span class="title"><span></span><a class="maximize"></a></span>
+        <pre><code class="language-bash"><span class="highlight-14">DOWNLOADED_INTERPRETER</span>=<span class="highlight-13">$</span><span class="highlight-14">1</span>
+
+<span class="highlight-7">git</span> clone <span class="highlight-2">--depth</span> 1 https://github.com/microsoft/uf2.git uf2
+<span class="highlight-14">uf2</span><span class="highlight-7">/utils/uf2conv.py</span> <span class="highlight-13">$</span><span class="highlight-14">DOWNLOADED_INTERPRETER</span>
+<span class="highlight-7">probe-rs</span> download \
+    <span class="highlight-2">--protocol</span> swd \
+    <span class="highlight-2">--chip</span> RP2040 \
+    <span class="highlight-2">--format</span> bin \
+    <span class="highlight-2">--base-address</span> 0x10000000 \
+    flash.bin</code></pre>
+      </div>
+      <p>
+        A Rust version of this example that corresponds fairly directly to the
+        original:
+      </p>
+      <div class="editor">
+        <span class="title"><span></span><a class="maximize"></a></span>
+        <pre><code class="language-rust"><span class="highlight-10">loop</span> {
+    <span class="highlight-1">// read the distance in millimetres</span>
+    <span class="highlight-10">let</span> dist = dist_sensor.<span class="highlight-9">read</span>().<span class="highlight-9">unwrap</span>();
+    <span class="highlight-1">// convert the number to a string and print</span>
+    <span class="highlight-8">println</span><span class="highlight-8">!</span>(<span class="highlight-15">"{} m"</span>, dist.to_f64() / <span class="highlight-3">1000.0_f64</span>);
+    delay.<span class="highlight-9">delay_us</span>(<span class="highlight-3">100_000</span>);
+}</code></pre>
+      </div>
+      <p>
+        In both cases, readings from <em>p7</em> will be printed every
+        decisecond indefinitely:
+      </p>
+      <pre class="terminal"><samp>1822 mm
+1825 mm
+1823 mm
+1824 mm
+1820 mm
+</samp></pre>
+      <p>
+        To compare the results from these example programs it is necessary to
+        prevent them from running indefinitely.
+      </p>
+      <p>
+        Spurious differences between readings Taking the range over 1000
+        readings and doubling, we decide that that is the max acceptable delta
+      </p>
+      <pre class="terminal"><samp>% <kbd>probe-run target/thumbv6m-none-eabi/debug/examples/p7 \
+> --chip RP2040 --no-location 2>/dev/null \
+> | head -n1000 \
+> | sort -nk1 \
+> | uniq -c</kbd>
+   4 1819 mm
+  12 1820 mm
+  71 1821 mm
+ 203 1822 mm
+ 334 1823 mm
+ 255 1824 mm
+  98 1825 mm
+  14 1826 mm
+   9 1827 mm</samp></pre>
+      <p>
+        We're making a statement about the stability of a real-world
+        environment. Even if this is a controlled environment, it begs the
+        question: just how controlled is this environment? If we intend others
+        to run these tests, how strict do we want to be about their environment?
+        Sensor noise is a source of error but also subtle movement of sensor or
+        the service it is targeting, atmospheric conditions, vibrations etc.
+      </p>
+      <p>
+        probe-run --chip RP2040 target/thumbv6m-none-eabi/debug/examples/p7 1
+        1819 mm 16 1820 mm 41 1821 mm 173 1822 mm 273 1823 mm 295 1824 mm 132
+        1825 mm 64 1826 mm 5 1827 mm
+      </p>
+      <p>
+        1 1817 mm 12 1818 mm 132 1819 mm 1205 1820 mm 6573 1821 mm 18643 1822 mm
+        29304 1823 mm 26601 1824 mm 13341 1825 mm 3580 1826 mm 548 1827 mm 57
+        1828 mm 3 1829 mm
+      </p>
+      <p>
+        Despite the length of time between Python and Rust, maybe it makes sense
+        to treat them as part of the same series.
+      </p>
+      <p>
+        Using an unreleased version of <code>probe-rs</code> for the sake of a
+        new flag: <code>--no-location</code>
+        <code>bash cargo install --features cli --rev 481ffd5 \ --git
+          https://github.com/probe-rs/probe-rs.git \ probe-rs
+        </code>
+      </p>
+      <p>
+        To get the right format of image from binary distribution of MicroPython
+      </p>
+      <pre><code class="language-bash"><span class="highlight-7">cd</span> uf2/utils
+<span class="highlight-1"># python3 from homebrew. other installations omit 3 from name</span>
+<span class="highlight-7">python3</span> uf2conv.py
+  <span class="highlight-1"># find uf2 image appropriate for target at </span>
+  <span class="highlight-1"># https://micropython.org/download/?port=rp2</span>
+  <span class="highlight-7"><span class="highlight-5">&lt; ( <span class="highlight-7">curl</span> https://micropython.org/resources/firmware/RPI_PICO_W-20230426-v1.20.0.uf2)</span></span>
+<span class="highlight-7">--convert</span> <span class="highlight-2">--output</span> mp-pico-w.bin</code></pre>
+      <p>
+        --- UF2 File Header Info --- Family ID is RP2040, hex value is
+        0xe48bff56 Target Address is 0x10000000 All block flag values
+        consistent, 0x2000
+      </p>
+      <hr />
+      <p>
+        Converted to bin, output size: 700416, start address: 0x10000000 Wrote
+        700416 bytes to /Users/tom/piicodev-drivers/python/mp-pico-w.bin
+      </p>
+<!--
+      <pre>
+<code class="language-bash">
+<span class="highlight-14">RUST_ASSETS_DIR</span>=target/thumbv6m-none-eabi/debug/examples
+<span class="highlight-14">OUR_EXAMPLE_NAME</span>=p7
+<span class="highlight-14">MICROPYTHON_ASSETS_DIR</span>=python
+<span class="highlight-14">MICROPYTHON_BIN</span>=mp-pico-w.bin
+<span class="highlight-14">MICROPYTHON_LIBS</span>=<span class="highlight-15">"
+CE-PiicoDev-Unified/min/PiicoDev_Unified.py
+CE-PiicoDev-VL53L1X-MicroPython-Module/min/PiicoDev_VL53L1X.py
+"</span>
+<span class="highlight-14">THEIR_EXAMPLE_NAME</span>=CE-PiicoDev-VL53L1X-MicroPython-Module/main.py
+
+<span class="highlight-7">pushd</span> <span class="highlight-13">$</span><span class="highlight-14">RUST_ASSETS_DIR</span>
+<span class="highlight-7">echo</span> Building ours
+<span class="highlight-7">cargo</span> build <span class="highlight-2">--target</span> thumbv6m-none-eabi <span class="highlight-2">--example</span> <span class="highlight-13">$</span><span class="highlight-14">OUR_EXAMPLE_NAME</span>
+<span class="highlight-7">echo</span> Downloading ours to target
+<span class="highlight-7">probe-rs</span> download <span class="highlight-2">--protocol</span> swd <span class="highlight-2">--chip</span> RP2040 <span class="highlight-13">$</span><span class="highlight-14">OUR_EXAMPLE_NAME</span>
+<span class="highlight-7">echo</span> Collecting our results
+<span class="highlight-14">ours</span>=<span class="highlight-15">"<span class="highlight-5">$(<span class="highlight-7">probe-rs</span> run <span class="highlight-2">--protocol</span> swd <span class="highlight-2">--chip</span> RP2040 \
+  <span class="highlight-2">--disable-progressbars</span> <span class="highlight-2">--no-location</span> \
+  <span class="highlight-13">$</span><span class="highlight-14">OUR_EXAMPLE_NAME</span> <span class="highlight-12">2</span><span class="highlight-13">></span>/dev/null <span class="highlight-13">|</span> <span class="highlight-7">head</span> <span class="highlight-13">|</span> <span class="highlight-7">shuf</span>)</span>"</span>
+<span class="highlight-7">echo</span> <span class="highlight-15">"<span class="highlight-13">$</span><span class="highlight-14">ours</span>"</span>
+<span class="highlight-7">popd</span>
+
+<span class="highlight-7">pushd</span> <span class="highlight-13">$</span><span class="highlight-14">MICROPYTHON_ASSETS_DIR</span>
+<span class="highlight-7">echo</span> Downloading MicroPython to target
+<span class="highlight-7">probe-rs</span> download <span class="highlight-2">--protocol</span> swd <span class="highlight-2">--chip</span> RP2040 \
+  <span class="highlight-2">--format</span> bin <span class="highlight-2">--base-address</span> 0x10000000 <span class="highlight-13">$</span><span class="highlight-14">MICROPYTHON_BIN</span>
+<span class="highlight-7">echo</span> Resetting target
+<span class="highlight-7">probe-rs</span> reset <span class="highlight-2">--protocol</span> swd <span class="highlight-2">--chip</span> RP2040
+<span class="highlight-7">echo</span> Waiting 1 second for MicroPython to come up
+<span class="highlight-7">sleep</span> 1
+<span class="highlight-7">echo</span> Copying MicroPython libraries to target
+<span class="highlight-7">mpremote</span> cp <span class="highlight-13">$</span><span class="highlight-14">MICROPYTHON_LIBS</span> :
+<span class="highlight-7">echo</span> Collecting their results
+<span class="highlight-14">theirs</span>=<span class="highlight-15">"<span class="highlight-5">$(<span class="highlight-7">mpremote</span> run \
+  <span class="highlight-13">$</span><span class="highlight-14">THEIR_EXAMPLE_NAME</span> <span class="highlight-12">2</span><span class="highlight-13">></span>/dev/null <span class="highlight-13">|</span> <span class="highlight-7">head</span> <span class="highlight-13">|</span> <span class="highlight-7">shuf</span>)</span>"</span>
+<span class="highlight-7">echo</span> <span class="highlight-15">"<span class="highlight-13">$</span><span class="highlight-14">theirs</span>"</span>
+<span class="highlight-7">popd</span></code></pre>
+
+<p>From here let's try to create an integration test</p>
+-->
+<style>
+</style>
