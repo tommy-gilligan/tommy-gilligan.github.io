@@ -4,6 +4,7 @@ use crate::{
 };
 use chrono::{DateTime, TimeZone, Utc};
 
+use askama::Template;
 use std::{
     ffi::OsStr,
     fs::{read_dir, File},
@@ -62,22 +63,22 @@ impl Article {
 
     #[must_use]
     pub fn updated_at(&self) -> Option<DateTime<Utc>> {
-        let updated_at = Utc
-            .timestamp_opt(self.repo.latest(&self.path).time().seconds(), 0)
-            .unwrap();
-        if updated_at > self.published_at() {
-            Some(updated_at)
-        } else {
-            None
-        }
+        // let updated_at = Utc
+        //     .timestamp_opt(self.repo.latest(&self.path).time().seconds(), 0)
+        //     .unwrap();
+        // if updated_at > self.published_at() {
+        //     Some(updated_at)
+        // } else {
+        //     None
+        // }
+        None
     }
 
     #[must_use]
     pub fn published_at(&self) -> DateTime<Utc> {
-        self.frontmatter().published_at.unwrap_or_else(|| {
-            Utc.timestamp_opt(self.repo.earliest(&self.path).time().seconds(), 0)
-                .unwrap()
-        })
+        self.frontmatter()
+            .published_at
+            .unwrap_or_else(|| Utc.timestamp_opt(0, 0).unwrap())
     }
 
     #[must_use]
@@ -160,9 +161,13 @@ pub fn render() {
         let layed_out = Layout {
             description: &article.description(),
             body: &m.render(),
+            lang: "en-AU",
+            sitemap: "sitemap",
+            title: crate::TITLE,
             page_title: Some(&article.title()),
         }
-        .to_string();
+        .render()
+        .unwrap();
         Output::page(article.file_stem())
             .write_all(layed_out.as_bytes())
             .unwrap();

@@ -1,5 +1,6 @@
 use crate::{article::Article, layout::Layout, output::Output, view::ArticleList};
 
+use askama::Template;
 use std::io::Write;
 
 pub fn render() {
@@ -10,9 +11,13 @@ pub fn render() {
     let layed_out = Layout {
         description: "",
         body: &ArticleList { articles }.to_string(),
+        lang: "en-AU",
+        sitemap: "sitemap",
+        title: crate::TITLE,
         page_title: None,
     }
-    .to_string();
+    .render()
+    .unwrap();
 
     Output::index().write_all(layed_out.as_bytes()).unwrap();
 }
