@@ -1,7 +1,3 @@
-use markdown::{
-    mdast::{Node, Toml},
-    ParseOptions,
-};
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 
@@ -16,13 +12,14 @@ pub struct Frontmatter {
 }
 
 #[must_use]
-pub fn frontmatter(contents: &str, parse_options: &ParseOptions) -> Frontmatter {
-    if let Ok(mdast) = markdown::to_mdast(contents, parse_options) {
-        if let [Node::Toml(Toml { value, .. }), ..] = &mdast.children().unwrap()[..] {
-            if let Ok(frontmatter) = toml::from_str(value) {
-                return frontmatter;
-            }
-        }
-    }
-    unimplemented!("No YAML support planned")
+pub fn frontmatter(contents: &str) -> Frontmatter {
+    let dom = tl::parse(contents, tl::ParserOptions::default()).unwrap();
+    let parser = dom.parser();
+    let element = dom
+        .get_element_by_id("frontmatter")
+        .expect("Failed to find element")
+        .get(parser)
+        .unwrap()
+        .inner_text(parser);
+    toml::from_str(&element).unwrap()
 }

@@ -11,7 +11,7 @@ pub struct Layout<'a> {
     pub page_title: Option<&'a str>,
 }
 
-fn combined_title(page_title: Option<&str>) -> String {
+pub fn combined_title(page_title: Option<&str>) -> String {
     if page_title.is_some() {
         format!("{} - {}", page_title.unwrap(), crate::TITLE)
     } else {

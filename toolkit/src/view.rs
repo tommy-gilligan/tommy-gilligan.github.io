@@ -21,15 +21,8 @@ markup::define! {
 }
 
 markup::define! {
-    ArticleList(articles: Vec<crate::article::Article>) {
-        h2 {
-            "Articles"
-        }
-        @for article in articles.iter() {
-            div {
-                @ArticleItem { article }
-            }
-        }
+    ArticleList<'a>(articles: Vec<crate::article::Article>, formatted_code: &'a str) {
+        @markup::raw(formatted_code)
     }
 }
 
