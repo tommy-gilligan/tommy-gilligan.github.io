@@ -6,6 +6,6 @@ use toolkit::{article, asset};
 async fn main() {
     article::render();
     asset::copy();
-    toolkit::prettier::run();
+    // toolkit::prettier::run();
     eprintln!("Finished generating");
 }

@@ -69,10 +69,10 @@ What in the world is `set-mark-command`?  The `man` page has the answer!
 After scrolling a bit:
 
 <pre><samp>set-mark-command (^@) (unbound) (unbound)
-      Set the mark at the cursor position.  If called with a negative
-      numeric argument, do not set the mark but deactivate the region
-      so that it is no longer highlighted (it is still usable for
-      other purposes).  Otherwise the region is marked as active.
+  Set the mark at the cursor position.  If called with a negative
+  numeric argument, do not set the mark but deactivate the region
+  so that it is no longer highlighted (it is still usable for
+  other purposes).  Otherwise the region is marked as active.
 </samp></pre>
 
 So it should be possible to just grep for this documentation right?

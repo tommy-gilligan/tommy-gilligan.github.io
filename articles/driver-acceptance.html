@@ -1,5 +1,5 @@
 <script id="frontmatter" type="application/toml">
-title = "Zsh Keybinding Reminders"
+title = "Acceptance Testing Rust Drivers"
 description = "A small flagellator to learn more efficient use of Zsh"
 published = true
 published_at = 2023-01-01T01:01:01Z
@@ -62,7 +62,7 @@ Install an appropriate MicroPython interpreter on the Pico.
 <figure>
 <figcaption>Thonny options</figcaption>
 <img src="thonny-options.png"/>
-<div class="hand" style="right: 10%; bottom: 0;"></div>
+<div class="hand" style="right: 10%; bottom: 3%;"></div>
 </figure>
 </li>
   <li>
@@ -85,7 +85,7 @@ Install an appropriate MicroPython interpreter on the Pico.
 </ol>
 <h3>Running the MicroPython Example with <code>mpremote</code></h3>
 <p>
-Thonny is great for interactive operation of MicroPython on a Pico but to automate operation of the Pico I needed something different. MicroPython makes available a handy tool called <a href="https://docs.micropython.org/en/latest/reference/mpremote.html"><code>mpremote</code></a> for talking with the interpreter from a host's command line. Steps 2-4 of <em>Running the MicroPython Example with Thonny</em> can be automated through <code>mpremote</code></p>
+Thonny is great for interactive operation of a MicroPython interpreter but for running tests something less interactive is ideal.  MicroPython makes available a handy tool called <a href="https://docs.micropython.org/en/latest/reference/mpremote.html"><code>mpremote</code></a> for talking with the interpreter from a host's command line. Steps 2-4 of <em>Running the MicroPython Example with Thonny</em> can be automated through <code>mpremote</code></p>
 
 <p>In other words: <code>mpremote</code> can be used for basically all of what Thonny can be used for <em>except for installing a MicroPython interpreter when one isn't already installed</em>. Without Thonny to find the right MicroPython interpreter for a particular development board, it is necessary to carefully select the right one at <a href="https://micropython.org/download/">MicroPython Downloads</a>.<br>Some popular options:
 </p>
@@ -97,46 +97,40 @@ Thonny is great for interactive operation of MicroPython on a Pico but to automa
 <a href="https://micropython.org/resources/firmware/RPI_PICO-20230426-v1.20.0.uf2">MicroPython for Raspberry Pi Pico</a>
 </li>
 </ul>
-
+<p>Running the example with <code>mpremote</code>:</p>
 <ol>
 <li>
-  Hold BOOTSEL button during connection to put Pico in USB mass storage
-  device mode.
+Hold the BOOTSEL button whilst connecting the Pico to the host.  This puts Pico in USB mass storage device mode.
 </li>
-<li>
-  Copy a DOWNLOADED_INTERPRETER UF2 file to the mounted storage device
-  DEVBOARD_MOUNTPOINT.
-</li>
+<li>Copy the downloaded MicroPython UF2 file to the mounted Pico.</li>
 <li>Wait a second or two for the interpreter to become available.</li>
 <li>
-  Copy the PiicoDev shared library code ('Unified Library')
-  <code>mpremote cp CE-PiicoDev-Unified/min/PiicoDev_Unified.py :</code>
+Copy the PiicoDev shared library code to the Pico<br><code>mpremote cp CE-PiicoDev-Unified/min/PiicoDev_Unified.py :</code>
 </li>
 <li>
-  Copy the PiicoDev <em>p7</em> specific driver code
-  <code>mpremote cp
-    CE-PiicoDev-VL53L1X-MicroPython-Module/min/PiicoDev_VL53L1X.py
-    :</code>
+Copy the PiicoDev <em>p7</em> specific driver code to the Pico<br>
+<code>mpremote cp CE-PiicoDev-VL53L1X-MicroPython-Module/min/PiicoDev_VL53L1X.py :</code>
 </li>
 <li>
-  Run the <em>p7</em> example
-  <code>mpremote run CE-PiicoDev-VL53L1X-MicroPython-Module/main.py</code>
+Run the <em>p7</em> example<br>
+<code>mpremote run CE-PiicoDev-VL53L1X-MicroPython-Module/main.py</code>
 </li>
 </ol>
+
 <p>Condensing this into a script:</p>
 <div class="editor">
-<span class="title"><span>script.sh</span><a class="maximize"></a></span>
+<span class="title"><span>install-and-run.sh</span><a class="maximize"></a></span>
 <pre><code class="language-bash"><span class="highlight-1"># connect to Pico with BOOTSEL held</span>
-<span class="highlight-1"># assumes that it has been mounted to DEVBOARD_MOUNTPOINT</span>
+<span class="highlight-1"># assumes that it has been mounted to <var>DEVBOARD_MOUNTPOINT</var></span>
 <span class="highlight-7">set</span> <span class="highlight-2">-e</span>
-<span class="highlight-14">DOWNLOADED_INTERPRETER</span>=<span class="highlight-13">$</span><span class="highlight-14">1</span>
-<span class="highlight-14">DEVBOARD_MOUNTPOINT</span>=<span class="highlight-13">$</span><span class="highlight-14">2</span>
+<span class="highlight-14"><var>DOWNLOADED_INTERPRETER</var></span>=<span class="highlight-13">$</span><span class="highlight-14">1</span>
+<span class="highlight-14"><var>DEVBOARD_MOUNTPOINT</var></span>=<span class="highlight-13">$</span><span class="highlight-14">2</span>
 <span class="highlight-7">echo</span> Copying MicroPython interpreter to devboard
-<span class="highlight-10">if</span> <span class="highlight-7">cp</span> <span class="highlight-2">-X</span> <span class="highlight-2">-v</span> <span class="highlight-13">$</span><span class="highlight-14">DOWNLOADED_INTERPRETER</span> <span class="highlight-13">$</span><span class="highlight-14">DEVBOARD_MOUNTPOINT</span>
+<span class="highlight-10">if</span> <span class="highlight-7">cp</span> <span class="highlight-2">-X</span> <span class="highlight-2">-v</span> <span class="highlight-13">$</span><span class="highlight-14"><var>DOWNLOADED_INTERPRETER</var></span> <span class="highlight-13">$</span><span class="highlight-14"><var>DEVBOARD_MOUNTPOINT</var></span>
 <span class="highlight-10">then</span>
   <span class="highlight-7">:</span>
 <span class="highlight-10">else</span>
-  <span class="highlight-7">echo</span> Make sure the Pico is mounted at <span class="highlight-13">$</span><span class="highlight-14">DEVBOARD_MOUNTPOINT</span>
+  <span class="highlight-7">echo</span> Make sure the Pico is mounted at <span class="highlight-13">$</span><span class="highlight-14"><var>DEVBOARD_MOUNTPOINT</var></span>
   <span class="highlight-7">exit</span> 1
 <span class="highlight-10">fi</span>
 <span class="highlight-7">echo</span> Waiting for intepreter to come up
@@ -146,54 +140,49 @@ Thonny is great for interactive operation of MicroPython on a Pico but to automa
   CE-PiicoDev-VL53L1X-MicroPython-Module/min/PiicoDev_VL53L1X.py :
 <span class="highlight-7">echo</span> Running example
 <span class="highlight-7">mpremote</span> run CE-PiicoDev-VL53L1X-MicroPython-Module/main.py</code></pre>
-      </div>
-      <p>
-        The example runs indefinitely but can be disconnected from with
-        <kbd>Ctrl</kbd>+<kbd>X</kbd>. This automates basically all of the steps
-        involved in running this example except
-      </p>
-      <ul>
-        <li>selecting and downloading the right interpreter</li>
-        <li>
-          putting the Pico in the right state for installing the interpreter
-        </li>
-      </ul>
-      <h3>Installing MicroPython Without BOOTSEL</h3>
-      <p>
-        Being familiar with running code on the Pico with
-        <a href="https://probe.rs"><code>probe-rs</code></a>, needing to connect the Pico in USB mass storage device mode to
-        install the interpreter does not seem all that necessary. The
-        <a href="https://github.com/rp-rs/rp2040-project-template"><code>rp2040-project-template</code></a>
-        is what originally got me onto using <code>probe-rs</code> for
-        programming the Pico in a Rust environment. It is a great starting point
-        if you're somewhat familiar with Rust but have never used it on the Pico
-        before.
-      </p>
-      <p>
-        Using <a href="https://probe.rs"><code>probe-rs</code></a> with the
-        Raspberry Pi Pico requires a probe. Two easy options for getting your
-        hands on a probe:
-      </p>
-      <ul>
-        <li>
-          <a href="https://www.raspberrypi.com/documentation/microcontrollers/debug-probe.html">buy a purpose-built probe</a>
-          or
-        </li>
-        <li>
-          <a href="https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html#debugging-using-another-raspberry-pi-pico">repurpose a spare Raspberry Pi Pico</a>
-        </li>
-      </ul>
-      <p>
-        I don't have one of the purpose-built probes handy so I went with
-        repurposing a spare Pico.
-      </p>
-      <figure>
-        <img src="" />
-        <caption>
-          Obligatory photo of using a spare Raspberry Pi Pico as a probe
-          connected to a target Raspberry Pi Pico
-        </caption>
-      </figure>
+</div>
+<p>
+The example runs indefinitely but can be disconnected from with
+<kbd>Ctrl</kbd>+<kbd>X</kbd>. This automates basically all of the steps
+involved in running this example except
+</p>
+<ul>
+<li>selecting and downloading the right interpreter</li>
+<li>
+putting the Pico in the right state for installing the interpreter
+</li>
+</ul>
+<h3>Installing MicroPython Without Holding BOOTSEL</h3>
+<p>
+Being familiar with running code on the Pico with
+<a href="https://probe.rs"><code>probe-rs</code></a>, needing to connect the Pico with the BOOTSEL button held to
+install the interpreter does not seem strictly necessary. The
+<a href="https://github.com/rp-rs/rp2040-project-template"><code>rp2040-project-template</code></a>
+is what originally got me onto using <code>probe-rs</code> for
+programming the Pico in a Rust environment. It is a great starting point
+if you're somewhat familiar with Rust but have never used it on the Pico
+before.
+</p>
+<p>
+Using <a href="https://probe.rs"><code>probe-rs</code></a> with the
+Raspberry Pi Pico requires a probe. Two easy options for getting your
+hands on a probe:
+</p>
+<ul>
+<li><a href="https://www.raspberrypi.com/documentation/microcontrollers/debug-probe.html">buy a purpose-built probe</a> or
+</li>
+<li><a href="https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html#debugging-using-another-raspberry-pi-pico">repurpose a spare Raspberry Pi Pico</a>
+</li>
+</ul>
+<p>
+I don't own one of the purpose-built probes but I do have a spare Pico.  So I've used that as my probe.
+</p>
+<figure>
+<figcaption>
+A Raspberry Pi Pico connected as a probe to a target Pi Pico
+</figcaption>
+<img src="probe.jpg"/>
+</figure>
       <p>
         MicroPython binaries are distributed as UF2. UF2 is a pretty handy
         format. It is designed expressly for ease-of-use. A device makes itself
@@ -224,149 +213,192 @@ Wrote 700416 bytes to flash.bin
       <p>
         This information can be fed fairly directly into <code>probe-rs</code>
       </p>
-      <pre class="terminal"><samp>% <kbd>probe-rs download --protocol swd --chip RP2040 --disable-progressbars \</kbd>
-> <kbd>--format bin --base-address 0x10000000 flash.bin</kbd>
+      <pre class="terminal"><samp>% <kbd>probe-rs download --protocol swd --chip RP2040 --format bin \</kbd>
+> <kbd>--base-address 0x10000000 --disable-progressbars flash.bin</kbd>
     <span class="ansi-green-fg ansi-bold">Finished in 44.151s</span></samp></pre>
-      <p>
-        Now the interpreter is installed and running on the target Pico without
-        having to reconnect it with BOOTSEL held.
-      </p>
-      <p>Bringing this all together:</p>
-      <div class="editor">
-        <span class="title"><span></span><a class="maximize"></a></span>
-        <pre><code class="language-bash"><span class="highlight-14">DOWNLOADED_INTERPRETER</span>=<span class="highlight-13">$</span><span class="highlight-14">1</span>
-
-<span class="highlight-7">git</span> clone <span class="highlight-2">--depth</span> 1 https://github.com/microsoft/uf2.git uf2
-<span class="highlight-14">uf2</span><span class="highlight-7">/utils/uf2conv.py</span> <span class="highlight-13">$</span><span class="highlight-14">DOWNLOADED_INTERPRETER</span>
-<span class="highlight-7">probe-rs</span> download \
-    <span class="highlight-2">--protocol</span> swd \
-    <span class="highlight-2">--chip</span> RP2040 \
-    <span class="highlight-2">--format</span> bin \
-    <span class="highlight-2">--base-address</span> 0x10000000 \
-    flash.bin</code></pre>
-      </div>
-<h3>Running My Rust Example</h3>
 <p>
-A Rust version of the earlier *p7* example that corresponds fairly directly to the original:
+Now the interpreter is installed and running on the target Pico without
+having to reconnect it with BOOTSEL held every time a reinstallation is required.
 </p>
-      <div class="editor">
-        <span class="title"><span></span><a class="maximize"></a></span>
-        <pre><code class="language-rust"><span class="highlight-10">loop</span> {
+
+<h3>Installing MicroPython and Running the Example Without Holding Bootsel</h3>
+<p>
+A separate connection is still needed by <code>mpremote</code> to control the
+MicroPython interpreter (for important things like running the example). That is
+not actually a problem though: using a USB connection to the probe to install
+the MicroPython interpreter does not preclude a concurrent USB connection
+directly to the target. In other words, <code>probe-rs</code> can have its
+connection for installing MicroPython and <code>mpremote</code> can have its
+connection for communicating with the interpreter.  This is how I ended up with a monsterous testing apparatus 
+</p>
+<figure>
+<figcaption>
+A target Raspberry Pi Pico connected to a probe and a host
+</figcaption>
+<img src="probe-mp.jpg"/>
+</figure>
+<p>Having connected the host to the target and the probe, manual intervention is no longer necessary to install the interpreter and run an example:</p>
+<div class="editor">
+        <span class="title"><span>install-and-run-no-bootsel.sh</span><a class="maximize"></a></span>
+<pre><code class="language-bash"><span class="highlight-7">set</span> <span class="highlight-2">-e</span>
+<span class="highlight-14"><var>DOWNLOADED_INTERPRETER</var></span>=<span class="highlight-13">$</span><span class="highlight-14">1</span>
+<span class="highlight-7">git</span> clone <span class="highlight-2">--depth</span> 1 https://github.com/microsoft/uf2.git uf2
+<span class="highlight-14">uf2</span><span class="highlight-7">/utils/uf2conv.py</span> <span class="highlight-13">$</span><span class="highlight-14"><var>DOWNLOADED_INTERPRETER</var></span>
+<span class="highlight-7">echo</span> Installing MicroPython interpreter
+<span class="highlight-7">probe-rs</span> download <span class="highlight-2">--protocol</span> swd <span class="highlight-2">--chip</span> RP2040 \
+    <span class="highlight-2">--format</span> bin <span class="highlight-2">--base-address</span> 0x10000000 flash.bin
+<span class="highlight-7">echo</span> Waiting for intepreter to come up
+<span class="highlight-7">sleep</span> 5
+<span class="highlight-7">echo</span> Copying libraries to devboard
+<span class="highlight-7">mpremote</span> cp CE-PiicoDev-Unified/min/PiicoDev_Unified.py \
+  CE-PiicoDev-VL53L1X-MicroPython-Module/min/PiicoDev_VL53L1X.py :
+<span class="highlight-7">echo</span> Running example
+<span class="highlight-7">mpremote</span> run CE-PiicoDev-VL53L1X-MicroPython-Module/main.py</code></pre>
+</div>
+<h3>Running A Rust Example</h3>
+<p>
+Coming back to the problem of validating Rust drivers by running example code, let's look at what the main loop of a Rust example might look like:
+</p>
+<div class="editor">
+<span class="title"><span>examples/p7.rs</span><a class="maximize"></a></span>
+<pre><code class="language-rust"><span class="highlight-10">loop</span> {
     <span class="highlight-1">// read the distance in millimetres</span>
     <span class="highlight-10">let</span> dist = dist_sensor.<span class="highlight-9">read</span>().<span class="highlight-9">unwrap</span>();
     <span class="highlight-1">// convert the number to a string and print</span>
     <span class="highlight-8">println</span><span class="highlight-8">!</span>(<span class="highlight-15">"{} m"</span>, dist.to_f64() / <span class="highlight-3">1000.0_f64</span>);
     delay.<span class="highlight-9">delay_us</span>(<span class="highlight-3">100_000</span>);
 }</code></pre>
-      </div>
+</div>
 <p>
-<code>probe-rs</code> provides a mechanism called <a href="https://github.com/probe-rs/rtt-target">Real-Time Transfer</a> that can be used to carry program output from the target to the host in real-time.  This is useful for capturing the output of the Rust example.  Readings from <em>p7</em> will be printed every decisecond indefinitely:
+<code>probe-rs</code> provides a mechanism called <a href="https://github.com/probe-rs/rtt-target">Real-Time Transfer</a> that carries program output from the target to the host in real-time over the same connection used to program the target.  Readings from <em>p7</em> will be printed every decisecond indefinitely (until interrupted with <kbd>Ctrl</kbd>+<kbd>C</kbd>):
 </p>
-      <pre class="terminal"><samp>1822 mm
-1825 mm
-1823 mm
-1824 mm
-1820 mm
-</samp></pre>
+<pre class="terminal"><samp>% <kbd>probe-rs run --protocol swd --chip rp2040 --no-location  \</kbd>
+> <kbd>target/thumbv6m-none-eabi/debug/examples/p7 2>/dev/null</kbd>
+1.623 m
+1.623 m
+1.628 m
+1.626 m
+1.626 m</samp></pre>
+<h3>Validating Rust Example Against MicroPython Example</h3>
 <p>
-Despite the length of time between Python and Rust, maybe it makes sense
-to treat them as part of the same series.
-To get the right format of image from binary distribution of MicroPython
+Whether running the Rust example or the MicroPython example, the program output ends up in the same place: <code><var>STDOUT</var></code>.  Thus, a simple process to validate the Rust example against the MicroPython example could look like this
 </p>
+<ol>
+<li>
+Collect output from running the MicroPython example
+</li>
+<li>
+Collect output from running the Rust example
+</li>
+<li>
+Compare the output collected from the Rust example with the output collected from the MicroPython example
+</li>
+</ol>
 <p>
-That is not a problem though because using a USB connection to the probe
-to install the MicroPython interpreter does not preclude a separate USB
-connection to the target. In other words, <code>probe-rs</code> can have
-its connection for installing MicroPython and <code>mpremote</code> can
-have its connection for communicating with the interpreter.
+With just a little bit of work this process can be adapted for Rust; even integrating with the default test runner. The details of reaching out to the target and running the different examples are hidden away in a support module here.
 </p>
-      <p>
-        To compare the results from these example programs it is necessary to
-        prevent them from running indefinitely.
-      </p>
-      <p>
-        Spurious differences between readings Taking the range over 1000
-        readings and doubling, we decide that that is the max acceptable delta
-      </p>
-      <pre class="terminal"><samp>% <kbd>probe-run target/thumbv6m-none-eabi/debug/examples/p7 \
-> --chip RP2040 --no-location 2>/dev/null \
-> | head -n1000 \
-> | sort -nk1 \
-> | uniq -c</kbd>
-   4 1819 mm
-  12 1820 mm
-  71 1821 mm
- 203 1822 mm
- 334 1823 mm
- 255 1824 mm
-  98 1825 mm
-  14 1826 mm
-   9 1827 mm</samp></pre>
-      <p>
-        We're making a statement about the stability of a real-world
-        environment. Even if this is a controlled environment, it begs the
-        question: just how controlled is this environment? If we intend others
-        to run these tests, how strict do we want to be about their environment?
-        Sensor noise is a source of error but also subtle movement of sensor or
-        the service it is targeting, atmospheric conditions, vibrations etc.
-      </p>
-<!--
-      <pre><code class="language-bash"><span class="highlight-7">cd</span> uf2/utils
-<span class="highlight-1"># python3 from homebrew. other installations omit 3 from name</span>
-<span class="highlight-7">python3</span> uf2conv.py
-  <span class="highlight-1"># find uf2 image appropriate for target at </span>
-  <span class="highlight-1"># https://micropython.org/download/?port=rp2</span>
-  <span class="highlight-7"><span class="highlight-5">&lt; ( <span class="highlight-7">curl</span> https://micropython.org/resources/firmware/RPI_PICO_W-20230426-v1.20.0.uf2)</span></span>
-<span class="highlight-7">--convert</span> <span class="highlight-2">--output</span> mp-pico-w.bin</code></pre>
-      <p>
-        --- UF2 File Header Info --- Family ID is RP2040, hex value is
-        0xe48bff56 Target Address is 0x10000000 All block flag values
-        consistent, 0x2000
-      </p>
-      <hr />
-      <p>
-        Converted to bin, output size: 700416, start address: 0x10000000 Wrote
-        700416 bytes to /Users/tom/piicodev-drivers/python/mp-pico-w.bin
-      </p>
-      <pre>
-<code class="language-bash">
-<span class="highlight-14">RUST_ASSETS_DIR</span>=target/thumbv6m-none-eabi/debug/examples
-<span class="highlight-14">OUR_EXAMPLE_NAME</span>=p7
-<span class="highlight-14">MICROPYTHON_ASSETS_DIR</span>=python
-<span class="highlight-14">MICROPYTHON_BIN</span>=mp-pico-w.bin
-<span class="highlight-14">MICROPYTHON_LIBS</span>=<span class="highlight-15">"
-CE-PiicoDev-Unified/min/PiicoDev_Unified.py
-CE-PiicoDev-VL53L1X-MicroPython-Module/min/PiicoDev_VL53L1X.py
-"</span>
-<span class="highlight-14">THEIR_EXAMPLE_NAME</span>=CE-PiicoDev-VL53L1X-MicroPython-Module/main.py
+<div class="editor">
+<span class="title"><span>tests/p7.rs</span><a class="maximize"></a></span>
+<pre><code class="language-rust"><span class="highlight-10">mod</span> support;
 
-<span class="highlight-7">pushd</span> <span class="highlight-13">$</span><span class="highlight-14">RUST_ASSETS_DIR</span>
-<span class="highlight-7">echo</span> Building ours
-<span class="highlight-7">cargo</span> build <span class="highlight-2">--target</span> thumbv6m-none-eabi <span class="highlight-2">--example</span> <span class="highlight-13">$</span><span class="highlight-14">OUR_EXAMPLE_NAME</span>
-<span class="highlight-7">echo</span> Downloading ours to target
-<span class="highlight-7">probe-rs</span> download <span class="highlight-2">--protocol</span> swd <span class="highlight-2">--chip</span> RP2040 <span class="highlight-13">$</span><span class="highlight-14">OUR_EXAMPLE_NAME</span>
-<span class="highlight-7">echo</span> Collecting our results
-<span class="highlight-14">ours</span>=<span class="highlight-15">"<span class="highlight-5">$(<span class="highlight-7">probe-rs</span> run <span class="highlight-2">--protocol</span> swd <span class="highlight-2">--chip</span> RP2040 \
-  <span class="highlight-2">--disable-progressbars</span> <span class="highlight-2">--no-location</span> \
-  <span class="highlight-13">$</span><span class="highlight-14">OUR_EXAMPLE_NAME</span> <span class="highlight-12">2</span><span class="highlight-13">></span>/dev/null <span class="highlight-13">|</span> <span class="highlight-7">head</span> <span class="highlight-13">|</span> <span class="highlight-7">shuf</span>)</span>"</span>
-<span class="highlight-7">echo</span> <span class="highlight-15">"<span class="highlight-13">$</span><span class="highlight-14">ours</span>"</span>
-<span class="highlight-7">popd</span>
+<span class="highlight-10">fn</span> <span class="highlight-7">parse_line</span>(<span class="highlight-20">line</span>: <span class="highlight-13">&amp;</span><span class="highlight-17">str</span>) -&gt; <span class="highlight-17">i16</span> {
+    <span class="highlight-10">let</span> (value, unit) = line.<span class="highlight-9">rsplit_once</span>(<span class="highlight-15">' '</span>).<span class="highlight-9">unwrap</span>();
+    <span class="highlight-8">assert_eq</span><span class="highlight-8">!</span>(unit, <span class="highlight-15">"mm"</span>);
+    value.<span class="highlight-9">parse</span>().<span class="highlight-9">unwrap</span>()
+}
 
-<span class="highlight-7">pushd</span> <span class="highlight-13">$</span><span class="highlight-14">MICROPYTHON_ASSETS_DIR</span>
-<span class="highlight-7">echo</span> Downloading MicroPython to target
-<span class="highlight-7">probe-rs</span> download <span class="highlight-2">--protocol</span> swd <span class="highlight-2">--chip</span> RP2040 \
-  <span class="highlight-2">--format</span> bin <span class="highlight-2">--base-address</span> 0x10000000 <span class="highlight-13">$</span><span class="highlight-14">MICROPYTHON_BIN</span>
-<span class="highlight-7">echo</span> Resetting target
-<span class="highlight-7">probe-rs</span> reset <span class="highlight-2">--protocol</span> swd <span class="highlight-2">--chip</span> RP2040
-<span class="highlight-7">echo</span> Waiting 1 second for MicroPython to come up
-<span class="highlight-7">sleep</span> 1
-<span class="highlight-7">echo</span> Copying MicroPython libraries to target
-<span class="highlight-7">mpremote</span> cp <span class="highlight-13">$</span><span class="highlight-14">MICROPYTHON_LIBS</span> :
-<span class="highlight-7">echo</span> Collecting their results
-<span class="highlight-14">theirs</span>=<span class="highlight-15">"<span class="highlight-5">$(<span class="highlight-7">mpremote</span> run \
-  <span class="highlight-13">$</span><span class="highlight-14">THEIR_EXAMPLE_NAME</span> <span class="highlight-12">2</span><span class="highlight-13">></span>/dev/null <span class="highlight-13">|</span> <span class="highlight-7">head</span> <span class="highlight-13">|</span> <span class="highlight-7">shuf</span>)</span>"</span>
-<span class="highlight-7">echo</span> <span class="highlight-15">"<span class="highlight-13">$</span><span class="highlight-14">theirs</span>"</span>
-<span class="highlight-7">popd</span></code></pre>
+<span class="highlight-0">#[test]</span>
+<span class="highlight-10">fn</span> <span class="highlight-7">p7_test</span>() {
+    <span class="highlight-10">let</span> <span class="highlight-10">mut</span> micropython_example = support::<span class="highlight-16">Example</span>::<span class="highlight-7">run_micropython</span>(
+        <span class="highlight-15">"mp/CE-PiicoDev-VL53L1X-MicroPython-Module/main.py"</span>,
+        <span class="highlight-8">vec</span><span class="highlight-8">!</span>[
+            <span class="highlight-15">"mp/CE-PiicoDev-Unified/min/PiicoDev_Unified.py"</span>,
+            <span class="highlight-15">"mp/CE-PiicoDev-VL53L1X-MicroPython-Module/min/PiicoDev_VL53L1X.py"</span>,
+        ],
+    );
+    <span class="highlight-10">let</span> micropython_output: <span class="highlight-16">Vec</span>&lt;<span class="highlight-17">i16</span>&gt; = micropython_example
+        .<span class="highlight-9">output</span>().<span class="highlight-9">take</span>(<span class="highlight-3">10</span>).<span class="highlight-9">map</span>(|l| <span class="highlight-7">parse_line</span>(<span class="highlight-13">&amp;</span>l)).<span class="highlight-9">collect</span>();
 
-<p>From here let's try to create an integration test</p>
--->
+    <span class="highlight-10">let</span> <span class="highlight-10">mut</span> example = support::<span class="highlight-16">Example</span>::<span class="highlight-7">run</span>(<span class="highlight-15">"p7"</span>);
+    <span class="highlight-10">let</span> output: <span class="highlight-16">Vec</span>&lt;<span class="highlight-17">i16</span>&gt; = example
+        .<span class="highlight-9">output</span>().<span class="highlight-9">take</span>(<span class="highlight-3">10</span>).<span class="highlight-9">map</span>(|l| <span class="highlight-7">parse_line</span>(<span class="highlight-13">&amp;</span>l)).<span class="highlight-9">collect</span>();
+
+    <span class="highlight-8">assert</span><span class="highlight-8">!</span>(output.iter().zip(micropython_output)
+        .all(|(mm, mp_mm)| (mm - mp_mm).abs() &lt; <span class="highlight-3">10</span>));
+}</code></pre></div>
+Running the test:
+<pre class="terminal"><samp>% <kbd>cargo test</kbd>
+    <span class="ansi-bold ansi-green-fg">Finished</span> test [optimized + debuginfo] target(s) in 0.36s
+     <span class="ansi-bold"><span class="ansi-green-fg">Running</span></span> tests/p7.rs (target/debug/deps/p7-0c2d20189102e932)
+
+running 1 test
+test p7_test ... <span class="ansi-red-fg">FAILED</span>
+
+failures:
+
+---- p7_test stdout ----
+thread 'p7_test' panicked at 'assertion failed: `(left == right)`
+  left: `"m"`,
+ right: `"mm"`', tests/p7.rs:6:5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    p7_test
+
+test result: <span class="ansi-red-fg">FAILED</span>. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 40.22s
+
+<span class="ansi-red-fg"><span class="ansi-bold">error</span></span>: test failed, to rerun pass `--test p7`</samp></pre>
+<p>
+Oh no!  The test has failed!  Admittedly, this is a contrived example of a test failure: the wrong units have been used.  Correcting the example:
+</p>
+<div class="editor">
+<span class="title"><span>examples/p7.rs</span><a class="maximize"></a></span>
+<pre><code class="language-rust"><span class="highlight-10">loop</span> {
+    <span class="highlight-1">// read the distance in millimetres</span>
+    <span class="highlight-10">let</span> dist = dist_sensor.<span class="highlight-9">read</span>().<span class="highlight-9">unwrap</span>();
+    <span class="highlight-1">// convert the number to a string and print</span>
+    <span class="highlight-8">println</span><span class="highlight-8">!</span>(<span class="highlight-15">"{} mm"</span>, dist);
+    delay.<span class="highlight-9">delay_us</span>(<span class="highlight-3">100_000</span>);
+}</code></pre>
+</div>
+Running the test again (having corrected the mistake)
+<pre class="terminal"><samp>% <kbd>cargo test</kbd>
+    <span class="ansi-bold ansi-green-fg">Finished</span> test [optimized + debuginfo] target(s) in 0.36s
+     <span class="ansi-bold"><span class="ansi-green-fg">Running</span></span> tests/p7.rs (target/debug/deps/p7-0c2d20189102e932)
+
+running 1 test
+test p7_test ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 56.51s
+
+     Running tests/support.rs (target/debug/deps/support-797f4721340a568e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s</samp></pre>
+<h3>A Problematic Approach?</h3>
+<p>
+So I've been able to use a Rust example corresponding to a MicroPython example as some kind of proxy for whether or not my Rust driver is a suitable replacement for the MicroPython driver.  There are notably some problems with the approach I've taken:
+</p>
+<ul>
+<li>It relies on the stability of <em>p7</em> readings.  A 10mm margin of error was deemed acceptable fairly arbitrarily.  This was the maximum range after 1000 readings.  A larger range of readings is captured when more readings are captured.</li>
+<li>It relies on the stability of a physical environment.  I kept <em>p7</em> stationary and had it pointed at my ceiling.  What about incidents like earthquakes (or more minor incidents like bumping the desk I've attached the <em>p7</em> to).  Other than ensuring the stability of the environment as best you can, the main other way to mitigate environmental stabiltiy is by loosening the test (thus undermining its usefulness).</li>
+<li>It assumes physical interaction with <em>p7</em> during test is not necessary.  Testing a laser distance sensor this way is all well and good but what if I wanted to test and NFC card reader?  Would some kind of test jig be necessary?  If so, the control of the jig would be another concern for the test (an annoying burden in terms of complexity).</li>
+<li>It assumes uniformity in <em>p7</em> devices.  For my testing to be useful I need for it to be making a statement about more than just my <em>p7</em>, I need it to be making a statement about all <em>p7</em> (or some archetypal <em>p7</em>).  For all I know I've baked assumptions about my <em>p7</em> into the test (other <em>p7</em> could be prone to more noise).  Here consulting technical specifications would be useful (I haven't done this yet).</li>
+<li>It assumes uniformity in environment.  What if it's not possible for somebody else to recreate the physical environment I have used?  Have I been specific enough in my description of the test environment?</li>
+</ul>
+<p>
+There are probably more issues to consider than just these.  Overall, the setup and reproducibility is not perfectly certain.  Web developers often talk about tests being <em>flakey</em>.  It's reasonable to expect some flakiness in my driver acceptance tests.  I don't expect to be running these tests much though (only to determine whether or not a new version of a driver crate is suitable for release).  Just how burdensome will it be for me to deal with flakey driver acceptance tests?  I feel like this is something to be borne out by usage.
+</p>
+<h3>Improvements</h3>
+<p>
+There are definitely some issues with what I've come up with here.  Some improvements I'm keen to try:
+</p>
+<ul>
+<li>Keeping Rust and MicroPython examples installed on the target simultaneously.  There is certainly enough flash memory available for this to be feeasible.  This necessitates retargeting the MicroPython (or Rust) binary and then having some way of passing execution between these.  It would mean that tests take much less time to run (at the moment the vast majority of time taken in running the test is reinstalling MicroPython).
+<li>Including my testing as part of CD.  I already have some Github actions that run unit tests and linting with every push.  By using a 'custom runner' I should be able to run these tests automatically on every release.  This should help with keeping the tests focussed on being able to be run without manual intervention and it should help with making it harder to obscure whether or not they were run for a particular release.</li>
+<li>Specify environmental conditions for each test.</li>
+<li>Use 3rd-party assertion crates to improve test readability.</li>
+<li>Eliminate the need for 2 USB connections.  Needing 2 USB connections is more than just an annoying requirement.  There is work necessary to make sure the right connection is being used for the right thing.  If I accidentally try to use the MicroPython connection for <code>probe-rs</code> then the test fails.  This somewhat dovetails with keeping Rust and MicroPython examples installed simultaneously.  If I could use the Rust environment for getting at MicroPython state or vice versa then I maybe wouldn't need 2 USB connections.  It'd be nice if MicroPython supported RTT but adding this support is no minor feat.</li>
+</ul>

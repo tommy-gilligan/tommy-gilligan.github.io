@@ -3,6 +3,8 @@ use crate::{
     view::CodeContainer,
 };
 use chrono::{DateTime, TimeZone, Utc};
+use lol_html::{element, HtmlRewriter, Settings};
+use regex::Regex;
 
 use askama::Template;
 use std::{
@@ -13,7 +15,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-const EXTENSION: &str = "md";
+const EXTENSION: &str = "html";
 
 #[derive(Debug)]
 pub struct Article {
@@ -53,8 +55,34 @@ pub fn replace_code(contents: &mut String) {
     }
 }
 
+fn highlight(code: &str, language: &str) -> String {
+    match language {
+        "rust" => String::from_utf8(crate::syntax_highlighting::highlight(
+            code.as_bytes(),
+            crate::syntax_highlighting::Language::Rust,
+        ))
+        .unwrap(),
+        "python" => String::from_utf8(crate::syntax_highlighting::highlight(
+            code.as_bytes(),
+            crate::syntax_highlighting::Language::Python,
+        ))
+        .unwrap(),
+        "bash" | "zsh" | "sh" => String::from_utf8(crate::syntax_highlighting::highlight(
+            code.as_bytes(),
+            crate::syntax_highlighting::Language::Sh,
+        ))
+        .unwrap(),
+        _ => String::new(),
+    }
+}
+
 impl Article {
     fn new(path: PathBuf) -> Self {
+        let input_file = File::open(&path).unwrap();
+        let mut buf_reader = BufReader::new(input_file);
+        let mut contents = String::new();
+        buf_reader.read_to_string(&mut contents).unwrap();
+
         Self {
             path,
             repo: Git::new(),
@@ -118,7 +146,7 @@ impl Article {
     }
 
     fn frontmatter(&self) -> Frontmatter {
-        crate::frontmatter::frontmatter(&self.contents(), &crate::markdown::OPTIONS.parse)
+        crate::frontmatter::frontmatter(&self.contents())
     }
 
     pub fn from_dir(path_str: &str) -> std::io::Result<Vec<Self>> {
@@ -143,6 +171,31 @@ impl Article {
             })
             .collect())
     }
+
+    pub fn highlight(&mut self) -> String {
+        let binding = self.contents();
+        let mut dom = tl::parse(&binding, tl::ParserOptions::default()).unwrap();
+
+        // let code_handle = dom.query_selector("code[data-language]").unwrap().next().unwrap();
+
+        // let parser = dom.parser();
+        // let code = code_handle.get(parser)
+        //   .expect("Failed to resolve node")
+        //   .as_tag()
+        //   .expect("Failed to cast Node to HTMLTag");
+
+        // let language = code.attributes().get("data-language").unwrap().unwrap().try_as_utf8_str().unwrap();
+        // let highlighted = highlight(&code.inner_text(parser), language);
+
+        // let mut parser = dom.parser_mut();
+        // let code_tag = code_handle.get_mut(parser).unwrap().as_tag_mut().unwrap();
+        // let mut highlighted_node = tl::parse(&highlighted, tl::ParserOptions::default()).unwrap();
+
+        // let mut children_mut = code_tag.children_mut();
+        // children_mut = highlighted_node.children_mut();
+
+        dom.outer_html()
+    }
 }
 
 pub fn watch<W>(watcher: &mut W)
@@ -155,19 +208,20 @@ where
 }
 
 pub fn render() {
-    for article in Article::from_dir(crate::ARTICLES).unwrap() {
-        let mut m = Markdown::new(article.contents());
-        m.highlight();
+    for mut article in Article::from_dir(crate::ARTICLES).unwrap() {
+        let re = Regex::new(r"</br>|</img>|</hr>").unwrap();
+
         let layed_out = Layout {
             description: &article.description(),
-            body: &m.render(),
-            lang: "en-AU",
+            body: &re.replace_all(&article.highlight(), ""),
+            lang: &crate::locale::language_tag(),
             sitemap: "sitemap",
             title: crate::TITLE,
             page_title: Some(&article.title()),
         }
         .render()
         .unwrap();
+
         Output::page(article.file_stem())
             .write_all(layed_out.as_bytes())
             .unwrap();
