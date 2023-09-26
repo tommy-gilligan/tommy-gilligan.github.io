@@ -1,7 +1,7 @@
 use crate::sitemap::Sitemap;
 use std::{
     ffi::OsStr,
-    fs::File,
+    fs::{create_dir_all, File},
     path::{Path, PathBuf},
 };
 
@@ -20,6 +20,7 @@ impl Output {
 
     #[must_use]
     pub fn page(file_stem: &OsStr) -> File {
+        create_dir_all(crate::SITE).unwrap();
         File::create(Self::page_path(file_stem)).unwrap()
     }
 
