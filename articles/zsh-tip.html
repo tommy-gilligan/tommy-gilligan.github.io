@@ -1,0 +1,190 @@
+<script id="frontmatter" type="application/toml">
+title = "Zsh Keybinding Reminders"
+description = "A small flagellator to learn more efficient use of Zsh"
+published = true
+published_at = 2023-01-01T01:01:01Z
+</script>
+      <p>
+        I've never been able to remember all of the handy line editing
+        keyboardshortcuts that are available in Zsh. Sure, I know that
+        <kbd>Ctrl</kbd>+<kbd>A</kbd> goes to the beginning of the line and
+        <kbd>Ctrl</kbd>+<kbd>E</kbd> goes to the end of the line but there are
+        many other keyboard shortcuts (<em>key bindings</em>) besides these that
+        can be quite useful. I'd like to learn them so that I can use Zsh more
+        efficiently. Maybe a program that annoys me with random keybinding at
+        shell startup could help me learn. Let's make that.
+      </p>
+      <h3>Finding Zsh Keybindings</h3>
+      <p>
+        First I need a list of all the key bindings active in the shell. ZLE or
+        the zsh line editor is the part of Zsh that is responsible for binding a
+        particular key combination to a line editing command. Consulting the
+        <code>man</code> page for ZLE we find that <code>bindkey</code> can be
+        used to display a set of key bindings (a <em>keymap</em>).
+      </p>
+      <pre class="terminal"><samp>% <kbd>bindkey</kbd>
+"^@" set-mark-command
+"^A" beginning-of-line
+"^B" backward-char
+"^D" delete-char-or-list
+"^E" end-of-line
+"^F" forward-char
+"^G" send-break
+</samp>[TRUNCATED]</pre>
+      <p>
+        There's a little bit of interpretation involved in understanding this
+        keymap:
+      </p>
+      <ul>
+        <li>
+          <code>^[</code> followed by <var>character</var> means
+          <kbd>Alt</kbd>+<kbd><var>character</var></kbd>.<br />
+          <kbd>Alt</kbd>+<kbd>U</kbd> invokes <code>up-case-word</code>:<br />
+          <code>&quot;^[u&quot; up-case-word</code>
+        </li>
+        <li>
+          <code>^</code> followed by <var>character</var> means
+          <kbd>Ctrl</kbd>+<kbd><var>character</var></kbd>.<br />
+          <kbd>Ctrl</kbd>+<kbd>A</kbd> invokes
+          <code>beginning-of-line</code>:<br />
+          <code>&quot;^A&quot; beginning-of-line</code>
+        </li>
+        <li>
+          Sometimes a binding consists of multiple keys pressed in sequence.<br />
+          <kbd>Ctrl</kbd>+<kbd>X</kbd> then <kbd>Ctrl</kbd>+<kbd>F</kbd> invokes
+          <code>vi-find-next-char</code>:<br />
+          <code>&quot;^X^F&quot; vi-find-next-char</code>
+        </li>
+        <li>
+          <var>character</var> without <code>^[</code> or <code>^</code> is
+          <kbd><var>character</var></kbd> by itself.<br />
+          If <kbd>Ctrl</kbd>+<kbd>X</kbd> then <kbd>=</kbd> is pressed then
+          <code>what-cursor-position</code>:<br />
+          <code>&quot;^X=&quot; what-cursor-position</code>
+        </li>
+      </ul>
+      <h3>Selecting a Random Keybinding</h3>
+      <p>
+        It is easy enough to select a random keybinding, just shuffle all the
+        keybindings and select the first one:
+      </p>
+      <pre class="terminal"><samp>% <kbd>bindkey | shuf -n1</kbd>
+"^[f" forward-word
+</samp></pre>
+      <h3>Printing Help for ZLE Commands</h3>
+      <p>
+        It's all well and good if a key is mapped to a ZLE command with an
+        obvious name like <code>forward-word</code> but what if that's not the
+        case. Selecting another random keybinding:
+      </p>
+      <pre class="terminal"><samp>% <kbd>bindkey | shuf -n1</kbd>
+"^@" set-mark-command
+</samp></pre>
+      <p>
+        What in the world is <code>set-mark-command</code>? The
+        <code>man</code> page has the answer!
+      </p>
+      <pre class="terminal"><samp>% <kbd>man 1 zshzle</kbd></samp></pre>
+      <p>After scrolling a bit:</p>
+      <pre class="terminal"><samp>set-mark-command (^@) (unbound) (unbound)
+      Set the mark at the cursor position.  If called with a negative
+      numeric argument, do not set the mark but deactivate the region
+      so that it is no longer highlighted (it is still usable for
+      other purposes).  Otherwise the region is marked as active.
+</samp></pre>
+      <p>So it should be possible to just grep for this documentation right?</p>
+      <pre class="terminal"><samp>% <kbd>man 1 zshzle | grep -A1 set-mark-command</kbd>
+% </samp></pre>
+      <p>
+        Curiously, <code>grep</code> doesn't return any matches. What is going
+        on here? Inspecting the output from <code>man</code> with
+        <code>xxd</code>
+      </p>
+      <pre class="terminal"><samp>% <kbd>man 1 zshzle | xxd | cut -b11-</kbd>
+&hellip;
+0a20 2020 2020 2020 7308 7365 0865 7408  .       s.se.et.
+742d 082d 6d08 6d61 0861 7208 726b 086b  t-.-m.ma.ar.rk.k
+2d08 2d63 0863 6f08 6f6d 086d 6d08 6d61  -.-c.co.om.mm.ma
+0861 6e08 6e64 0864 2028 5e08 5e40 0840  .an.nd.d (^.^@.@
+2920 2875 6e62 6f75 6e64 2920 2875 6e62  ) (unbound) (unb
+6f75 6e64 290a 2020 2020 2020 2020 2020  ound).
+&hellip;</samp></pre>
+      <p>
+        The label for <code>set-mark-command</code> is present but it is
+        somewhat mangled. Every letter in the label is followed by
+        <code>0x08</code> and then a repitition of the original letter.
+        Presumably this strange sequence of characters is to format things
+        nicely for display. This output is a bit annoying to have to deal with
+        but it's not hard to do so by filtering through <code>sed</code>:
+      </p>
+      <pre class="terminal"><samp>% <kbd>man 1 zshzle | sed 's/.\x08//g</kbd></samp></pre>
+      <p>
+        This <code>sed</code> filter is essentailly &quot;when there is a
+        character followed by the <code>0x08</code> character, substitute both
+        characters with nothing (delete them).&quot; By chaining
+        <code>grep</code> on the end, it is now possible to search the
+        documentation for a ZLE command by name:
+      </p>
+      <pre class="terminal"><samp>% <kbd>man 1 zshzle | sed -E 's/^ *|\x08.//g' | grep -A1 set-mark-command</kbd>
+set-mark-command in Emacs mode, or by visual-mode in Vi mode) is
+enabled by default; consult this reference for more information.
+--
+set-mark-command (^@) (unbound) (unbound)
+Set the mark at the cursor position.  If called with a negative
+--
+set-mark-command or exchange-point-and-mark.  Note that whether
+or not the region is active has no effect on its use within</samp></pre>
+      <p>
+        There are a few unintended matches here. The match in the middle is what
+        I'm interested in. Tightening up the regular expression:
+      </p>
+      <pre class="terminal"><samp>% <kbd>man 1 zshzle | sed -E 's/^ *|\x08.//g' | grep '^set-mark-command ('</kbd>
+set-mark-command (^@) (unbound) (unbound)</samp></pre>
+      <p>
+        Switching from <code>grep</code> to <code>sed</code> and generalising to
+        create a Zsh function:
+      </p>
+      <pre class="editor"><code class="language-zsh"><span class="highlight-10">function</span> <span class="highlight-7">print_zle_command_help</span>() {
+  <span class="highlight-7">man</span> 1 zshzle <span class="highlight-13">|</span> <span class="highlight-7">sed</span> <span class="highlight-2">-E</span> <span class="highlight-2">-n</span> <span class="highlight-15">"
+  # unindent and delete special formatting characters
+  s/^ *|\x08.//g
+  # so <span class="highlight-13">$</span><span class="highlight-14">1</span> matches the start of a command's manpage entry
+  # up until the next blank line
+  /^<span class="highlight-13">$</span><span class="highlight-14">1</span> \(/,/^<span class="highlight-13">$</span>/ {
+      # delete header line and blank lines
+      /^<span class="highlight-13">$</span><span class="highlight-14">1</span> \(|^<span class="highlight-13">$</span>/d
+      # print entry
+      p
+  }"</span>
+}</code></pre>
+      <p>
+        Calling <code>print_zle_command_help</code> with
+        <code>set-mark-command</code>
+      </p>
+      <pre class="terminal"><samp>% <kbd>print_zle_command_help set-mark-command</kbd>
+Set the mark at the cursor position.  If called with a negative
+numeric argument, do not set the mark but deactivate the region
+so that it is no longer highlighted (it is still usable for
+other purposes).  Otherwise the region is marked as active.
+</samp></pre>
+      <h3>Printing Random Keybinding on Shell Startup</h3>
+      <p>
+        To print a random keybinding every time the shell starts, add the
+        <code>print_zle_command_help</code> function and this
+        <code>print_random_keybinding</code> function to <code>~/.zshrc</code>.
+      </p>
+      <pre class="editor"><code class="language-zsh"><span class="highlight-10">function</span> <span class="highlight-7">print_random_keybinding</span>() {
+    <span class="highlight-1"># Select a random keybinding
+</span>
+    local <span class="highlight-14">keybinding</span>=<span class="highlight-5">$(<span class="highlight-7">bindkey</span> <span class="highlight-13">|</span> <span class="highlight-7">shuf</span> <span class="highlight-2">-n1</span>)</span>
+    <span class="highlight-1"># Get keyboard shortcut part of the keybinding, deleting the quotes
+</span>
+    local <span class="highlight-14">shortcut</span>=${<span class="highlight-13">$</span>{${(s. .)<span class="highlight-14">keybinding</span>}[1]}[2,-2]}
+    <span class="highlight-1"># Get the command part of the keybinding
+</span>
+    local <span class="highlight-14">command_name</span>=${<span class="highlight-13">$</span>{(s. .)<span class="highlight-14">keybinding</span>}[2]}
+    <span class="highlight-7">echo</span> <span class="highlight-13">$</span><span class="highlight-14">shortcut</span>
+    <span class="highlight-7">print_zle_command_help</span> <span class="highlight-13">$</span><span class="highlight-14">command_name</span>
+}</code></pre>
+      <p>Combining selecting a random keybinding and printing it:</p>
+      <script src="https://gist.github.com/tommy-gilligan/6c9b4de4def9702c80364fba43f6f938.js"></script>
