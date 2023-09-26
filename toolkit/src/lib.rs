@@ -30,3 +30,5 @@ pub mod terminal;
 pub mod view;
 pub mod watch;
 pub mod xml;
+pub const SITEMAP: &str = "sitemap.xml";
+pub mod sitemap;

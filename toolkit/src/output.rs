@@ -1,3 +1,4 @@
+use crate::sitemap::Sitemap;
 use std::fs::create_dir_all;
 use std::{
     ffi::OsStr,
@@ -33,5 +34,10 @@ impl Output {
     #[must_use]
     pub fn index() -> File {
         File::create(Path::new(crate::SITE).join("index.html")).unwrap()
+    }
+
+    #[must_use]
+    pub fn sitemap() -> Sitemap {
+        Sitemap::new(Path::new(crate::SITE))
     }
 }

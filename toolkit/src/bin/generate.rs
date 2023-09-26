@@ -1,5 +1,3 @@
-use std::env::args;
-
 use toolkit::{article, asset};
 
 #[tokio::main]
