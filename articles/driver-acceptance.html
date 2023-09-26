@@ -396,7 +396,7 @@ There are probably more issues to consider than just these.  Overall, the setup 
 There are definitely some issues with what I've come up with here.  Some improvements I'm keen to try:
 </p>
 <ul>
-<li>Keeping Rust and MicroPython examples installed on the target simultaneously.  There is certainly enough flash memory available for this to be feeasible.  This necessitates retargeting the MicroPython (or Rust) binary and then having some way of passing execution between these.  It would mean that tests take much less time to run (at the moment the vast majority of time taken in running the test is reinstalling MicroPython).
+<li>Keeping Rust and MicroPython examples installed on the target simultaneously.  There is certainly enough flash memory available for this to be feeasible.  This necessitates retargeting the MicroPython (or Rust) binary and then having some way of passing execution between these.  It would mean that tests take much less time to run (at the moment the vast majority of time taken in running the test is reinstalling MicroPython).</li>
 <li>Including my testing as part of CD.  I already have some Github actions that run unit tests and linting with every push.  By using a 'custom runner' I should be able to run these tests automatically on every release.  This should help with keeping the tests focussed on being able to be run without manual intervention and it should help with making it harder to obscure whether or not they were run for a particular release.</li>
 <li>Specify environmental conditions for each test.</li>
 <li>Use 3rd-party assertion crates to improve test readability.</li>

@@ -4,7 +4,7 @@
     local("MS Sans Serif"),
     url("w95fa.woff2") format("woff2"),
     url("w95fa.woff") format("woff"),
-    url("W95FA.otf") format("opentype"),
+    url("W95FA.otf") format("opentype");
 }
 :root {
   --link-color: rgb(0, 0, 238);
@@ -237,7 +237,7 @@ body {
     content: " ";
     display: block;
     width: 10%;
-    aspect-ratio: 0.96875;
+    aspect-ratio: 0.96875 / 1;
     position: absolute;
     background-image: url(hand.png);
     background-size: contain;
