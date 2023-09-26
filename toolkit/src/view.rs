@@ -21,7 +21,7 @@ markup::define! {
 }
 
 markup::define! {
-    ArticleList<'a>(articles: Vec<crate::article::Article>, formatted_code: &'a str) {
+    ArticleList<'a>(_articles: Vec<crate::article::Article>, formatted_code: &'a str) {
         @markup::raw(formatted_code)
     }
 }

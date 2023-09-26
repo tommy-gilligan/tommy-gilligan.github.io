@@ -1,5 +1,4 @@
 use crate::sitemap::Sitemap;
-use std::fs::create_dir_all;
 use std::{
     ffi::OsStr,
     fs::File,

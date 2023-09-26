@@ -1,9 +1,5 @@
-use crate::{
-    frontmatter::Frontmatter, git::Git, layout::Layout, markdown::Markdown, output::Output,
-    view::CodeContainer,
-};
+use crate::{frontmatter::Frontmatter, layout::Layout, output::Output, view::CodeContainer};
 use chrono::{DateTime, TimeZone, Utc};
-use lol_html::{element, HtmlRewriter, Settings};
 use regex::Regex;
 
 use askama::Template;
@@ -20,7 +16,6 @@ const EXTENSION: &str = "html";
 #[derive(Debug)]
 pub struct Article {
     path: PathBuf,
-    repo: Git,
 }
 
 pub fn replace_code(contents: &mut String) {
@@ -55,26 +50,26 @@ pub fn replace_code(contents: &mut String) {
     }
 }
 
-fn highlight(code: &str, language: &str) -> String {
-    match language {
-        "rust" => String::from_utf8(crate::syntax_highlighting::highlight(
-            code.as_bytes(),
-            crate::syntax_highlighting::Language::Rust,
-        ))
-        .unwrap(),
-        "python" => String::from_utf8(crate::syntax_highlighting::highlight(
-            code.as_bytes(),
-            crate::syntax_highlighting::Language::Python,
-        ))
-        .unwrap(),
-        "bash" | "zsh" | "sh" => String::from_utf8(crate::syntax_highlighting::highlight(
-            code.as_bytes(),
-            crate::syntax_highlighting::Language::Sh,
-        ))
-        .unwrap(),
-        _ => String::new(),
-    }
-}
+// fn highlight(code: &str, language: &str) -> String {
+//     match language {
+//         "rust" => String::from_utf8(crate::syntax_highlighting::highlight(
+//             code.as_bytes(),
+//             crate::syntax_highlighting::Language::Rust,
+//         ))
+//         .unwrap(),
+//         "python" => String::from_utf8(crate::syntax_highlighting::highlight(
+//             code.as_bytes(),
+//             crate::syntax_highlighting::Language::Python,
+//         ))
+//         .unwrap(),
+//         "bash" | "zsh" | "sh" => String::from_utf8(crate::syntax_highlighting::highlight(
+//             code.as_bytes(),
+//             crate::syntax_highlighting::Language::Sh,
+//         ))
+//         .unwrap(),
+//         _ => String::new(),
+//     }
+// }
 
 impl Article {
     fn new(path: PathBuf) -> Self {
@@ -83,10 +78,7 @@ impl Article {
         let mut contents = String::new();
         buf_reader.read_to_string(&mut contents).unwrap();
 
-        Self {
-            path,
-            repo: Git::new(),
-        }
+        Self { path }
     }
 
     #[must_use]
@@ -174,7 +166,7 @@ impl Article {
 
     pub fn highlight(&mut self) -> String {
         let binding = self.contents();
-        let mut dom = tl::parse(&binding, tl::ParserOptions::default()).unwrap();
+        let dom = tl::parse(&binding, tl::ParserOptions::default()).unwrap();
 
         // let code_handle = dom.query_selector("code[data-language]").unwrap().next().unwrap();
 
