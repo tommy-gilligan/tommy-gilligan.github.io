@@ -237,7 +237,6 @@ body {
     content: " ";
     display: block;
     width: 10%;
-    aspect-ratio: 0.96875 / 1;
     position: absolute;
     background-image: url(hand.png);
     background-size: contain;
