@@ -241,6 +241,7 @@ body {
     background-image: url(hand.png);
     background-size: contain;
     background-repeat: no-repeat;
+    aspect-ratio: 9688 / 10000;
 }
 *:has(> aside) {
   position: relative;
