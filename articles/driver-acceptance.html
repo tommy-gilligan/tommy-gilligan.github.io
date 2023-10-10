@@ -6,29 +6,29 @@ published_at = 2023-09-26T10:01:01Z
 </script>
 <p>
 A while ago I was working on <a href="https://github.com/tommy-gilligan/piicodev-rs">some Rust <code>embedded-hal</code> drivers</a> for the <a href="https://core-electronics.com.au/piicodev.html">PiicoDev</a> range of open hardware from <a href="https://core-electronics.com.au">Core Electronics</a>.  <a href="https://core-electronics.com.au/piicodev.html">PiicoDev</a> already has <a href="https://github.com/CoreElectronics">excellent support</a> in <a href="https://micropython.org">MicroPython</a> and there are existing
-<code>embedded-hal</code> drivers for individual pieces of PiicoDev hardware (albeit incidentally; by targeting whichever IC is at the heart of the device eg. <a href="https://github.com/TomSievers/vl53l1x-rs">vl53l1x-uld</a>). Nevertheless, I was interested in creating a holistic set of <code>embedded-hal</code> drivers that targeted PiicoDev specifically.
+<code>embedded-hal</code> drivers for individual pieces of PiicoDev hardware (albeit incidentally; by targeting whichever IC is at the heart of the device e.g. <a href="https://github.com/TomSievers/vl53l1x-rs">vl53l1x-uld</a>). Nevertheless, I was interested in creating a holistic set of <code>embedded-hal</code> drivers that targeted PiicoDev specifically.
 </p>
 <p>
-Moving from MicroPython to Rust's <code>embedded-hal</code>, it makes little sense to get too attached to a MicroPython API. There's only so well the API can realistically be replicated in Rust. Choosing to disregard the API of the existing MicroPython drivers was liberating: it allowed me to focus on creating my own API that could best utilize the Rust environment. I feel like I made some interesting API choices but these choices are not what I want to talk about here.
+Moving from MicroPython to Rust's <code>embedded-hal</code>, it makes little sense to get too attached to a MicroPython API. There's only so well the API can realistically be replicated in Rust. Choosing to disregard the API of the existing MicroPython drivers was liberating: it allowed me to focus on creating my own API that could best utilize the Rust environment. I feel like I made some interesting API choices but these choices are not really what I want to talk about here.
 </p>
 <p>
-A problem came up working on these drivers: how do I decide when these are ready to be released? One potential criterion for whether my new drivers pass mustard:
-</p>
-<blockquote>
-<p>
-Can these new drivers be used for all of the same things as the existing drivers?
-</p>
-</blockquote>
-<p>
-This criterion is overly broad. The set of specific uses for the drivers is basically endless. Thankfully the offical drivers come with a large but finite number of examples. So an improved criterion:
+A problem came up working on these drivers: how do I decide when these are ready to be released? One potential criterion for whether my new drivers pass muster:
 </p>
 <blockquote>
 <p>
-Can these new drivers be used to recreate all of the same examples as the existing drivers?
+Can these new <code>embedded-hal</code> drivers be used for all of the same things as the existing MicroPython drivers?
 </p>
 </blockquote>
 <p>
-A nice bonus here is that by using this as some kind of acceptance criterion, it follows that the examples need to be ported (and code examples are usually a pretty indispensible artefact for API consumers).
+This definition is too broad since we can't anticipate the uses of this driver for everyone.  The official drivers come with a number of examples though, so perhaps a more realistic definition could be:
+</p>
+<blockquote>
+<p>
+Can these new <code>embedded-hal</code> drivers be used to recreate all of the same examples as the existing MicroPython drivers?
+</p>
+</blockquote>
+<p>
+A nice bonus here is that by using this as some kind of acceptance criterion, it follows that the examples need to be ported (and code examples are usually a pretty indispensable resource for API consumers).
 </p>
 <h3>Laser Distance Sensor VL53L1X (<em>p7</em>)</h3>
 <p>
@@ -68,12 +68,12 @@ Install an appropriate MicroPython interpreter on the Pico.
   <li>
     Copy the
     <a href="https://raw.githubusercontent.com/CoreElectronics/CE-PiicoDev-Unified/main/PiicoDev_Unified.py">PiicoDev Unified Library</a>
-    to the Pico filesystem.
+    to the Pico file system.
   </li>
   <li>
     Copy the
     <a href="https://raw.githubusercontent.com/CoreElectronics/CE-PiicoDev-VL53L1X-MicroPython-Module/main/PiicoDev_VL53L1X.py">PiicoDev_VL53L1X.py</a>
-    to the Pico filesystem.
+    to the Pico file system.
   </li>
   <li>
     Run the above example.
@@ -85,7 +85,7 @@ Install an appropriate MicroPython interpreter on the Pico.
 </ol>
 <h3>Running the MicroPython Example with <code>mpremote</code></h3>
 <p>
-Thonny is great for interactive operation of a MicroPython interpreter but for running tests something less interactive is ideal.  MicroPython makes available a handy tool called <a href="https://docs.micropython.org/en/latest/reference/mpremote.html"><code>mpremote</code></a> for talking with the interpreter from a host's command line. Steps 2-4 of <em>Running the MicroPython Example with Thonny</em> can be automated through <code>mpremote</code></p>
+Thonny is great for interactive operation of a MicroPython interpreter but for running tests something less interactive is ideal.  MicroPython makes available a handy tool called <a href="https://docs.micropython.org/en/latest/reference/mpremote.html"><code>mpremote</code></a> for talking with the interpreter from a host's command line. Steps 2-4 of <em>Running the MicroPython Example with Thonny</em> can be automated through <code>mpremote</code>.</p>
 
 <p>In other words: <code>mpremote</code> can be used for basically all of what Thonny can be used for <em>except for installing a MicroPython interpreter when one isn't already installed</em>. Without Thonny to find the right MicroPython interpreter for a particular development board, it is necessary to carefully select the right one at <a href="https://micropython.org/download/">MicroPython Downloads</a>.<br>Some popular options:
 </p>
@@ -100,7 +100,7 @@ Thonny is great for interactive operation of a MicroPython interpreter but for r
 <p>Running the example with <code>mpremote</code>:</p>
 <ol>
 <li>
-Hold the BOOTSEL button whilst connecting the Pico to the host.  This puts Pico in USB mass storage device mode.
+Hold the BOOTSEL button whilst connecting the Pico to the host.  This puts Pico in USB mass storage device mode, ready for the interpreter to be copied to it.
 </li>
 <li>Copy the downloaded MicroPython UF2 file to the mounted Pico.</li>
 <li>Wait a second or two for the interpreter to become available.</li>
@@ -126,14 +126,8 @@ Run the <em>p7</em> example<br>
 <span class="highlight-14"><var>DOWNLOADED_INTERPRETER</var></span>=<span class="highlight-13">$</span><span class="highlight-14">1</span>
 <span class="highlight-14"><var>DEVBOARD_MOUNTPOINT</var></span>=<span class="highlight-13">$</span><span class="highlight-14">2</span>
 <span class="highlight-7">echo</span> Copying MicroPython interpreter to devboard
-<span class="highlight-10">if</span> <span class="highlight-7">cp</span> <span class="highlight-2">-X</span> <span class="highlight-2">-v</span> <span class="highlight-13">$</span><span class="highlight-14"><var>DOWNLOADED_INTERPRETER</var></span> <span class="highlight-13">$</span><span class="highlight-14"><var>DEVBOARD_MOUNTPOINT</var></span>
-<span class="highlight-10">then</span>
-  <span class="highlight-7">:</span>
-<span class="highlight-10">else</span>
-  <span class="highlight-7">echo</span> Make sure the Pico is mounted at <span class="highlight-13">$</span><span class="highlight-14"><var>DEVBOARD_MOUNTPOINT</var></span>
-  <span class="highlight-7">exit</span> 1
-<span class="highlight-10">fi</span>
-<span class="highlight-7">echo</span> Waiting for intepreter to come up
+<span class="highlight-7">cp</span> <span class="highlight-2">-X</span> <span class="highlight-2">-v</span> <span class="highlight-13">$</span><span class="highlight-14"><var>DOWNLOADED_INTERPRETER</var></span> <span class="highlight-13">$</span><span class="highlight-14"><var>DEVBOARD_MOUNTPOINT</var></span>
+<span class="highlight-7">echo</span> Waiting for interpreter to come up
 <span class="highlight-7">sleep</span> 5
 <span class="highlight-7">echo</span> Copying libraries to devboard
 <span class="highlight-7">mpremote</span> cp CE-PiicoDev-Unified/min/PiicoDev_Unified.py \
@@ -154,14 +148,7 @@ putting the Pico in the right state for installing the interpreter
 </ul>
 <h3>Installing MicroPython Without Holding BOOTSEL</h3>
 <p>
-Being familiar with running code on the Pico with
-<a href="https://probe.rs"><code>probe-rs</code></a>, needing to connect the Pico with the BOOTSEL button held to
-install the interpreter does not seem strictly necessary. The
-<a href="https://github.com/rp-rs/rp2040-project-template"><code>rp2040-project-template</code></a>
-is what originally got me onto using <code>probe-rs</code> for
-programming the Pico in a Rust environment. It is a great starting point
-if you're somewhat familiar with Rust but have never used it on the Pico
-before.
+Being familiar with running code on the Pico with <a href="https://probe.rs"><code>probe-rs</code></a>, needing to connect the Pico with the BOOTSEL button held just to install the interpreter does not seem strictly necessary. The <a href="https://github.com/rp-rs/rp2040-project-template"><code>rp2040-project-template</code></a> is what originally got me onto using <code>probe-rs</code> for programming the Pico in a Rust environment. It is a great starting point if you're somewhat familiar with Rust but have never used it on the Pico before.
 </p>
 <p>
 Using <a href="https://probe.rs"><code>probe-rs</code></a> with the
@@ -171,7 +158,7 @@ hands on a probe:
 <ul>
 <li><a href="https://www.raspberrypi.com/documentation/microcontrollers/debug-probe.html">buy a purpose-built probe</a> or
 </li>
-<li><a href="https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html#debugging-using-another-raspberry-pi-pico">repurpose a spare Raspberry Pi Pico</a>
+<li><a href="https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html#debugging-using-another-raspberry-pi-pico">re-purpose a spare Raspberry Pi Pico</a>
 </li>
 </ul>
 <p>
@@ -189,8 +176,8 @@ A Raspberry Pi Pico connected as a probe to a target Pi Pico
         available as mass storage (for the Pico this is when a BOOTSEL button
         is held during connection) and any UF2 file copied to this storage is
         treated as a new binary to run. <code>probe-rs</code> does not accept UF2
-        files for programming (but will
-        <a href="https://github.com/probe-rs/probe-rs/pull/1765">on the next release</a>). This is only a minor problem though because there is 
+        files for programming (but will for
+        <a href="https://github.com/probe-rs/probe-rs/pull/1765">version 0.21.0</a>). This is only a minor problem though because there is 
         <a href="https://github.com/microsoft/uf2/blob/master/utils/uf2conv.py">an official tool</a>
         to convert any UF2 file to a plain-old Bin format that is acceptable to
         <code>probe-rs</code>.
@@ -218,10 +205,10 @@ Wrote 700416 bytes to flash.bin
     <span class="ansi-green-fg ansi-bold">Finished in 44.151s</span></samp></pre>
 <p>
 Now the interpreter is installed and running on the target Pico without
-having to reconnect it with BOOTSEL held every time a reinstallation is required.
+having to reconnect it with BOOTSEL held every time a re-installation is required.
 </p>
 
-<h3>Installing MicroPython and Running the Example Without Holding Bootsel</h3>
+<h3>Installing MicroPython and Running the Example Without Holding BOOTSEL</h3>
 <p>
 A separate connection is still needed by <code>mpremote</code> to control the
 MicroPython interpreter (for important things like running the example). That is
@@ -229,7 +216,7 @@ not actually a problem though: using a USB connection to the probe to install
 the MicroPython interpreter does not preclude a concurrent USB connection
 directly to the target. In other words, <code>probe-rs</code> can have its
 connection for installing MicroPython and <code>mpremote</code> can have its
-connection for communicating with the interpreter.  This is how I ended up with a monsterous testing apparatus 
+connection for communicating with the interpreter.  This is how I ended up with a monstrous testing apparatus 
 </p>
 <figure>
 <figcaption>
@@ -247,7 +234,7 @@ A target Raspberry Pi Pico connected to a probe and a host
 <span class="highlight-7">echo</span> Installing MicroPython interpreter
 <span class="highlight-7">probe-rs</span> download <span class="highlight-2">--protocol</span> swd <span class="highlight-2">--chip</span> RP2040 \
     <span class="highlight-2">--format</span> bin <span class="highlight-2">--base-address</span> 0x10000000 flash.bin
-<span class="highlight-7">echo</span> Waiting for intepreter to come up
+<span class="highlight-7">echo</span> Waiting for interpreter to come up
 <span class="highlight-7">sleep</span> 5
 <span class="highlight-7">echo</span> Copying libraries to devboard
 <span class="highlight-7">mpremote</span> cp CE-PiicoDev-Unified/min/PiicoDev_Unified.py \
@@ -281,21 +268,21 @@ Coming back to the problem of validating Rust drivers by running example code, l
 1.626 m</samp></pre>
 <h3>Validating Rust Example Against MicroPython Example</h3>
 <p>
-Whether running the Rust example or the MicroPython example, the program output ends up in the same place: <code><var>STDOUT</var></code>.  Thus, a simple process to validate the Rust example against the MicroPython example could look like this
+Whether running the Rust example or the MicroPython example, the program output ends up in the same place: <code><var>STDOUT</var></code>.  Thus, a process to validate the Rust example against the MicroPython:
 </p>
 <ol>
 <li>
-Collect output from running the MicroPython example
+Collect output from the MicroPython example
 </li>
 <li>
-Collect output from running the Rust example
+Collect output from the Rust example
 </li>
 <li>
 Compare the output collected from the Rust example with the output collected from the MicroPython example
 </li>
 </ol>
 <p>
-With just a little bit of work this process can be adapted for Rust; even integrating with the default test runner. The details of reaching out to the target and running the different examples are hidden away in a support module here.
+With just a little bit of work this process can be adapted for Rust; even integrating with the default test runner. The details of reaching out to the target and running the different examples are hidden away in a <a href="https://github.com/tommy-gilligan/piicodev-rs/blob/7004c1f759e1153945f54d6bdbd4502f9d70c1cd/tests/support.rs">support module</a> for the test here:
 </p>
 <div class="editor">
 <span class="title"><span>tests/p7.rs</span><a class="maximize"></a></span>
@@ -350,7 +337,7 @@ test result: <span class="ansi-red-fg">FAILED</span>. 0 passed; 1 failed; 0 igno
 
 <span class="ansi-red-fg"><span class="ansi-bold">error</span></span>: test failed, to rerun pass `--test p7`</samp></pre>
 <p>
-Oh no!  The test has failed!  Admittedly, this is a contrived example of a test failure: the wrong units have been used.  Correcting the example:
+Oh no!  The test has failed!  The wrong units have been used.  Correcting the example:
 </p>
 <div class="editor">
 <span class="title"><span>examples/p7.rs</span><a class="maximize"></a></span>
@@ -383,22 +370,29 @@ So I've been able to use a Rust example corresponding to a MicroPython example a
 </p>
 <ul>
 <li>It relies on the stability of <em>p7</em> readings.  A 10mm margin of error was deemed acceptable fairly arbitrarily.  This was the maximum range after 1000 readings.  A larger range of readings is captured when more readings are captured.</li>
-<li>It relies on the stability of a physical environment.  I kept <em>p7</em> stationary and had it pointed at my ceiling.  What about incidents like earthquakes (or more minor incidents like bumping the desk I've attached the <em>p7</em> to).  Other than ensuring the stability of the environment as best you can, the main other way to mitigate environmental stabiltiy is by loosening the test (thus undermining its usefulness).</li>
-<li>It assumes physical interaction with <em>p7</em> during test is not necessary.  Testing a laser distance sensor this way is all well and good but what if I wanted to test and NFC card reader?  Would some kind of test jig be necessary?  If so, the control of the jig would be another concern for the test (an annoying burden in terms of complexity).</li>
+<li>It relies on the stability of a physical environment.  I kept <em>p7</em> stationary and had it pointed at my ceiling.  What about incidents like earthquakes (or more minor incidents like bumping the desk I've attached the <em>p7</em> to).  Other than ensuring the stability of the environment as best you can, the main other way to mitigate environmental stability is by loosening the test (thus undermining its usefulness).</li>
+<li>It assumes physical interaction with <em>p7</em> during test is not necessary.  Testing a laser distance sensor this way is all well and good but what if I wanted to test an NFC card reader?  Would some kind of test jig be necessary?  If so, the control of the jig would be another concern for the test (an annoying burden in terms of complexity).</li>
 <li>It assumes uniformity in <em>p7</em> devices.  For my testing to be useful I need for it to be making a statement about more than just my <em>p7</em>, I need it to be making a statement about all <em>p7</em> (or some archetypal <em>p7</em>).  For all I know I've baked assumptions about my <em>p7</em> into the test (other <em>p7</em> could be prone to more noise).  Here consulting technical specifications would be useful (I haven't done this yet).</li>
 <li>It assumes uniformity in environment.  What if it's not possible for somebody else to recreate the physical environment I have used?  Have I been specific enough in my description of the test environment?</li>
 </ul>
 <p>
-There are probably more issues to consider than just these.  Overall, the setup and reproducibility is not perfectly certain.  Web developers often talk about tests being <em>flakey</em>.  It's reasonable to expect some flakiness in my driver acceptance tests.  I don't expect to be running these tests much though (only to determine whether or not a new version of a driver crate is suitable for release).  Just how burdensome will it be for me to deal with flakey driver acceptance tests?  I feel like this is something to be borne out by usage.
+There are probably more issues to consider than just these.  Overall, the setup and reproducibility is not perfectly certain.  Web developers often talk about tests being <em>flaky</em>.  It's reasonable to expect some flakiness in my driver acceptance tests.  I don't expect to be running these tests much though (only to determine whether or not a new version of a driver crate is suitable for release).  Just how burdensome will it be for me to deal with flaky driver acceptance tests?  I feel like this is something to be borne out by usage.
 </p>
 <h3>Improvements</h3>
 <p>
 There are definitely some issues with what I've come up with here.  Some improvements I'm keen to try:
 </p>
 <ul>
-<li>Keeping Rust and MicroPython examples installed on the target simultaneously.  There is certainly enough flash memory available for this to be feeasible.  This necessitates retargeting the MicroPython (or Rust) binary and then having some way of passing execution between these.  It would mean that tests take much less time to run (at the moment the vast majority of time taken in running the test is reinstalling MicroPython).</li>
-<li>Including my testing as part of CD.  I already have some Github actions that run unit tests and linting with every push.  By using a 'custom runner' I should be able to run these tests automatically on every release.  This should help with keeping the tests focussed on being able to be run without manual intervention and it should help with making it harder to obscure whether or not they were run for a particular release.</li>
+<li>Keeping Rust and MicroPython examples installed on the target simultaneously.  There is certainly enough flash memory available for this to be feasible.  This necessitates re-targeting the MicroPython (or Rust) binary and then having some way of passing execution between these.  It would vastly improve how long it takes for tests to run (the vast majority of time taken in running the test is reinstalling MicroPython).</li>
+<li>Including my testing as part of CD.  I already have some GitHub actions that run unit tests and linting with every push.  By using a 'custom runner' I should be able to run these tests automatically on every release.  This should help with keeping the tests focussed on being able to be run without manual intervention and it should help with making it harder to obscure whether or not they were run for a particular release.</li>
 <li>Specify environmental conditions for each test.</li>
 <li>Use 3rd-party assertion crates to improve test readability.</li>
 <li>Eliminate the need for 2 USB connections.  Needing 2 USB connections is more than just an annoying requirement.  There is work necessary to make sure the right connection is being used for the right thing.  If I accidentally try to use the MicroPython connection for <code>probe-rs</code> then the test fails.  This somewhat dovetails with keeping Rust and MicroPython examples installed simultaneously.  If I could use the Rust environment for getting at MicroPython state or vice versa then I maybe wouldn't need 2 USB connections.  It'd be nice if MicroPython supported RTT but adding this support is no minor feat.</li>
 </ul>
+<h3>Thank You for Proofreading</h3>
+<ul>
+<li><a href="https://github.com/camjc">Cameron Chamberlain</a></li>
+<li><a href="https://github.com/vlas-voloshin">Vlas Voloshin</a></li>
+</ul>
+<h3>Plug</h3>
+I would love to work full-time on embedded and/or Rust projects.  If you know of any interesting work opportunities in this area please  <a href="https://mastodon.online/@tommygilligan">drop me a line</a>. 
