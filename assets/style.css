@@ -23,6 +23,9 @@ code {
 li code {
    word-break: break-all;
 }
+quote code {
+   font-size: 0.9rem;
+}
 
 body {
   margin: 0;
